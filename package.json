@@ -1,0 +1,32 @@
+{
+  "name": "uu5charts~root",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "uu5charts"
+  ],
+  "description": "",
+  "license": "License Commercial",
+  "spec": "nodejs-multi; uu_appg01_devkit@5.2.2",
+  "dependencies": {},
+  "uuBuildSettings": {},
+  "devDependencies": {
+    "uu_appg01_devkit": "^5.2.2"
+  },
+  "scripts": {
+    "clean": "uu_appg01_devkit clean",
+    "test": "uu_appg01_devkit test",
+    "testBrowser": "uu_appg01_devkit testBrowser",
+    "build": "uu_appg01_devkit build",
+    "package": "uu_appg01_devkit package",
+    "start": "uu_appg01_devkit start",
+    "prettify": "uu_appg01_devkit prettify",
+    "vulnerabilityScan": "uu_appg01_devkit vulnerabilityScan",
+    "deploy": "uu_appg01_devkit deploy",
+    "uuAppBox": "uu_appg01_devkit uuAppBox",
+    "uuCloudDeploy": "uu_appg01_devkit uuCloudDeploy",
+    "uuCloudUndeploy": "uu_appg01_devkit uuCloudUndeploy",
+    "uuCloudDeployList": "uu_appg01_devkit uuCloudDeployList",
+    "uuAppDevKitUpgrade": "uu_appg01_devkit uuAppDevKitUpgrade"
+  }
+}

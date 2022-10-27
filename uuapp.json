@@ -1,0 +1,25 @@
+{
+  "product": "oc_uu5charts",
+  "version": "0.1.0",
+  "license": "License Commercial",
+  "description": {
+    "en": "",
+    "cs": ""
+  },
+  "docUri": "",
+  "flsUri": "",
+  "slsUri": "",
+  "imageUri": "",
+  "devkit": {
+    "development": {
+      "appBoxLocationUri": "----- VALUE REQUIRED -----",
+      "appDeploymentUri": null,
+      "resourcePoolUri": "----- VALUE REQUIRED -----"
+    }
+  },
+  "uu5charts": {
+    "namespace": "Uu5Charts",
+    "sourceUri": "https://cdn.plus4u.net/oc-uu5charts/%s/uu5charts.min.js",
+    "componentList": []
+  }
+}

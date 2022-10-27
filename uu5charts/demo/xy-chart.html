@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>XyChart</title>
+
+    <script src="https://cdn.plus4u.net/uu-uu5loaderg01/1.0.0/uu5loaderg01.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.plus4u.net/uu-uu5g05/1.0.0/assets/example-config.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.plus4u.net/uu-uu5tilesg02/2.0.0/assets/example-config.js" crossorigin="anonymous"></script>
+
+    <script>
+      Uu5Loader.config({
+        imports: {
+          "uu5charts": "/uu5charts.js"
+        },
+      });
+    </script>
+
+    <style>
+      body {
+        padding: 16px 32px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="uu5">Loading...</div>
+
+    <script type="text/babel">
+      import { Utils } from "uu5g05";
+      import Uu5Elements from "uu5g05-elements";
+      import { XyChart, carsData } from "uu5charts";
+
+      function Page() {
+        return (
+          <div>
+            <Uu5Elements.Block headerType="title" header="Default">
+              <XyChart
+                data={carsData}
+                series={[{ valueKey: "Horsepower" }]}
+                labelAxis={{ dataKey: "Miles_per_Gallon", title: "Spotřeba", unit: " MpG" }}
+                valueAxis={{ title: "Výkon" }}
+                legend
+              />
+            </Uu5Elements.Block>
+          </div>
+        );
+      }
+
+      Utils.Dom.render(<Page />, document.getElementById("uu5"));
+    </script>
+  </body>
+</html>

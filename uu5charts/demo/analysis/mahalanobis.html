@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mahalanobis</title>
+
+    <script src="https://cdn.plus4u.net/uu-uu5loaderg01/1.0.0/uu5loaderg01.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.plus4u.net/uu-uu5g05/1.0.0/assets/example-config.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.plus4u.net/uu-uu5tilesg02/2.0.0/assets/example-config.js" crossorigin="anonymous"></script>
+
+    <script>
+      Uu5Loader.config({
+        imports: {
+          "uu5charts": "/uu5charts.js"
+        },
+      });
+    </script>
+
+    <style>
+      body {
+        padding: 16px 32px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="uu5">Loading...</div>
+
+    <script type="text/babel">
+      import { useUpdateEffect, useState, Utils } from "uu5g05";
+      import Uu5Elements from "uu5g05-elements";
+      import Uu5TilesElements from "uu5tilesg02-elements";
+      import { XyChart, carsData, Model, Histogram } from "uu5charts";
+
+      // console.log(carsData.map((item, i) => {
+      //   let r = Object.values(item).join(";");
+      //   if (!i) r = Object.keys(item).join(";") + "\n" + r;
+      //   return r;
+      // }).join("\n"));
+
+      function prepareMahalData(data) {
+        const d = data instanceof Model.Data ? data : new Model.Data(data);
+        d.removeOutliers();
+        return d;
+      }
+
+      function Mahalanobis({ data, valueAxis, ...restProps }) {
+        const [dataModel, setDataModel] = useState(() => prepareMahalData(data));
+
+        useUpdateEffect(() => {
+          setDataModel(prepareMahalData(data));
+        }, [data]);
+
+        const [activeCode, setActiveCode] = useState("distance");
+
+        // const histData = dataModel.getHistogram("_distance", 20);
+        // const cumData = histData.reduce((r, { ...a }, i) => {
+        //   if (i) a.value += r[i - 1].value;
+        //   a.percent = Math.round(a.value * 1000 / dataModel.length) / 10;
+        //   r.push(a);
+        //   return r;
+        // }, []);
+        // console.log("cumData", cumData);
+
+        return (
+          <div>
+            <Uu5Elements.Tabs
+              itemList={[
+                { label: "Distance", code: "distance" },
+                { label: "Histogram", code: "histogram" },
+                // { label: "Cumulative", code: "cumulative" },
+              ]}
+              activeCode={activeCode}
+              onChange={(e) => setActiveCode(e.data.activeCode)}
+            />
+            {{
+              distance: (
+                <XyChart
+                  {...restProps}
+                  data={dataModel.map(({ _distance, _outlier, ...item }) => ({
+                    ...item,
+                    [_outlier ? "_outlier" : "_distance"]: _distance,
+                  }))}
+                  series={[{ valueKey: "_distance" }, { valueKey: "_outlier", color: "red" }]}
+                  valueAxis={{ title: "Distance" }}
+                  labelAxis={{ title: "Name", dataKey: "Name" }}
+                />
+              ),
+              histogram: (
+                <Histogram
+                  data={dataModel}
+                  valueAxis={{ dataKey: "_distance" }}
+                  binSize={20}
+                />
+              ),
+              // cumulative: (
+              //   <XyChart
+              //     {...restProps}
+              //     data={cumData}
+              //     series={[{ valueKey: "percent", bar: true }]}
+              //     valueAxis={{ title: "Count", dataKey: "_distance" }}
+              //     labelAxis={{
+              //       title: "Range",
+              //       dataKey: "label",
+              //       ticks: histData.map((item) => item.max).filter((it) => !!it),
+              //     }}
+              //     barGap={0}
+              //   />
+              // )
+            }[activeCode]}
+          </div>
+        )
+      }
+
+      function Page() {
+        const data1 = carsData;
+        const dataModel1 = new Model.Data(data1.map((it) => ({ ...it })));
+        const outliers1 = dataModel1.removeOutliers();
+
+        const data2 = data1.filter(it => !outliers1.some(ou => ou.Name === it.Name));
+        const dataModel2 = new Model.Data(data2.map((it) => ({ ...it })));
+
+        return (
+          <div>
+            <Uu5Elements.Block headerType="title" header="Data">
+              <Uu5TilesElements.List data={carsData} height={500} />
+            </Uu5Elements.Block>
+
+            <Uu5Elements.Block headerType="title" header="Mahalanobis">
+              <Mahalanobis
+                data={dataModel1}
+                labelAxis={{ title: "Name", dataKey: "Name" }}
+              />
+            </Uu5Elements.Block>
+
+            <Uu5Elements.Block headerType="title" header="Mahalanobis 2">
+              <Mahalanobis
+                data={dataModel2}
+                labelAxis={{ title: "Name", dataKey: "Name" }}
+              />
+            </Uu5Elements.Block>
+
+            <Uu5Elements.Block headerType="title" header="Consumption vs Horsepower">
+              <XyChart
+                data={carsData}
+                series={[{ valueKey: "Horsepower" }]}
+                labelAxis={{ dataKey: "Miles_per_Gallon", title: "Consumption", unit: " MpG" }}
+                valueAxis={{ title: "Horsepower" }}
+                legend
+              />
+            </Uu5Elements.Block>
+          </div>
+        );
+      }
+
+      Utils.Dom.render(<Page />, document.getElementById("uu5"));
+    </script>
+  </body>
+</html>
