@@ -32,14 +32,16 @@
       import { XyChart, carsData } from "uu5charts";
 
       function Page() {
+        const data = [...carsData];
+
         return (
           <div>
             <Uu5Elements.Block headerType="title" header="Default">
               <XyChart
-                data={carsData}
-                series={[{ valueKey: "Horsepower" }]}
+                data={data}
+                series={[{ valueKey: "Horsepower", title: "Výkon" }, { valueKey: "Horsepower", line: true, color: "red", title: "Čára" }]}
                 labelAxis={{ dataKey: "Miles_per_Gallon", title: "Spotřeba", unit: " MpG" }}
-                valueAxis={{ title: "Výkon" }}
+                valueAxis={{ title: "Výkon", unit: " W" }}
                 legend
               />
             </Uu5Elements.Block>

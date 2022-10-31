@@ -2,13 +2,11 @@
 import {
   ComposedChart,
   CartesianGrid,
-  Legend,
   Scatter,
   Line,
   Area,
   Bar,
   ResponsiveContainer,
-  Tooltip,
   XAxis,
   YAxis,
   Label,
@@ -16,10 +14,13 @@ import {
   LineChart,
   AreaChart,
   BarChart,
+  ReferenceArea,
 } from "recharts";
 import { createComponent, createVisualComponent, PropTypes, useState } from "uu5g05";
-import { UuGds } from "uu5g05-elements";
+import Uu5Elements, { UuGds } from "uu5g05-elements";
 import Config from "../config/config.js";
+import Tooltip from "./tooltip";
+import Legend from "./legend";
 //@@viewOff:imports
 
 const gdsColors = UuGds.getValue(["ColorPalette", "basic"]);
@@ -85,6 +86,99 @@ function withDataCorrector(Component) {
   });
 }
 
+function getAxisYDomain(data, from, to, refList, offset) {
+  const refData = [...data].slice(from - 1, to);
+
+  const mins = [];
+  const maxs = [];
+  refList.forEach((ref) => {
+    const values = refData.map((item) => item[ref]);
+    mins.push(Math.min(...values));
+    maxs.push(Math.max(...values));
+  });
+
+  const bottom = Math.min(...mins);
+  const top = Math.min(...maxs);
+
+  return [(bottom | 0) - offset, (top | 0) + offset];
+}
+
+function useZoom(data, valueKeyList) {
+  const [refArea, setRefArea] = useState();
+
+  const [domainX, setDomainX] = useState();
+  const [domainY, setDomainY] = useState();
+
+  function zoom() {
+    let { left: refAreaLeft, right: refAreaRight } = refArea || {};
+
+    if (refAreaLeft !== refAreaRight && refAreaRight != null) {
+      // xAxis domain
+      if (refAreaLeft > refAreaRight) [refAreaLeft, refAreaRight] = [refAreaRight, refAreaLeft];
+
+      // yAxis domain
+      const [bottom, top] = getAxisYDomain(data, refAreaLeft, refAreaRight, valueKeyList, 1);
+
+      setDomainX([refAreaLeft, refAreaRight]);
+      setDomainY([bottom, top]);
+    }
+
+    setRefArea(null);
+  }
+
+  return [
+    refArea,
+    domainX,
+    domainY,
+    // TODO 1) add touch, 2) vertical area, 3) zoom by scroll
+    {
+      onMouseDown: (e) => setRefArea({ left: e?.activeLabel }),
+      onMouseMove: (e) =>
+        refArea?.left &&
+        refArea.right !== e.activeLabel &&
+        setRefArea({
+          ...refArea,
+          right: e.activeLabel,
+        }),
+      onMouseUp: zoom,
+      onDoubleClick: (e) => {
+        e.preventDefault();
+        setRefArea(null);
+        setDomainX(null);
+        setDomainY(null);
+      },
+    },
+  ];
+}
+
+function useInteractiveLegend(series) {
+  const [visibility, _setVisibility] = useState(() =>
+    series.reduce((s, { id }, i) => {
+      s[id ?? "id-" + i] = true;
+      return s;
+    }, {})
+  );
+
+  function setVisibility(key) {
+    _setVisibility({ ...visibility, [key]: !visibility[key] });
+  }
+
+  const [hover, setHover] = useState();
+
+  return [
+    visibility,
+    hover,
+    {
+      onClick: (e) => {
+        setVisibility(e.payload.id);
+        setHover(visibility[e.payload.id] ? null : e.payload.id);
+      },
+      onMouseEnter: (e) => visibility[e.payload.id] && setHover(e.payload.id),
+      onMouseLeave: () => setHover(null),
+    },
+  ];
+}
+
 const COMPONENTS = {
   point: ScatterChart,
   line: LineChart,
@@ -113,13 +207,47 @@ const XyChart = withDataCorrector(
             PropTypes.bool,
             PropTypes.shape({
               point: PropTypes.bool,
-              type: PropTypes.oneOf(["basis", "linear", "natural", "monotoneX", "monotoneY", "monotone", "step", "stepBefore", "stepAfter"]),
+              type: PropTypes.oneOf([
+                "basis",
+                "linear",
+                "natural",
+                "monotoneX",
+                "monotoneY",
+                "monotone",
+                "step",
+                "stepBefore",
+                "stepAfter",
+              ]),
               label: PropTypes.oneOfType([PropTypes.bool, PropTypes.func]),
               width: PropTypes.number,
             }),
           ]),
-          area: PropTypes.oneOfType([PropTypes.bool, PropTypes.shape({})]),
-          bar: PropTypes.oneOfType([PropTypes.bool, PropTypes.shape({})]),
+          area: PropTypes.oneOfType([
+            PropTypes.bool,
+            PropTypes.shape({
+              point: PropTypes.bool,
+              type: PropTypes.oneOf([
+                "basis",
+                "linear",
+                "natural",
+                "monotoneX",
+                "monotoneY",
+                "monotone",
+                "step",
+                "stepBefore",
+                "stepAfter",
+              ]),
+              label: PropTypes.oneOfType([PropTypes.bool, PropTypes.func]),
+              stackId: PropTypes.string,
+            }),
+          ]),
+          bar: PropTypes.oneOfType([
+            PropTypes.bool,
+            PropTypes.shape({
+              label: PropTypes.oneOfType([PropTypes.bool, PropTypes.func]),
+              stackId: PropTypes.string,
+            }),
+          ]),
           //labelKey: PropTypes.string, // for Pie and Radar
         })
       ).isRequired,
@@ -137,16 +265,22 @@ const XyChart = withDataCorrector(
       legend: PropTypes.oneOfType([
         PropTypes.bool,
         PropTypes.shape({
-          title: PropTypes.string,
+          title: PropTypes.node,
           position: PropTypes.oneOf([
-            "top-left", "top-center", "top-right",
-            "middle-left", "middle-center", "middle-right",
-            "bottom-left", "bottom-center", "bottom-right",
+            "top-left",
+            "top-center",
+            "top-right",
+            "middle-left",
+            "middle-center",
+            "middle-right",
+            "bottom-left",
+            "bottom-center",
+            "bottom-right",
           ]),
-          component: PropTypes.func,
+          children: PropTypes.element,
         }),
       ]),
-      tooltip: PropTypes.oneOfType([PropTypes.bool, PropTypes.func]),
+      tooltip: PropTypes.oneOfType([PropTypes.bool, PropTypes.element]),
       label: PropTypes.shape({
         position: PropTypes.oneOf(["top", "center", "bottom"]),
         component: PropTypes.func,
@@ -154,6 +288,7 @@ const XyChart = withDataCorrector(
 
       displayCartesianGrid: PropTypes.bool,
       onClick: PropTypes.func,
+      height: PropTypes.number,
     },
     //@@viewOff:propTypes
 
@@ -162,6 +297,7 @@ const XyChart = withDataCorrector(
       data: [],
       series: [],
       tooltip: true,
+      height: 300,
     },
     //@@viewOff:defaultProps
 
@@ -174,15 +310,20 @@ const XyChart = withDataCorrector(
         valueAxis,
         legend,
         tooltip,
-        label,
         displayCartesianGrid,
-        onClick,
+        height,
 
         barGap,
       } = props;
 
       const [colors] = useState(generateColors(series.length));
       const currentColors = [...colors];
+
+      const [visibilityMap, hoverId, legendAttrs] = useInteractiveLegend(series);
+
+      const [refArea, domainX, domainY, { onDoubleClick, ...chartAttrs }] = useZoom(data, [
+        ...new Set(series.map(({ valueKey }) => valueKey)),
+      ]);
       //@@viewOff:private
 
       //@@viewOn:interface
@@ -191,39 +332,59 @@ const XyChart = withDataCorrector(
       //@@viewOn:render
       let MainChart = ComposedChart;
       const typeSet = new Set(series.map((serie) => Object.keys(COMPONENTS).find((v) => serie[v])));
+      if (typeSet.size === 1) MainChart = COMPONENTS[[...typeSet][0]] || MainChart;
 
-      if (typeSet.size === 1) {
-        MainChart = COMPONENTS[[...typeSet][0]] || MainChart;
-      }
+      const isNumericX = typeof data.find((it) => it[labelAxis.dataKey] != null)[labelAxis.dataKey] === "number";
+      if (isNumericX) data.sort((a, b) => a[labelAxis.dataKey] - b[labelAxis.dataKey]);
 
-      const isNumericX = typeof data[0][labelAxis?.dataKey] === "number";
-      if (isNumericX) data.sort((a, b) => a[labelAxis?.dataKey] - b[labelAxis?.dataKey]);
+      const isNumericY = typeof data.find((it) => it[series[0].valueKey] != null)[series[0].valueKey] === "number";
 
       return (
-        <div style={{ width: "100%", height: 300 }}>
+        <div style={{ width: "100%", height }} onDoubleClick={onDoubleClick}>
           <ResponsiveContainer>
-            <ComposedChart data={data} barCategoryGap={barGap}>
+            <ComposedChart
+              data={data}
+              margin={{ top: 8, right: 8, bottom: 8, left: 8 }}
+              barCategoryGap={barGap}
+              {...chartAttrs}
+            >
               <XAxis
-                dataKey={labelAxis?.dataKey}
-                unit={labelAxis?.unit}
-                type={typeof data[0][labelAxis?.dataKey] === "number" ? "number" : undefined}
-                domain={["auto", "auto"]}
-                ticks={labelAxis?.ticks}
+                dataKey={labelAxis.dataKey}
+                unit={labelAxis.unit}
+                type={isNumericX ? "number" : undefined}
+                domain={domainX || ["auto", "auto"]}
+                interval="preserveStartEnd"
+                tickCount={10}
+                tickSize={5}
+                minTickGap={1}
+                ticks={labelAxis.ticks}
+
+                // because of zooming
+                allowDataOverflow
               >
-                {labelAxis?.title != null && <Label value={labelAxis.title} offset={0} position="insideBottomRight" />}
+                {labelAxis.title != null && <Label value={labelAxis.title} offset={0} position="insideBottomRight" />}
               </XAxis>
 
               <YAxis
                 unit={valueAxis?.unit}
-                type={typeof data[0][series[0]?.valueKey] === "number" ? "number" : undefined}
+                type={isNumericY ? "number" : undefined}
+                domain={domainY || ["auto", "auto"]}
+                interval="preserveStartEnd"
+
+                // because of zooming
+                allowDataOverflow
+                yAxisId="1"
               >
-                {valueAxis?.title != null && <Label value={valueAxis?.title} angle={-90} position="insideLeft" />}
+                {valueAxis?.title != null && <Label value={valueAxis.title} angle={-90} position="insideLeft" />}
               </YAxis>
 
-              {series.map(({ valueKey, title, color, onClick, point, line, area, bar }) => {
+              {series.map(({ id, valueKey, title, color, onClick, point, line, area, bar }, i) => {
+                id ??= "id-" + i;
                 let Component;
-                let componentProps = { onClick };
+                let componentProps = { onClick, id, hide: !visibilityMap[id], yAxisId: "1" };
                 if (title) componentProps.name = title;
+
+                const opacity = hoverId && hoverId !== id ? 0.4 : undefined;
 
                 if (line) {
                   Component = Line;
@@ -246,37 +407,75 @@ const XyChart = withDataCorrector(
                   componentProps = {
                     ...componentProps,
                     stroke: getColor(color, currentColors), // fixed value
+                    strokeOpacity: opacity ?? componentProps.strokeOpacity,
                   };
                   componentProps.dot ??= false; // default if not set
                   componentProps.legendType = componentProps.dot ? "line" : "plainline"; // fixed value
-
                 } else if (area) {
-                  // TODO
                   Component = Area;
-                  if (typeof area === "object") componentProps = { ...area, ...componentProps };
-                  componentProps = { ...componentProps, stroke: getColor(color, currentColors) };
+                  if (typeof area === "object") {
+                    const { point: dot, ...lineProps } = line;
+                    componentProps = { dot, ...lineProps, ...componentProps };
+
+                    if (typeof componentProps.label === "function") {
+                      const label = componentProps.label;
+                      componentProps.label = ({ x, y, stroke, value }) => {
+                        const { value: resultValue, ...attrs } = label({ x, y, stroke, value }) || {};
+                        return (
+                          <text x={x} y={y} dy={-4} fill={stroke} textAnchor="middle" {...attrs}>
+                            {resultValue ?? value}
+                          </text>
+                        );
+                      };
+                    }
+                  }
+                  componentProps = {
+                    ...componentProps,
+                    stroke: getColor(color, currentColors), // fixed value
+                    strokeOpacity: opacity ?? componentProps.strokeOpacity,
+                  };
+                  componentProps.dot ??= false; // default if not set
+                  componentProps.legendType = componentProps.dot ? "line" : "plainline"; // fixed value
                 } else if (bar) {
                   Component = Bar;
-                  if (typeof bar === "object") componentProps = { ...bar, ...componentProps };
-                  componentProps = { ...componentProps, fill: getColor(color, currentColors) };
+                  if (typeof bar === "object") {
+                    componentProps = { ...line, ...componentProps };
+
+                    if (typeof componentProps.label === "function") {
+                      const label = componentProps.label;
+                      componentProps.label = ({ x, y, stroke, value }) => {
+                        const { value: resultValue, ...attrs } = label({ x, y, stroke, value }) || {};
+                        return (
+                          <text x={x} y={y} dy={-4} fill={stroke} textAnchor="middle" {...attrs}>
+                            {resultValue ?? value}
+                          </text>
+                        );
+                      };
+                    }
+                  }
+                  componentProps = {
+                    ...componentProps,
+                    fill: getColor(color, currentColors), // fixed value
+                    fillOpacity: opacity ?? componentProps.strokeOpacity,
+                  };
                 } else {
                   Component = Scatter;
                   if (typeof point === "object") componentProps = { ...point, ...componentProps };
-                  componentProps = { ...componentProps, fill: getColor(color, currentColors) };
+                  componentProps = {
+                    ...componentProps,
+                    fill: getColor(color, currentColors),
+                    fillOpacity: opacity ?? componentProps.fillOpacity,
+                  };
                 }
 
-                return (
-                  <Component
-                    {...componentProps}
-                    key={valueKey}
-                    dataKey={valueKey}
-                  />
-                );
+                return <Component {...componentProps} key={valueKey} dataKey={valueKey} />;
               })}
 
-              {tooltip != null && <Tooltip />}
-              {legend != null && <Legend verticalAlign="top" />}
               {displayCartesianGrid && <CartesianGrid strokeDasharray="3 3" />}
+              {tooltip != null && Tooltip({ labelAxis, valueAxis, children: tooltip === true ? undefined : tooltip })}
+              {legend != null && Legend({ ...(legend === true ? null : legend), ...legendAttrs })}
+
+              {refArea && <ReferenceArea yAxisId="1" x1={refArea.left} x2={refArea.right} strokeOpacity={0.3} />}
             </ComposedChart>
           </ResponsiveContainer>
         </div>
