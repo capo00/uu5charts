@@ -29,21 +29,419 @@
     <script type="text/babel">
       import { Utils } from "uu5g05";
       import Uu5Elements from "uu5g05-elements";
+      import { Config } from "uu5g05-dev";
       import { XyChart, carsData } from "uu5charts";
 
+      // <XyChart
+      //   data={data}
+      //   series={[{ valueKey: "Horsepower", title: "Výkon" }, { valueKey: "Horsepower", line: true, color: "red", title: "Čára" }]}
+      //   labelAxis={{ dataKey: "Miles_per_Gallon", title: "Spotřeba", unit: " MpG" }}
+      //   valueAxis={{ title: "Výkon", unit: " W" }}
+      //   legend
+      // />
+
+      const data = [
+        {
+          "month": "January",
+          "apples": 10,
+          "bananas": 20,
+        },
+        {
+          "month": "February",
+          "apples": 12,
+          "bananas": 18,
+        },
+        {
+          "month": "March",
+          "apples": 22,
+          "bananas": 8,
+        },
+        {
+          "month": "April",
+          "apples": 17,
+          "bananas": 14,
+        },
+        {
+          "month": "May",
+          "apples": 20,
+          "bananas": 12,
+        }
+      ].map((item) => ({ ...item, sum: item.apples + item.bananas }));
+
+
       function Page() {
-        const data = [...carsData];
+        // const cleanData = carsData.filter(item => item["Miles_per_Gallon"] != null && item["Horsepower"] != null)
+        //
+        // const groupMap = cleanData.reduce((obj, item) => {
+        //   if (item["Miles_per_Gallon"]) {
+        //     obj[item["Miles_per_Gallon"]] ||= { itemList: [] };
+        //     obj[item["Miles_per_Gallon"]].itemList.push(item);
+        //   }
+        //   return obj;
+        // }, {});
+        //
+        // for (let key in groupMap) {
+        //   groupMap[key].avg = groupMap[key].itemList.reduce((sum, item) => {
+        //     sum += item["Horsepower"];
+        //     return sum;
+        //   }, 0) / groupMap[key].itemList.length;
+        // }
+        //
+        // const data = cleanData.map((item, i, arr) => {
+        //   if (item["Miles_per_Gallon"]) {
+        //     return {
+        //       ...item,
+        //       avg: groupMap[item["Miles_per_Gallon"]].avg,
+        //       avg2: groupMap[item["Miles_per_Gallon"]].avg + groupMap[arr[(i || arr.length) - 1]["Miles_per_Gallon"]].avg / 5
+        //     };
+        //   }
+        //   return item;
+        // });
+        //
+        // console.log(data);
 
         return (
           <div>
-            <Uu5Elements.Block headerType="title" header="Default">
+            <Uu5Elements.Block headerType="title" header="Data" collapsible initialCollapsed>
+              <pre>{"[\n  " + JSON.stringify(data, null, 4).replace(/}/, "  }") + ",\n  ...\n]"}</pre>
+            </Uu5Elements.Block>
+
+            <Uu5Elements.Block headerType="title" header="Default" collapsible>
               <XyChart
                 data={data}
-                series={[{ valueKey: "Horsepower", title: "Výkon" }, { valueKey: "Horsepower", line: true, color: "red", title: "Čára" }]}
-                labelAxis={{ dataKey: "Miles_per_Gallon", title: "Spotřeba", unit: " MpG" }}
-                valueAxis={{ title: "Výkon", unit: " W" }}
-                legend
+                series={[{ valueKey: "apples" }]}
+                labelAxis={{ dataKey: "month" }}
               />
+            </Uu5Elements.Block>
+
+            <Uu5Elements.Block headerType="title" header="Series" collapsible>
+              <div className={Config.Css.css({
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+                gap: 16,
+              })}>
+                <div>
+                  <h3>color</h3>
+                  <XyChart
+                    data={data}
+                    series={[{ valueKey: "apples", color: "green" }]}
+                    labelAxis={{ dataKey: "month" }}
+                  />
+                  <XyChart
+                    data={data}
+                    series={[{ valueKey: "apples", color: "#654321" }]}
+                    labelAxis={{ dataKey: "month" }}
+                  />
+                </div>
+
+                <div>
+                  <h3>onClick</h3>
+                  <XyChart
+                    data={data}
+                    series={[{ valueKey: "apples", onClick: (e) => console.log("click", e) }]}
+                    labelAxis={{ dataKey: "month" }}
+                  />
+                </div>
+              </div>
+            </Uu5Elements.Block>
+
+            <Uu5Elements.Block headerType="title" header="Line" collapsible>
+              <div className={Config.Css.css({
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+                gap: 16,
+              })}>
+                <div>
+                  <h3>default</h3>
+                  <XyChart
+                    data={data}
+                    series={[{ valueKey: "apples", line: true }]}
+                    labelAxis={{ dataKey: "month" }}
+                  />
+                </div>
+
+                <div>
+                  <h3>point: true, type: "basis", width: 2</h3>
+                  <XyChart
+                    data={data}
+                    series={[{
+                      valueKey: "apples",
+                      line: { point: true, type: "basis", width: 2 },
+                    }]}
+                    labelAxis={{ dataKey: "month" }}
+                  />
+                </div>
+
+                <div>
+                  <h3>labelContent</h3>
+                  <XyChart
+                    data={data}
+                    series={[{
+                      valueKey: "apples",
+                      line: {
+                        labelContent: (props) => {
+                          //console.log("labelContent", props);
+                          return props.value;
+                        },
+                      },
+                    }]}
+                    labelAxis={{ dataKey: "month" }}
+                  />
+                </div>
+
+                <div>
+                  <h3>label</h3>
+                  <XyChart
+                    data={data}
+                    series={[{
+                      valueKey: "apples",
+                      line: {
+                        label: (props) => {
+                          //console.log("label", props);
+                          const { x, y, stroke, offset, value } = props;
+                          return (
+                            <text x={x} y={y} dy={-offset} fill={stroke} textAnchor="middle">
+                              {value}
+                            </text>
+                          );
+                        },
+                      },
+                    }]}
+                    labelAxis={{ dataKey: "month" }}
+                  />
+                </div>
+              </div>
+            </Uu5Elements.Block>
+
+            <Uu5Elements.Block headerType="title" header="Area" collapsible>
+              <div className={Config.Css.css({
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+                gap: 16,
+              })}>
+                <div>
+                  <h3>default</h3>
+                  <XyChart
+                    data={data}
+                    series={[{ valueKey: "apples", area: true }]}
+                    labelAxis={{ dataKey: "month" }}
+                  />
+                </div>
+
+                <div>
+                  <h3>point: true, type: basis</h3>
+                  <XyChart
+                    data={data}
+                    series={[{
+                      valueKey: "apples",
+                      area: { point: true, type: "basis" },
+                    }]}
+                    labelAxis={{ dataKey: "month" }}
+                  />
+                </div>
+
+                <div>
+                  <h3>labelContent</h3>
+                  <XyChart
+                    data={data}
+                    series={[{
+                      valueKey: "apples",
+                      area: {
+                        labelContent: (props) => {
+                          //console.log("labelContent", props);
+                          return props.value;
+                        },
+                      },
+                    }]}
+                    labelAxis={{ dataKey: "month" }}
+                  />
+                </div>
+
+                <div>
+                  <h3>label</h3>
+                  <XyChart
+                    data={data}
+                    series={[{
+                      valueKey: "apples",
+                      area: {
+                        label: (props) => {
+                          // console.log("label", props);
+                          const { x, y, stroke, offset, value } = props;
+                          return (
+                            <text x={x} y={y} dy={-offset} fill={stroke} textAnchor="middle">
+                              {value}
+                            </text>
+                          );
+                        },
+                      },
+                    }]}
+                    labelAxis={{ dataKey: "month" }}
+                  />
+                </div>
+              </div>
+            </Uu5Elements.Block>
+
+            <Uu5Elements.Block headerType="title" header="Bar" collapsible>
+              <div className={Config.Css.css({
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+                gap: 16,
+              })}>
+                <div>
+                  <h3>default</h3>
+                  <XyChart
+                    data={data}
+                    series={[{ valueKey: "apples", bar: true }]}
+                    labelAxis={{ dataKey: "month" }}
+                  />
+                </div>
+
+                <div>
+                  <h3>barSize: 20</h3>
+                  <XyChart
+                    data={data}
+                    series={[{
+                      valueKey: "apples",
+                      bar: { barSize: 20 },
+                    }]}
+                    labelAxis={{ dataKey: "month" }}
+                  />
+                </div>
+
+                <div>
+                  <h3>layout: vertical</h3>
+                  <XyChart
+                    data={data}
+                    layout="vertical"
+                    series={[{
+                      valueKey: "apples",
+                      bar: true,
+                    }]}
+                    labelAxis={{ dataKey: "month" }}
+                  />
+                </div>
+
+                <div>
+                  <h3>labelContent</h3>
+                  <XyChart
+                    data={data}
+                    series={[{
+                      valueKey: "apples",
+                      bar: {
+                        labelContent: (props) => {
+                          //console.log("labelContent", props);
+                          return props.value;
+                        },
+                      },
+                    }]}
+                    labelAxis={{ dataKey: "month" }}
+                  />
+                </div>
+
+                <div>
+                  <h3>label</h3>
+                  <XyChart
+                    data={data}
+                    series={[{
+                      valueKey: "apples",
+                      bar: {
+                        label: (props) => {
+                          //console.log("label", props);
+                          const { x, y, width, stroke, offset, value } = props;
+                          return (
+                            <text
+                              x={x + width / 2}
+                              y={y}
+                              dy={value < 0 ? 3 * offset : -offset}
+                              fill={stroke}
+                              textAnchor="middle"
+                            >
+                              {value}
+                            </text>
+                          );
+                        },
+                      },
+                    }]}
+                    labelAxis={{ dataKey: "month" }}
+                  />
+                </div>
+              </div>
+            </Uu5Elements.Block>
+
+            <Uu5Elements.Block headerType="title" header="Series" collapsible>
+              <div className={Config.Css.css({
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+                gap: 16,
+              })}>
+                <div>
+                  <h3>default</h3>
+                  <XyChart
+                    data={data}
+                    series={[{ valueKey: "apples" }, { valueKey: "bananas" }]}
+                    labelAxis={{ dataKey: "month" }}
+                  />
+                </div>
+
+                <div>
+                  <h3>color, line</h3>
+                  <XyChart
+                    data={data}
+                    series={[
+                      { valueKey: "apples", color: "green", line: true },
+                      { valueKey: "bananas", color: "orange", line: true },
+                    ]}
+                    labelAxis={{ dataKey: "month" }}
+                  />
+                </div>
+
+                <div>
+                  <h3>color, types</h3>
+                  <XyChart
+                    data={data}
+                    series={[
+                      { valueKey: "apples", color: "green", bar: true },
+                      { valueKey: "bananas", color: "orange", bar: true },
+                      { valueKey: "sum", line: true },
+                    ]}
+                    labelAxis={{ dataKey: "month" }}
+                  />
+                </div>
+
+                <div>
+                  <h3>color, area, stackId</h3>
+                  <XyChart
+                    data={data}
+                    series={[
+                      { valueKey: "apples", color: "green", area: { stackId: "1" } },
+                      { valueKey: "bananas", color: "orange", area: { stackId: "1" } },
+                    ]}
+                    labelAxis={{ dataKey: "month" }}
+                  />
+                </div>
+
+                <div>
+                  <h3>label</h3>
+                  <XyChart
+                    data={data}
+                    series={[{
+                      valueKey: "apples",
+                      bar: {
+                        label: (props) => {
+                          // console.log("label", props);
+                          const { x, y, width, stroke, offset, value } = props;
+                          return (
+                            <text x={x + width / 2} y={y} dy={-offset} fill={stroke} textAnchor="middle">
+                              {value}
+                            </text>
+                          );
+                        },
+                      },
+                    }]}
+                    labelAxis={{ dataKey: "month" }}
+                  />
+                </div>
+              </div>
             </Uu5Elements.Block>
           </div>
         );

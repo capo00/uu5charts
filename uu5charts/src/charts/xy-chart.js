@@ -15,33 +15,15 @@ import {
   AreaChart,
   BarChart,
   ReferenceArea,
+  ReferenceLine,
 } from "recharts";
-import { createComponent, createVisualComponent, PropTypes, useState } from "uu5g05";
-import Uu5Elements, { UuGds } from "uu5g05-elements";
+import { createComponent, createVisualComponent, PropTypes, useState, Utils } from "uu5g05";
 import Config from "../config/config.js";
 import Tooltip from "./tooltip";
 import Legend from "./legend";
+import Color from "./color";
+
 //@@viewOff:imports
-
-const gdsColors = UuGds.getValue(["ColorPalette", "basic"]);
-
-function generateColors(length) {
-  const colors = [];
-
-  for (let color of ["blue", "purple"]) {
-    for (let key of ["mainDarkest", "mainDarker", "main", "mainLighter", "mainLightest"]) {
-      colors.push(gdsColors[color][key]);
-      if (colors.length >= length) break;
-    }
-    if (colors.length >= length) break;
-  }
-
-  return colors;
-}
-
-function getColor(color, colorList) {
-  return (color ? gdsColors[color]?.main : null) || colorList.shift();
-}
 
 function withDataCorrector(Component) {
   return createComponent({
@@ -73,6 +55,24 @@ function withDataCorrector(Component) {
         labelAxis.dataKey ??= 0;
         series[0] ||= {};
         series[0].valueKey ??= 1;
+      }
+
+      if (series.length === 0) {
+        let valueKey;
+        for (let i = 0; i < data.length && !valueKey; i++) {
+          valueKey = Object.keys(data[i]).find((k, _, arr) => typeof arr[k] === "number");
+        }
+        if (!valueKey) throw new Error("Data does not contain any number values for y axis");
+        series[0] = { valueKey };
+      }
+
+      if (!labelAxis?.dataKey) {
+        let dataKey;
+        const keys = Object.keys(data[0]);
+        const values = keys.map((k) => data.map(({ [k]: v }) => v)); // TODO find uniq values as label
+        for (let i = 0; i < data.length && !dataKey; i++) {
+          dataKey = Object.keys(data[i]).find((k, _, arr) => typeof arr[k] === "number");
+        }
       }
       //@@viewOff:private
 
@@ -179,6 +179,48 @@ function useInteractiveLegend(series) {
   ];
 }
 
+function CustomLabel(props) {
+  const { label, labelContent: LabelContent, layout, ...restProps } = props;
+  const { x, y, width, height, stroke, offset, value } = restProps;
+
+  let result = null;
+  if (typeof label === "function") {
+    const Component = label;
+    result = <Component {...restProps} />;
+  } else if (Utils.Element.isValid(label)) {
+    result = Utils.Element.clone(label, restProps);
+  } else if (label === true || LabelContent) {
+    if (layout === "vertical") {
+      result = (
+        <text
+          x={x + width}
+          y={y + height / 2}
+          dy={offset}
+          dx={value < 0 ? -2 * offset : 2 * offset}
+          fill={stroke}
+          textAnchor="middle"
+        >
+          {label === true ? value : <LabelContent {...restProps} />}
+        </text>
+      );
+    } else {
+      result = (
+        <text
+          x={x + (width ? width / 2 : 0)}
+          y={y}
+          dy={value < 0 ? 3 * offset : -offset}
+          fill={stroke}
+          textAnchor="middle"
+        >
+          {label === true ? value : <LabelContent {...restProps} />}
+        </text>
+      );
+    }
+  }
+
+  return result;
+}
+
 const COMPONENTS = {
   point: ScatterChart,
   line: LineChart,
@@ -219,6 +261,7 @@ const XyChart = withDataCorrector(
                 "stepAfter",
               ]),
               label: PropTypes.oneOfType([PropTypes.bool, PropTypes.func]),
+              labelContent: PropTypes.func,
               width: PropTypes.number,
             }),
           ]),
@@ -238,13 +281,18 @@ const XyChart = withDataCorrector(
                 "stepAfter",
               ]),
               label: PropTypes.oneOfType([PropTypes.bool, PropTypes.func]),
+              labelContent: PropTypes.func,
               stackId: PropTypes.string,
             }),
           ]),
           bar: PropTypes.oneOfType([
             PropTypes.bool,
             PropTypes.shape({
+              layout: PropTypes.oneOf(["horizontal", "vertical"]),
+              barSize: PropTypes.number,
+              maxBarSize: PropTypes.number,
               label: PropTypes.oneOfType([PropTypes.bool, PropTypes.func]),
+              labelContent: PropTypes.func,
               stackId: PropTypes.string,
             }),
           ]),
@@ -303,7 +351,7 @@ const XyChart = withDataCorrector(
 
     render(props) {
       //@@viewOn:private
-      const {
+      let {
         data,
         series,
         labelAxis,
@@ -314,9 +362,30 @@ const XyChart = withDataCorrector(
         height,
 
         barGap,
+        layout,
       } = props;
 
-      const [colors] = useState(generateColors(series.length));
+      let isNumericX = typeof data.find((it) => it[labelAxis.dataKey] != null)[labelAxis.dataKey] === "number";
+      if (isNumericX) data.sort((a, b) => a[labelAxis.dataKey] - b[labelAxis.dataKey]);
+
+      let isNumericY = typeof data.find((it) => it[series[0].valueKey] != null)[series[0].valueKey] === "number";
+
+      let zeroLineProps;
+      const valueKeyList = Object.values(series).map(({ valueKey }) => valueKey);
+      for (let item of data) {
+        if (valueKeyList.find((key) => item[key] < 0)) {
+          zeroLineProps = { y: 0 };
+          break;
+        }
+      }
+
+      if (layout === "vertical") {
+        [labelAxis = {}, valueAxis] = [valueAxis, labelAxis];
+        [isNumericX, isNumericY] = [isNumericY, isNumericX];
+        zeroLineProps = { x: 0 };
+      }
+
+      const [colors] = useState(() => Color.generateColors(series.length));
       const currentColors = [...colors];
 
       const [visibilityMap, hoverId, legendAttrs] = useInteractiveLegend(series);
@@ -324,6 +393,7 @@ const XyChart = withDataCorrector(
       const [refArea, domainX, domainY, { onDoubleClick, ...chartAttrs }] = useZoom(data, [
         ...new Set(series.map(({ valueKey }) => valueKey)),
       ]);
+
       //@@viewOff:private
 
       //@@viewOn:interface
@@ -334,11 +404,6 @@ const XyChart = withDataCorrector(
       const typeSet = new Set(series.map((serie) => Object.keys(COMPONENTS).find((v) => serie[v])));
       if (typeSet.size === 1) MainChart = COMPONENTS[[...typeSet][0]] || MainChart;
 
-      const isNumericX = typeof data.find((it) => it[labelAxis.dataKey] != null)[labelAxis.dataKey] === "number";
-      if (isNumericX) data.sort((a, b) => a[labelAxis.dataKey] - b[labelAxis.dataKey]);
-
-      const isNumericY = typeof data.find((it) => it[series[0].valueKey] != null)[series[0].valueKey] === "number";
-
       return (
         <div style={{ width: "100%", height }} onDoubleClick={onDoubleClick}>
           <ResponsiveContainer>
@@ -346,6 +411,7 @@ const XyChart = withDataCorrector(
               data={data}
               margin={{ top: 8, right: 8, bottom: 8, left: 8 }}
               barCategoryGap={barGap}
+              layout={layout}
               {...chartAttrs}
             >
               <XAxis
@@ -358,7 +424,6 @@ const XyChart = withDataCorrector(
                 tickSize={5}
                 minTickGap={1}
                 ticks={labelAxis.ticks}
-
                 // because of zooming
                 allowDataOverflow
               >
@@ -366,17 +431,19 @@ const XyChart = withDataCorrector(
               </XAxis>
 
               <YAxis
+                dataKey={valueAxis?.dataKey}
                 unit={valueAxis?.unit}
-                type={isNumericY ? "number" : undefined}
+                type={isNumericY ? "number" : "category"}
                 domain={domainY || ["auto", "auto"]}
                 interval="preserveStartEnd"
-
                 // because of zooming
                 allowDataOverflow
                 yAxisId="1"
               >
                 {valueAxis?.title != null && <Label value={valueAxis.title} angle={-90} position="insideLeft" />}
               </YAxis>
+
+              {zeroLineProps && <ReferenceLine {...zeroLineProps} yAxisId="1" stroke="#000" />}
 
               {series.map(({ id, valueKey, title, color, onClick, point, line, area, bar }, i) => {
                 id ??= "id-" + i;
@@ -389,24 +456,15 @@ const XyChart = withDataCorrector(
                 if (line) {
                   Component = Line;
                   if (typeof line === "object") {
-                    const { point: dot, width: strokeWidth, ...lineProps } = line;
-                    componentProps = { dot, strokeWidth, ...lineProps, ...componentProps };
+                    const { point: dot, width: strokeWidth, label, labelContent, ...restProps } = line;
+                    componentProps = { dot, strokeWidth, ...restProps, ...componentProps };
 
-                    if (typeof componentProps.label === "function") {
-                      const label = componentProps.label;
-                      componentProps.label = ({ x, y, stroke, value }) => {
-                        const { value: resultValue, ...attrs } = label({ x, y, stroke, value }) || {};
-                        return (
-                          <text x={x} y={y} dy={-4} fill={stroke} textAnchor="middle" {...attrs}>
-                            {resultValue ?? value}
-                          </text>
-                        );
-                      };
-                    }
+                    if (label || labelContent)
+                      componentProps.label = <CustomLabel label={label} labelContent={labelContent} />;
                   }
                   componentProps = {
                     ...componentProps,
-                    stroke: getColor(color, currentColors), // fixed value
+                    stroke: Color.getColor(color, currentColors), // fixed value
                     strokeOpacity: opacity ?? componentProps.strokeOpacity,
                   };
                   componentProps.dot ??= false; // default if not set
@@ -414,48 +472,34 @@ const XyChart = withDataCorrector(
                 } else if (area) {
                   Component = Area;
                   if (typeof area === "object") {
-                    const { point: dot, ...lineProps } = line;
-                    componentProps = { dot, ...lineProps, ...componentProps };
+                    const { point: dot, label, labelContent, ...restProps } = area;
+                    componentProps = { dot, ...restProps, ...componentProps };
 
-                    if (typeof componentProps.label === "function") {
-                      const label = componentProps.label;
-                      componentProps.label = ({ x, y, stroke, value }) => {
-                        const { value: resultValue, ...attrs } = label({ x, y, stroke, value }) || {};
-                        return (
-                          <text x={x} y={y} dy={-4} fill={stroke} textAnchor="middle" {...attrs}>
-                            {resultValue ?? value}
-                          </text>
-                        );
-                      };
-                    }
+                    if (label || labelContent)
+                      componentProps.label = <CustomLabel label={label} labelContent={labelContent} />;
                   }
+
+                  const selectedColor = Color.getColor(color, currentColors);
                   componentProps = {
                     ...componentProps,
-                    stroke: getColor(color, currentColors), // fixed value
-                    strokeOpacity: opacity ?? componentProps.strokeOpacity,
+                    stroke: selectedColor,
+                    fill: selectedColor, // fixed value
+                    fillOpacity: opacity ?? componentProps.fillOpacity,
                   };
                   componentProps.dot ??= false; // default if not set
                   componentProps.legendType = componentProps.dot ? "line" : "plainline"; // fixed value
                 } else if (bar) {
                   Component = Bar;
                   if (typeof bar === "object") {
-                    componentProps = { ...line, ...componentProps };
+                    const { label, labelContent, ...restProps } = bar;
+                    componentProps = { ...restProps, ...componentProps };
 
-                    if (typeof componentProps.label === "function") {
-                      const label = componentProps.label;
-                      componentProps.label = ({ x, y, stroke, value }) => {
-                        const { value: resultValue, ...attrs } = label({ x, y, stroke, value }) || {};
-                        return (
-                          <text x={x} y={y} dy={-4} fill={stroke} textAnchor="middle" {...attrs}>
-                            {resultValue ?? value}
-                          </text>
-                        );
-                      };
-                    }
+                    if (label || labelContent)
+                      componentProps.label = <CustomLabel label={label} labelContent={labelContent} layout={layout} />;
                   }
                   componentProps = {
                     ...componentProps,
-                    fill: getColor(color, currentColors), // fixed value
+                    fill: Color.getColor(color, currentColors), // fixed value
                     fillOpacity: opacity ?? componentProps.strokeOpacity,
                   };
                 } else {
@@ -463,7 +507,7 @@ const XyChart = withDataCorrector(
                   if (typeof point === "object") componentProps = { ...point, ...componentProps };
                   componentProps = {
                     ...componentProps,
-                    fill: getColor(color, currentColors),
+                    fill: Color.getColor(color, currentColors),
                     fillOpacity: opacity ?? componentProps.fillOpacity,
                   };
                 }
@@ -475,7 +519,9 @@ const XyChart = withDataCorrector(
               {tooltip != null && Tooltip({ labelAxis, valueAxis, children: tooltip === true ? undefined : tooltip })}
               {legend != null && Legend({ ...(legend === true ? null : legend), ...legendAttrs })}
 
-              {refArea && <ReferenceArea yAxisId="1" x1={refArea.left} x2={refArea.right} strokeOpacity={0.3} />}
+              {refArea?.left && refArea.right && (
+                <ReferenceArea yAxisId="1" x1={refArea.left} x2={refArea.right} strokeOpacity={0.3} />
+              )}
             </ComposedChart>
           </ResponsiveContainer>
         </div>

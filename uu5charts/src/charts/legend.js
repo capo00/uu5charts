@@ -30,9 +30,10 @@ function CustomLegend(props) {
           display: "flex",
           flexDirection: layout === "vertical" ? "column" : undefined,
           gap: layout === "vertical" ? 4 : 8,
+          flexWrap: "wrap",
         })}
       >
-        {payload.map(({ color, value, inactive, payload: data }, i) => {
+        {payload.map(({ color, value, inactive, payload }, i) => {
           return (
             <Uu5Elements.Text
               key={i}
@@ -40,9 +41,9 @@ function CustomLegend(props) {
               significance={inactive ? "subdued" : undefined}
               hoverable={inactive || activeLength > 1}
               elementAttrs={{
-                onClick: inactive || activeLength > 1 ? () => onClick({ payload: data }) : undefined,
-                onMouseEnter: () => onMouseEnter({ payload: data }),
-                onMouseLeave: () => onMouseLeave({ payload: data }),
+                onClick: inactive || activeLength > 1 ? () => onClick({ payload }) : undefined,
+                onMouseEnter: () => onMouseEnter({ payload }),
+                onMouseLeave: () => onMouseLeave({ payload }),
               }}
             >
               <Uu5Elements.Badge
@@ -78,11 +79,7 @@ function Legend(props) {
       verticalAlign={verticalAlign}
       align={align}
       layout={layout}
-      content={
-        children || (
-          <CustomLegend title={title} />
-        )
-      }
+      content={children || <CustomLegend title={title} />}
     />
   );
   //@@viewOff:render
