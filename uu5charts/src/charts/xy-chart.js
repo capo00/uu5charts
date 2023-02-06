@@ -16,6 +16,7 @@ import {
   BarChart,
   ReferenceArea,
   ReferenceLine,
+  LabelList,
 } from "recharts";
 import { createComponent, createVisualComponent, PropTypes, useState, Utils } from "uu5g05";
 import Config from "../config/config.js";
@@ -180,45 +181,10 @@ function useInteractiveLegend(series) {
 }
 
 function CustomLabel(props) {
-  const { label, labelContent: LabelContent, layout, ...restProps } = props;
-  const { x, y, width, height, stroke, offset, value } = restProps;
+  const { label, dataKey: propsDataKey } = props;
+  const { dataKey, ...labelProps } = typeof label === "object" ? label : {};
 
-  let result = null;
-  if (typeof label === "function") {
-    const Component = label;
-    result = <Component {...restProps} />;
-  } else if (Utils.Element.isValid(label)) {
-    result = Utils.Element.clone(label, restProps);
-  } else if (label === true || LabelContent) {
-    if (layout === "vertical") {
-      result = (
-        <text
-          x={x + width}
-          y={y + height / 2}
-          dy={offset}
-          dx={value < 0 ? -2 * offset : 2 * offset}
-          fill={stroke}
-          textAnchor="middle"
-        >
-          {label === true ? value : <LabelContent {...restProps} />}
-        </text>
-      );
-    } else {
-      result = (
-        <text
-          x={x + (width ? width / 2 : 0)}
-          y={y}
-          dy={value < 0 ? 3 * offset : -offset}
-          fill={stroke}
-          textAnchor="middle"
-        >
-          {label === true ? value : <LabelContent {...restProps} />}
-        </text>
-      );
-    }
-  }
-
-  return result;
+  return <LabelList dataKey={dataKey || propsDataKey} {...labelProps} />;
 }
 
 const COMPONENTS = {
@@ -243,8 +209,14 @@ const XyChart = withDataCorrector(
           title: PropTypes.node,
           color: PropTypes.string,
           onClick: PropTypes.func,
+          label: PropTypes.oneOfType([PropTypes.bool, PropTypes.object]),
 
-          point: PropTypes.oneOfType([PropTypes.bool, PropTypes.shape({})]),
+          point: PropTypes.oneOfType([
+            PropTypes.bool,
+            PropTypes.shape({
+              shape: PropTypes.oneOf(["circle", "cross", "diamond", "square", "star", "triangle", "wye"]),
+            }),
+          ]),
           line: PropTypes.oneOfType([
             PropTypes.bool,
             PropTypes.shape({
@@ -260,8 +232,6 @@ const XyChart = withDataCorrector(
                 "stepBefore",
                 "stepAfter",
               ]),
-              label: PropTypes.oneOfType([PropTypes.bool, PropTypes.func]),
-              labelContent: PropTypes.func,
               width: PropTypes.number,
             }),
           ]),
@@ -280,8 +250,6 @@ const XyChart = withDataCorrector(
                 "stepBefore",
                 "stepAfter",
               ]),
-              label: PropTypes.oneOfType([PropTypes.bool, PropTypes.func]),
-              labelContent: PropTypes.func,
               stackId: PropTypes.string,
             }),
           ]),
@@ -291,8 +259,6 @@ const XyChart = withDataCorrector(
               layout: PropTypes.oneOf(["horizontal", "vertical"]),
               barSize: PropTypes.number,
               maxBarSize: PropTypes.number,
-              label: PropTypes.oneOfType([PropTypes.bool, PropTypes.func]),
-              labelContent: PropTypes.func,
               stackId: PropTypes.string,
             }),
           ]),
@@ -325,14 +291,11 @@ const XyChart = withDataCorrector(
             "bottom-center",
             "bottom-right",
           ]),
-          children: PropTypes.element,
+          layout: PropTypes.oneOf(["horizontal", "vertical"]),
+          children: PropTypes.oneOfType([PropTypes.element, PropTypes.func]),
         }),
       ]),
-      tooltip: PropTypes.oneOfType([PropTypes.bool, PropTypes.element]),
-      label: PropTypes.shape({
-        position: PropTypes.oneOf(["top", "center", "bottom"]),
-        component: PropTypes.func,
-      }),
+      tooltip: PropTypes.oneOfType([PropTypes.bool, PropTypes.element, PropTypes.func]),
 
       displayCartesianGrid: PropTypes.bool,
       onClick: PropTypes.func,
@@ -445,7 +408,7 @@ const XyChart = withDataCorrector(
 
               {zeroLineProps && <ReferenceLine {...zeroLineProps} yAxisId="1" stroke="#000" />}
 
-              {series.map(({ id, valueKey, title, color, onClick, point, line, area, bar }, i) => {
+              {series.map(({ id, valueKey, title, color, onClick, label, point, line, area, bar }, i) => {
                 id ??= "id-" + i;
                 let Component;
                 let componentProps = { onClick, id, hide: !visibilityMap[id], yAxisId: "1" };
@@ -453,14 +416,16 @@ const XyChart = withDataCorrector(
 
                 const opacity = hoverId && hoverId !== id ? 0.4 : undefined;
 
+                if (label === true) label = {};
+
                 if (line) {
                   Component = Line;
                   if (typeof line === "object") {
-                    const { point: dot, width: strokeWidth, label, labelContent, ...restProps } = line;
+                    const { point: dot, width: strokeWidth, ...restProps } = line;
                     componentProps = { dot, strokeWidth, ...restProps, ...componentProps };
 
-                    if (label || labelContent)
-                      componentProps.label = <CustomLabel label={label} labelContent={labelContent} />;
+                    // if (label || labelContent)
+                    //   componentProps.label = <CustomLabel label={label} labelContent={labelContent} />;
                   }
                   componentProps = {
                     ...componentProps,
@@ -472,11 +437,11 @@ const XyChart = withDataCorrector(
                 } else if (area) {
                   Component = Area;
                   if (typeof area === "object") {
-                    const { point: dot, label, labelContent, ...restProps } = area;
+                    const { point: dot, ...restProps } = area;
                     componentProps = { dot, ...restProps, ...componentProps };
 
-                    if (label || labelContent)
-                      componentProps.label = <CustomLabel label={label} labelContent={labelContent} />;
+                    // if (label || labelContent)
+                    //   componentProps.label = <CustomLabel label={label} labelContent={labelContent} />;
                   }
 
                   const selectedColor = Color.getColor(color, currentColors);
@@ -491,20 +456,31 @@ const XyChart = withDataCorrector(
                 } else if (bar) {
                   Component = Bar;
                   if (typeof bar === "object") {
-                    const { label, labelContent, ...restProps } = bar;
+                    const { ...restProps } = bar;
                     componentProps = { ...restProps, ...componentProps };
 
-                    if (label || labelContent)
-                      componentProps.label = <CustomLabel label={label} labelContent={labelContent} layout={layout} />;
+                    // if (label || labelContent)
+                    //   componentProps.label = <CustomLabel label={label} labelContent={labelContent} layout={layout} />;
                   }
+
+                  if (label && layout === "vertical") {
+                    label = { ...label, position: label.position || "right" };
+                  }
+
                   componentProps = {
                     ...componentProps,
                     fill: Color.getColor(color, currentColors), // fixed value
-                    fillOpacity: opacity ?? componentProps.strokeOpacity,
+                    fillOpacity: opacity ?? componentProps.fillOpacity,
                   };
                 } else {
                   Component = Scatter;
-                  if (typeof point === "object") componentProps = { ...point, ...componentProps };
+                  if (typeof point === "object") {
+                    const { ...restProps } = point;
+                    componentProps = { ...restProps, ...componentProps };
+
+                    // if (label || labelContent)
+                    //   componentProps.label = <CustomLabel label={label} labelContent={labelContent} />;
+                  }
                   componentProps = {
                     ...componentProps,
                     fill: Color.getColor(color, currentColors),
@@ -512,12 +488,16 @@ const XyChart = withDataCorrector(
                   };
                 }
 
-                return <Component {...componentProps} key={valueKey} dataKey={valueKey} />;
+                return (
+                  <Component {...componentProps} key={valueKey} dataKey={valueKey}>
+                    {label && <LabelList position="top" {...label} dataKey={label.dataKey ?? valueKey} />}
+                  </Component>
+                );
               })}
 
               {displayCartesianGrid && <CartesianGrid strokeDasharray="3 3" />}
-              {tooltip != null && Tooltip({ labelAxis, valueAxis, children: tooltip === true ? undefined : tooltip })}
-              {legend != null && Legend({ ...(legend === true ? null : legend), ...legendAttrs })}
+              {tooltip && Tooltip({ labelAxis, valueAxis, children: tooltip === true ? undefined : tooltip })}
+              {legend && Legend({ ...(legend === true ? null : legend), ...legendAttrs })}
 
               {refArea?.left && refArea.right && (
                 <ReferenceArea yAxisId="1" x1={refArea.left} x2={refArea.right} strokeOpacity={0.3} />

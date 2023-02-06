@@ -28,8 +28,7 @@ function CustomTooltip(props) {
               const formattedValue = typeof value === "number" ? <Uu5Elements.Number value={value} /> : value;
               return (
                 <div key={i} className={Config.Css.css({ paddingLeft: 8 })}>
-                  <Uu5Elements.Badge size="xs" borderRadius="full"
-                                     style={{ backgroundColor: color || data.fill }} />{" "}
+                  <Uu5Elements.Badge size="xs" borderRadius="full" style={{ backgroundColor: color || data.fill }} />{" "}
                   {name}: <b>{formattedValue}</b>
                   {valueUnit}
                 </div>
