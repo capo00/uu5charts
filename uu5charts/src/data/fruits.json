@@ -1,0 +1,32 @@
+[
+  {
+    "month": 1,
+    "monthName": "Leden",
+    "apples": 10,
+    "bananas": 20
+  },
+  {
+    "month": 2,
+    "monthName": "Únor",
+    "apples": 3,
+    "bananas": 7
+  },
+  {
+    "month": 3,
+    "monthName": "Březen",
+    "apples": 7,
+    "bananas": 16
+  },
+  {
+    "month": 4,
+    "monthName": "Duben",
+    "apples": 16,
+    "bananas": 25
+  },
+  {
+    "month": 5,
+    "monthName": "Květen",
+    "apples": 28,
+    "bananas": 7
+  }
+]

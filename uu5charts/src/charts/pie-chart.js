@@ -1,5 +1,5 @@
 //@@viewOn:imports
-import { ResponsiveContainer, Pie, PieChart as RechartsPieChart, Cell } from "recharts";
+import { ResponsiveContainer, Pie, PieChart as RechartsPieChart, Cell, LabelList, Label } from "recharts";
 import { createVisualComponent, PropTypes, useState } from "uu5g05";
 import Config from "../config/config.js";
 import Tooltip from "./tooltip";
@@ -54,10 +54,16 @@ const PieChart = createVisualComponent({
     series: PropTypes.arrayOf(
       PropTypes.shape({
         valueKey: PropTypes.string.isRequired,
-        title: PropTypes.node,
-        color: PropTypes.string,
-        onClick: PropTypes.func,
         labelKey: PropTypes.string,
+        color: PropTypes.func,
+        onClick: PropTypes.func,
+        label: PropTypes.oneOfType([PropTypes.bool, PropTypes.object]),
+        innerRadius: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+        outerRadius: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+        startAngle: PropTypes.number,
+        endAngle: PropTypes.number,
+        gap: PropTypes.number,
+        children: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
       })
     ).isRequired,
 
@@ -76,16 +82,12 @@ const PieChart = createVisualComponent({
           "bottom-center",
           "bottom-right",
         ]),
-        children: PropTypes.element,
+        layout: PropTypes.oneOf(["horizontal", "vertical"]),
+        children: PropTypes.oneOfType([PropTypes.element, PropTypes.func]),
       }),
     ]),
-    tooltip: PropTypes.oneOfType([PropTypes.bool, PropTypes.element]),
-    label: PropTypes.shape({
-      position: PropTypes.oneOf(["top", "center", "bottom"]),
-      component: PropTypes.func,
-    }),
+    tooltip: PropTypes.oneOfType([PropTypes.bool, PropTypes.element, PropTypes.func]),
 
-    onClick: PropTypes.func,
     height: PropTypes.number,
   },
   //@@viewOff:propTypes
@@ -127,9 +129,9 @@ const PieChart = createVisualComponent({
                 innerRadius,
                 outerRadius = "95%",
                 startAngle = 0,
-                endAngle = 360,
-                paddingAngle,
-                labelLine = true,
+                endAngle = startAngle + 360,
+                gap: paddingAngle,
+                children,
               } = serie;
 
               let componentProps = {
@@ -137,22 +139,12 @@ const PieChart = createVisualComponent({
                 id,
                 innerRadius,
                 outerRadius,
-                startAngle: startAngle + 90,
-                endAngle: endAngle + 90,
+                startAngle: 90 - startAngle,
+                endAngle: 90 - endAngle,
                 paddingAngle,
-                labelLine,
               };
 
-              if (typeof label === "function") {
-                componentProps.label = ({ x, y, stroke, value }) => {
-                  const { value: resultValue, ...attrs } = label({ x, y, stroke, value }) || {};
-                  return (
-                    <text x={x} y={y} dy={-4} fill={stroke} textAnchor="middle" {...attrs}>
-                      {resultValue ?? value}
-                    </text>
-                  );
-                };
-              }
+              if (label === true) label = {};
 
               const data = dataArr[i];
               const currentColors = Color.generateColors(data.length, i % 2 !== 0);
@@ -169,12 +161,14 @@ const PieChart = createVisualComponent({
 
                     return <Cell key={i} fill={fill} opacity={opacity} />;
                   })}
+                  {label && <LabelList position="inside" {...label} dataKey={label.dataKey ?? valueKey} />}
+                  {children && <Label position="center" value={children} />}
                 </Pie>
               );
             })}
 
-            {tooltip != null && Tooltip({ children: tooltip === true ? undefined : tooltip })}
-            {legend != null && Legend({ ...(legend === true ? null : legend), ...legendAttrs })}
+            {tooltip && Tooltip({ children: tooltip === true ? undefined : tooltip })}
+            {legend && Legend({ ...(legend === true ? null : legend), ...legendAttrs })}
           </RechartsPieChart>
         </ResponsiveContainer>
       </div>

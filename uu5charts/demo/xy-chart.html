@@ -30,76 +30,11 @@
       import { Utils } from "uu5g05";
       import Uu5Elements from "uu5g05-elements";
       import { Config } from "uu5g05-dev";
-      import { XyChart, carsData } from "uu5charts";
+      import { XyChart, fruitsData } from "uu5charts";
 
-      // <XyChart
-      //   data={data}
-      //   series={[{ valueKey: "Horsepower", title: "Výkon" }, { valueKey: "Horsepower", line: true, color: "red", title: "Čára" }]}
-      //   labelAxis={{ dataKey: "Miles_per_Gallon", title: "Spotřeba", unit: " MpG" }}
-      //   valueAxis={{ title: "Výkon", unit: " W" }}
-      //   legend
-      // />
-
-      const data = [
-        {
-          "month": "Leden",
-          "apples": 10,
-          "bananas": 20,
-        },
-        {
-          "month": "Únor",
-          "apples": 12,
-          "bananas": 18,
-        },
-        {
-          "month": "Březen",
-          "apples": 22,
-          "bananas": 8,
-        },
-        {
-          "month": "Duben",
-          "apples": 17,
-          "bananas": 14,
-        },
-        {
-          "month": "Květen",
-          "apples": 20,
-          "bananas": 12,
-        }
-      ].map((item) => ({ ...item, sum: item.apples + item.bananas }));
-
+      const data = fruitsData.map((item) => ({ ...item, sum: item.apples + item.bananas }));
 
       function Page() {
-        // const cleanData = carsData.filter(item => item["Miles_per_Gallon"] != null && item["Horsepower"] != null)
-        //
-        // const groupMap = cleanData.reduce((obj, item) => {
-        //   if (item["Miles_per_Gallon"]) {
-        //     obj[item["Miles_per_Gallon"]] ||= { itemList: [] };
-        //     obj[item["Miles_per_Gallon"]].itemList.push(item);
-        //   }
-        //   return obj;
-        // }, {});
-        //
-        // for (let key in groupMap) {
-        //   groupMap[key].avg = groupMap[key].itemList.reduce((sum, item) => {
-        //     sum += item["Horsepower"];
-        //     return sum;
-        //   }, 0) / groupMap[key].itemList.length;
-        // }
-        //
-        // const data = cleanData.map((item, i, arr) => {
-        //   if (item["Miles_per_Gallon"]) {
-        //     return {
-        //       ...item,
-        //       avg: groupMap[item["Miles_per_Gallon"]].avg,
-        //       avg2: groupMap[item["Miles_per_Gallon"]].avg + groupMap[arr[(i || arr.length) - 1]["Miles_per_Gallon"]].avg / 5
-        //     };
-        //   }
-        //   return item;
-        // });
-        //
-        // console.log(data);
-
         return (
           <div>
             <Uu5Elements.Block headerType="heading" level={4} header="Data" collapsible initialCollapsed>
@@ -110,7 +45,7 @@
               <XyChart
                 data={data}
                 series={[{ valueKey: "apples" }]}
-                labelAxis={{ dataKey: "month" }}
+                labelAxis={{ dataKey: "monthName" }}
               />
             </Uu5Elements.Block>
 
@@ -126,7 +61,7 @@
                     series={[
                       {
                         valueKey: "apples",
-                        color: "green",
+                        color: "red",
                         title: "Jablka",
                         onClick: (e) => console.log("click", e),
                         label: true
@@ -138,6 +73,7 @@
                         onClick: (e) => console.log("click", e),
                         label: {
                           content: (props) => {
+                            // console.log("label.content props", props);
                             const { x, y, offset, value } = props;
 
                             return (
@@ -149,7 +85,7 @@
                         }
                       },
                     ]}
-                    labelAxis={{ dataKey: "month" }}
+                    labelAxis={{ dataKey: "monthName" }}
                   />
                 </Uu5Elements.Block>
               </div>
@@ -165,7 +101,7 @@
                   <XyChart
                     data={data}
                     series={[{ valueKey: "apples", point: true }]}
-                    labelAxis={{ dataKey: "month" }}
+                    labelAxis={{ dataKey: "monthName" }}
                   />
                 </Uu5Elements.Block>
 
@@ -176,7 +112,7 @@
                       valueKey: "apples",
                       point: { shape: "star" },
                     }]}
-                    labelAxis={{ dataKey: "month" }}
+                    labelAxis={{ dataKey: "monthName" }}
                   />
                 </Uu5Elements.Block>
               </div>
@@ -192,7 +128,7 @@
                   <XyChart
                     data={data}
                     series={[{ valueKey: "apples", line: true }]}
-                    labelAxis={{ dataKey: "month" }}
+                    labelAxis={{ dataKey: "monthName" }}
                   />
                 </Uu5Elements.Block>
 
@@ -203,7 +139,7 @@
                       valueKey: "apples",
                       line: { point: true, type: "basis", width: 2 },
                     }]}
-                    labelAxis={{ dataKey: "month" }}
+                    labelAxis={{ dataKey: "monthName" }}
                   />
                 </Uu5Elements.Block>
               </div>
@@ -219,7 +155,7 @@
                   <XyChart
                     data={data}
                     series={[{ valueKey: "apples", area: true }]}
-                    labelAxis={{ dataKey: "month" }}
+                    labelAxis={{ dataKey: "monthName" }}
                   />
                 </Uu5Elements.Block>
 
@@ -230,7 +166,7 @@
                       valueKey: "apples",
                       area: { point: true, type: "basis" },
                     }]}
-                    labelAxis={{ dataKey: "month" }}
+                    labelAxis={{ dataKey: "monthName" }}
                   />
                 </Uu5Elements.Block>
               </div>
@@ -246,7 +182,7 @@
                   <XyChart
                     data={data}
                     series={[{ valueKey: "apples", bar: true }]}
-                    labelAxis={{ dataKey: "month" }}
+                    labelAxis={{ dataKey: "monthName" }}
                   />
                 </Uu5Elements.Block>
 
@@ -257,7 +193,7 @@
                       valueKey: "apples",
                       bar: { barSize: 20 },
                     }]}
-                    labelAxis={{ dataKey: "month" }}
+                    labelAxis={{ dataKey: "monthName" }}
                   />
                 </Uu5Elements.Block>
 
@@ -269,7 +205,7 @@
                       valueKey: "apples",
                       bar: true,
                     }]}
-                    labelAxis={{ dataKey: "month" }}
+                    labelAxis={{ dataKey: "monthName" }}
                   />
                 </Uu5Elements.Block>
               </div>
@@ -285,7 +221,7 @@
                   <XyChart
                     data={data}
                     series={[{ valueKey: "apples" }, { valueKey: "bananas" }]}
-                    labelAxis={{ dataKey: "month" }}
+                    labelAxis={{ dataKey: "monthName" }}
                   />
                 </Uu5Elements.Block>
 
@@ -293,11 +229,11 @@
                   <XyChart
                     data={data}
                     series={[
-                      { valueKey: "apples", color: "green", bar: true },
+                      { valueKey: "apples", color: "red", bar: true },
                       { valueKey: "bananas", color: "yellow", bar: true },
                       { valueKey: "sum", line: true },
                     ]}
-                    labelAxis={{ dataKey: "month" }}
+                    labelAxis={{ dataKey: "monthName" }}
                   />
                 </Uu5Elements.Block>
 
@@ -305,10 +241,10 @@
                   <XyChart
                     data={data}
                     series={[
-                      { valueKey: "apples", color: "green", area: { stackId: "1" } },
+                      { valueKey: "apples", color: "red", area: { stackId: "1" } },
                       { valueKey: "bananas", color: "yellow", area: { stackId: "1" } },
                     ]}
-                    labelAxis={{ dataKey: "month" }}
+                    labelAxis={{ dataKey: "monthName" }}
                   />
                 </Uu5Elements.Block>
               </div>
@@ -324,7 +260,7 @@
                   <XyChart
                     data={data}
                     series={[{ valueKey: "apples" }]}
-                    labelAxis={{ dataKey: "month", title: "Měsíc" }}
+                    labelAxis={{ dataKey: "monthName", title: "Měsíc" }}
                     valueAxis={{ title: "Počet", unit: " ks" }}
                   />
                 </Uu5Elements.Block>
@@ -333,7 +269,7 @@
                   <XyChart
                     data={data}
                     series={[{ valueKey: "apples" }]}
-                    labelAxis={{ dataKey: "month" }}
+                    labelAxis={{ dataKey: "monthName" }}
                     displayCartesianGrid
                   />
                 </Uu5Elements.Block>
@@ -350,10 +286,10 @@
                   <XyChart
                     data={data}
                     series={[
-                      { valueKey: "apples", title: "Jablka", color: "green" },
+                      { valueKey: "apples", title: "Jablka", color: "red" },
                       { valueKey: "bananas", title: "Banány", color: "yellow" },
                     ]}
-                    labelAxis={{ dataKey: "month" }}
+                    labelAxis={{ dataKey: "monthName" }}
                     legend
                   />
                 </Uu5Elements.Block>
@@ -362,10 +298,10 @@
                   <XyChart
                     data={data}
                     series={[
-                      { valueKey: "apples", title: "Jablka", color: "green" },
+                      { valueKey: "apples", title: "Jablka", color: "red" },
                       { valueKey: "bananas", title: "Banány", color: "yellow" },
                     ]}
-                    labelAxis={{ dataKey: "month" }}
+                    labelAxis={{ dataKey: "monthName" }}
                     legend={{ title: "Ovoce", position: "bottom-center" }}
                   />
                 </Uu5Elements.Block>
@@ -374,19 +310,19 @@
                   <XyChart
                     data={data}
                     series={[
-                      { valueKey: "apples", title: "Jablka", color: "green" },
+                      { valueKey: "apples", title: "Jablka", color: "red" },
                       { valueKey: "bananas", title: "Banány", color: "yellow" },
                     ]}
-                    labelAxis={{ dataKey: "month" }}
+                    labelAxis={{ dataKey: "monthName" }}
                     legend={{
-                      position: "bottom-left",
+                      position: "middle-right",
                       children: (props) => {
-                        // console.log("custom label props", props);
+                        // console.log("custom legend props", props);
                         const { payload } = props;
                         return (
                           <Uu5Elements.Tile header="Legenda">
                             {payload.map((item, i) => {
-                              // console.log("custom label item", item);
+                              // console.log("custom legend item", item);
                               const { color, value } = item;
                               return (
                                 <Uu5Elements.MenuItem key={i}>
@@ -417,10 +353,10 @@
                   <XyChart
                     data={data}
                     series={[
-                      { valueKey: "apples", title: "Jablka", color: "green" },
+                      { valueKey: "apples", title: "Jablka", color: "red" },
                       { valueKey: "bananas", title: "Banány", color: "yellow" },
                     ]}
-                    labelAxis={{ dataKey: "month" }}
+                    labelAxis={{ dataKey: "monthName" }}
                     tooltip={false}
                   />
                 </Uu5Elements.Block>
@@ -429,31 +365,31 @@
                   <XyChart
                     data={data}
                     series={[
-                      { valueKey: "apples", title: "Jablka", color: "green" },
+                      { valueKey: "apples", title: "Jablka", color: "red" },
                       { valueKey: "bananas", title: "Banány", color: "yellow" },
                     ]}
-                    labelAxis={{ dataKey: "month" }}
+                    labelAxis={{ dataKey: "monthName" }}
                     tooltip={(props) => {
-                        // console.log("custom tooltip props", props);
-                        const { payload } = props;
-                        return (
-                          <Uu5Elements.Tile header="Tooltip">
-                            {payload.map((item, i) => {
-                              // console.log("custom tooltip item", item);
-                              const { color, name, value } = item;
-                              return (
-                                <Uu5Elements.MenuItem key={i}>
-                                  <Uu5Elements.Badge
-                                    borderRadius="full"
-                                    style={{ backgroundColor: color, marginRight: 8 }}
-                                  />
-                                  {name}: {value}
-                                </Uu5Elements.MenuItem>
-                              )
-                            })}
-                          </Uu5Elements.Tile>
-                        )
-                      }
+                      // console.log("custom tooltip props", props);
+                      const { payload } = props;
+                      return (
+                        <Uu5Elements.Tile header="Tooltip">
+                          {payload.map((item, i) => {
+                            console.log("custom tooltip item", item);
+                            const { color, name, value, payload } = item;
+                            return (
+                              <Uu5Elements.MenuItem key={i}>
+                                <Uu5Elements.Badge
+                                  borderRadius="full"
+                                  style={{ backgroundColor: color || payload.fill, marginRight: 8 }}
+                                />
+                                {name}: {value}
+                              </Uu5Elements.MenuItem>
+                            )
+                          })}
+                        </Uu5Elements.Tile>
+                      )
+                    }
                     }
                   />
                 </Uu5Elements.Block>

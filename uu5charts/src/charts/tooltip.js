@@ -23,12 +23,13 @@ function CustomTooltip(props) {
         }
       >
         <div className={Config.Css.css({ display: "flex", flexDirection: "column", gap: 4 })}>
-          {payload.map(({ color, dataKey, name, value, payload: data }, i) => {
+          {payload.map((item, i) => {
+            const { fill, dataKey, name, value, payload: data } = item;
             if (value != null) {
               const formattedValue = typeof value === "number" ? <Uu5Elements.Number value={value} /> : value;
               return (
                 <div key={i} className={Config.Css.css({ paddingLeft: 8 })}>
-                  <Uu5Elements.Badge size="xs" borderRadius="full" style={{ backgroundColor: color || data.fill }} />{" "}
+                  <Uu5Elements.Badge size="xs" borderRadius="full" style={{ backgroundColor: fill || data.fill }} />{" "}
                   {name}: <b>{formattedValue}</b>
                   {valueUnit}
                 </div>

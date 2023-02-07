@@ -298,7 +298,6 @@ const XyChart = withDataCorrector(
       tooltip: PropTypes.oneOfType([PropTypes.bool, PropTypes.element, PropTypes.func]),
 
       displayCartesianGrid: PropTypes.bool,
-      onClick: PropTypes.func,
       height: PropTypes.number,
     },
     //@@viewOff:propTypes

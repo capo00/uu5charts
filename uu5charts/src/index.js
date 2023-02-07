@@ -6,8 +6,9 @@ export * from "./exports.js";
 export default Exports;
 
 import cars from "./data/cars.json";
+import fruits from "./data/fruits.json";
 
-export { cars as carsData };
+export { cars as carsData, fruits as fruitsData };
 
 if (process.env.NODE_ENV !== "test") {
   console.log(
