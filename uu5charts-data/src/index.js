@@ -1,9 +1,9 @@
 import { Utils } from "uu5g05";
-import "./config/config.js"; // startup (<style> element initialization)
 
-import * as Exports from "./exports.js";
-export * from "./exports.js";
-export default Exports;
+import carsData from "./data/cars.json";
+import fruitsData from "./data/fruits.json";
+
+export { carsData, fruitsData };
 
 if (process.env.NODE_ENV !== "test") {
   console.log(

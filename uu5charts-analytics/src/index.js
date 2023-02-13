@@ -1,5 +1,4 @@
 import { Utils } from "uu5g05";
-import "./config/config.js"; // startup (<style> element initialization)
 
 import * as Exports from "./exports.js";
 export * from "./exports.js";

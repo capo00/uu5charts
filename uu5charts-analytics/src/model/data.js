@@ -1,6 +1,7 @@
+import regression from "regression";
 import { mahalanobis } from "./mahalanobis";
 import { mean, median } from "./statistics";
-import regression from "regression";
+import TensorFlow from "./tensor-flow";
 
 export const getMahalanobisDistance = mahalanobis;
 
@@ -40,23 +41,23 @@ class Values extends Array {
   }
 
   filled() {
-    return this._filled ||= this.filter((it) => !!it);
+    return (this._filled ||= this.filter((it) => !!it));
   }
 
   min() {
-    return this._min == null ? this._min = Math.min(...this.filled()) : this._min;
+    return this._min == null ? (this._min = Math.min(...this.filled())) : this._min;
   }
 
   max() {
-    return this._max == null ? this._max = Math.max(...this.filled()) : this._max;
+    return this._max == null ? (this._max = Math.max(...this.filled())) : this._max;
   }
 
   mean() {
-    return this._mean == null ? this._mean = mean(...this.filled()) : this._mean;
+    return this._mean == null ? (this._mean = mean(...this.filled())) : this._mean;
   }
 
   median() {
-    return this._median == null ? this._median = median(...this.filled()) : this._median;
+    return this._median == null ? (this._median = median(...this.filled())) : this._median;
   }
 
   // Median absolute deviation
@@ -106,7 +107,7 @@ class Data extends Array {
   }
 
   values(key) {
-    return this._values[key] ||= new Values(this.map((item) => item[key]));
+    return (this._values[key] ||= new Values(this.map((item) => item[key])));
   }
 
   getHistogram(key, bins = 10) {
@@ -186,7 +187,7 @@ class Data extends Array {
       const quantitativeData = this.filter((it) => it._quantitativeValues);
 
       const distanceList = mahalanobis(quantitativeData.map(({ _quantitativeValues }) => _quantitativeValues)).all();
-      distanceList.forEach((distance, i) => quantitativeData[i]._distance = distance);
+      distanceList.forEach((distance, i) => (quantitativeData[i]._distance = distance));
 
       this._hasMahalanobisDistance = true;
     }
@@ -215,8 +216,8 @@ class Data extends Array {
     }
   }
 
-  addRegression(y, x, { key, predict } = {}) {
-    const regData = this.map((it) => (it._outlier ? undefined : [it[x], it[y]])).filter(Boolean);
+  addRegression(y, x, { key = `${y}~${x}`, predict } = {}) {
+    const regData = this.map((it) => (it._outlier || it._predict ? undefined : [it[x], it[y]])).filter(Boolean);
     const regressions = ["linear", "exponential", "logarithmic", "power", "polynomial"].map((name) => {
       const reg = regression[name](regData);
       reg.name = name;
@@ -226,9 +227,6 @@ class Data extends Array {
     regressions.sort((a, b) => b.r2 - a.r2);
     // choose 1st regression with the higher R^2
     const reg = regressions[0];
-    console.log(reg);
-
-    key ||= `${y}~${x}`;
 
     let i = 0;
     this.forEach((it) => {
@@ -239,13 +237,35 @@ class Data extends Array {
     });
 
     if (predict) {
+      const a = [];
       predict.forEach((v) => {
+        const r = reg.predict(v)[1];
+        a.push(r);
         this.push({
           [x]: v,
-          [key + "$predict"]: reg.predict(v)[1],
+          [key + "$predict"]: r,
           _predict: true,
         });
       });
+    }
+  }
+
+  async addTF(y, x, { key = `${y}~${x}`, predict } = {}) {
+    const regData = this.filter((it) => !it._outlier && !it._predict);
+    const data = regData.map((car) => ({ x: car[x], y: car[y] }));
+
+    const model = new TensorFlow(data);
+
+    await model.train();
+
+    this.forEach((it) => {
+      if (!it._outlier && !it._predict) {
+        it[key] = model.predict([it[x]])[0];
+      }
+    });
+
+    if (predict) {
+      this.push(...model.predict(predict).map((y, i) => ({ [x]: predict[i], [key + "$predict"]: y, _predict: true })));
     }
   }
 

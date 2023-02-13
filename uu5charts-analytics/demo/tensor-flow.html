@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TensorFlow</title>
+
+    <script src="https://cdn.plus4u.net/uu-uu5loaderg01/1.0.0/uu5loaderg01.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.plus4u.net/uu-uu5g05/1.0.0/assets/example-config.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.plus4u.net/uu-uu5tilesg02/2.0.0/assets/example-config.js" crossorigin="anonymous"></script>
+
+    <script>
+      Uu5Loader.config({
+        imports: {
+          "uu5charts-analytics": "/uu5charts-analytics.js",
+          "uu5charts": "http://localhost:2222/uu5charts.js",
+          "uu5charts-data": "http://localhost:2224/uu5charts-data.js",
+        },
+      });
+    </script>
+
+    <style>
+      body {
+        padding: 16px 32px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="uu5">Loading...</div>
+
+    <script type="text/babel">
+      import { useRef, useState, Utils, useEffect } from "uu5g05";
+      import Uu5Elements from "uu5g05-elements";
+      import { Config } from "uu5g05-dev";
+      import Uu5TilesElements from "uu5tilesg02-elements";
+      import { XyChart } from "uu5charts";
+      import { Model, TensorFlow } from "uu5charts-analytics";
+      import { carsData } from "uu5charts-data"
+
+      function Page() {
+        const dataModel = new Model.Data(carsData.map((it) => ({ ...it }))
+          .filter((car) => car.Miles_per_Gallon != null && car.Horsepower != null));
+
+        dataModel.removeOutliers();
+        dataModel.addRegression("Horsepower", "Miles_per_Gallon", {
+          key: "_regression",
+          predict: [5, 6, 7, 8, 9, 47, 48, 49, 50, 51, 52, 53, 54, 55],
+        });
+
+        const [data, setData] = useState(dataModel.filter(({ _outlier }) => !_outlier));
+
+        useEffect(() => {
+          (async function () {
+            await dataModel.addTF("Horsepower", "Miles_per_Gallon", {
+              key: "_tf",
+              predict: [5, 6, 7, 8, 9, 47, 48, 49, 50, 51, 52, 53, 54, 55],
+            });
+
+            console.log(dataModel);
+            setData(dataModel.filter(({ _outlier }) => !_outlier));
+          })();
+        }, []);
+
+        return (
+          <div>
+            <Uu5Elements.Block headerType="title" header="Consumption vs Horsepower">
+              <XyChart
+                data={data}
+                series={[
+                  { valueKey: "Horsepower", title: "Koňská síla vs. spotřeba" },
+                  { valueKey: "_regression", color: "red", line: { strokeWidth: 5 }, title: "Regrese" },
+                  { valueKey: "_regression$predict", color: "orange", line: { strokeWidth: 4 }, title: "Predikce" },
+                  { valueKey: "_tf", color: "cyan", line: { strokeWidth: 4 }, title: "TF" },
+                  { valueKey: "_tf$predict", color: "green", line: { strokeWidth: 4 }, title: "Predikce TF" },
+                ]}
+                labelAxis={{ dataKey: "Miles_per_Gallon", title: "Spotřeba" }}
+                valueAxis={{ title: "Koňská síla" }}
+                legend
+              />
+            </Uu5Elements.Block>
+          </div>
+        );
+      }
+
+      Utils.Dom.render(<Page />, document.getElementById("uu5"));
+    </script>
+  </body>
+</html>

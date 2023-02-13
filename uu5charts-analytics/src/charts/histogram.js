@@ -1,7 +1,7 @@
 //@@viewOn:imports
+import { XyChart } from "uu5charts";
 import { createVisualComponent, PropTypes, useState, useUpdateEffect } from "uu5g05";
 import Config from "../config/config.js";
-import XyChart from "./xy-chart";
 import Data from "../model/data";
 
 //@@viewOff:imports

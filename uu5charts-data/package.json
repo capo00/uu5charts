@@ -1,16 +1,13 @@
 {
-  "name": "uu5charts",
+  "name": "uu5charts-data",
   "version": "0.1.0",
   "description": "",
   "license": "License Commercial",
-  "namespace": "Uu5Charts",
+  "namespace": "Uu5ChartsData",
   "spec": "uu5-lib; uu_appg01_devkit@5.2.2",
   "dependencies": {
     "uu5g05": "^1.0.0",
-    "uu5g05-elements": "^1.0.0",
-    "chart.js": "^3.6.0",
-    "react-chartjs-2": "^4.0.0",
-    "recharts": "^2.0.0"
+    "uu5g05-elements": "^1.0.0"
   },
   "uuBuildSettings": {
     "externals": {}

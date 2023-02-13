@@ -1,25 +1,35 @@
 {
-  "product": "oc_uu5charts",
+  "product": "uu5charts",
   "version": "0.1.0",
   "license": "License Commercial",
   "description": {
     "en": "",
     "cs": ""
   },
-  "docUri": "",
-  "flsUri": "",
-  "slsUri": "",
-  "imageUri": "",
+  "docUri": "https://github.com/capo00/uu5charts",
+  "flsUri": "https://uuapp.plus4u.net/uu-flsg01-main/06ea1e6d022244a7a16ab9de54249e9c",
+  "slsUri": "https://uuapp.plus4u.net/uu-sls-maing01/e80acdfaeb5d46748a04cfc7c10fdf4e",
+  "imageUri": "https://uuapp.plus4u.net/uu-bookkit-maing01/ebdb06ba01fe480aac2165c66b2622b7/getProductLogo",
   "devkit": {
     "development": {
-      "appBoxLocationUri": "----- VALUE REQUIRED -----",
+      "appBoxLocationUri": "ues:UU-BT:CAPEK.ONDREJ.TOOLKIT/APPBOX",
       "appDeploymentUri": null,
-      "resourcePoolUri": "----- VALUE REQUIRED -----"
+      "resourcePoolUri": "ues:UUHUMANINTERFACEFAMILY-BT:FAMILY_UUHUMANINTERFACE_FAT_RESOURCEPOOL_AWE"
     }
   },
   "uu5charts": {
     "namespace": "Uu5Charts",
     "sourceUri": "https://cdn.plus4u.net/oc-uu5charts/%s/uu5charts.min.js",
+    "componentList": []
+  },
+  "uu5charts-analytics": {
+    "namespace": "Uu5ChartsAnalytics",
+    "sourceUri": "https://cdn.plus4u.net/uu-uu5charts/%s/uu5charts-analytics.min.js",
+    "componentList": []
+  },
+  "uu5charts-data": {
+    "namespace": "Uu5ChartsData",
+    "sourceUri": "https://cdn.plus4u.net/uu-uu5charts/%s/uu5charts-data.min.js",
     "componentList": []
   }
 }

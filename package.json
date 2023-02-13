@@ -3,7 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "workspaces": [
-    "uu5charts"
+    "uu5charts",
+    "uu5charts-analytics",
+    "uu5charts-data"
   ],
   "description": "",
   "license": "License Commercial",

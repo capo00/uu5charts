@@ -12,7 +12,8 @@
     <script>
       Uu5Loader.config({
         imports: {
-          "uu5charts": "/uu5charts.js"
+          "uu5charts": "/uu5charts.js",
+          "uu5charts-data": "http://localhost:2224/uu5charts-data.js"
         },
       });
     </script>
@@ -30,7 +31,8 @@
       import { Utils } from "uu5g05";
       import Uu5Elements from "uu5g05-elements";
       import { Config } from "uu5g05-dev";
-      import { PieChart, fruitsData } from "uu5charts";
+      import { PieChart } from "uu5charts";
+      import { fruitsData } from "uu5charts-data";
 
       const data = fruitsData.map((item) => ({ ...item, sum: item.apples + item.bananas }));
       const data2 = data.map(({ apples, bananas, sum, ...item }) => ([
