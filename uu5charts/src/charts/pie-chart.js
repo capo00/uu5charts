@@ -125,7 +125,7 @@ const PieChart = createVisualComponent({
                 labelKey,
                 color,
                 onClick,
-                label,
+                label = true,
                 innerRadius,
                 outerRadius = "95%",
                 startAngle = 0,

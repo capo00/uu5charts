@@ -8,6 +8,10 @@
   "dependencies": {
     "uu5g05": "^1.0.0",
     "uu5g05-elements": "^1.0.0",
+    "uu5g05-forms": "^1.0.0",
+    "uu5tilesg02": "^2.0.0",
+    "uu5tilesg02-elements": "^2.0.0",
+    "uu5tilesg02-controls": "^2.0.0",
     "regression": "^2.0.1",
     "@tensorflow/tfjs": "^4.2.0",
     "uu5charts": "C:\\Users\\User\\Documents\\work\\github\\uu5charts\\uu5charts\\target\\uu5charts-0.1.0.tgz"

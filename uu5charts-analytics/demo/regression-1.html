@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Regression</title>
+
+    <script src="https://cdn.plus4u.net/uu-uu5loaderg01/1.0.0/uu5loaderg01.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.plus4u.net/uu-uu5g05/1.0.0/assets/example-config.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.plus4u.net/uu-uu5tilesg02/2.0.0/assets/example-config.js" crossorigin="anonymous"></script>
+
+    <script>
+      Uu5Loader.config({
+        imports: {
+          "uu5charts-analytics": "/uu5charts-analytics.js",
+          "uu5charts": "http://localhost:2222/uu5charts.js",
+          "uu5charts-data": "http://localhost:2224/uu5charts-data.js"
+        },
+      });
+    </script>
+
+    <style>
+      body {
+        padding: 16px 32px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="uu5">Loading...</div>
+
+    <script type="text/babel">
+      import { useUpdateEffect, useState, Utils, useEffect } from "uu5g05";
+      import Uu5Elements from "uu5g05-elements";
+      import { Config } from "uu5g05-dev";
+      import Uu5TilesElements from "uu5tilesg02-elements";
+      import { XyChart } from "uu5charts";
+      import { Model, Regression } from "uu5charts-analytics";
+      import { carsData } from "uu5charts-data";
+
+      function Page() {
+        return (
+          <div>
+            <Uu5Elements.Block headerType="title" header="Data">
+              <Uu5TilesElements.List data={carsData} height={500} />
+            </Uu5Elements.Block>
+
+            <Uu5Elements.Block headerType="title" header="Spotřeba vs. koňská síla">
+              <Regression
+                data={carsData}
+                labelKey="Miles_per_Gallon"
+                valueKey="Horsepower"
+                series={[
+                  { valueKey: "Horsepower", title: "Spotřeba vs. koňská síla" },
+                ]}
+                labelAxis={{ title: "Spotřeba" }}
+                valueAxis={{ title: "Koňská síla" }}
+                legend
+              />
+            </Uu5Elements.Block>
+          </div>
+        );
+      }
+
+      Utils.Dom.render(<Page />, document.getElementById("uu5"));
+    </script>
+  </body>
+</html>

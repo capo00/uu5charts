@@ -1,7 +1,7 @@
 import { Utils } from "uu5g05";
 
-import carsData from "./data/cars.json";
-import fruitsData from "./data/fruits.json";
+import carsData from "./assets/cars.json";
+import fruitsData from "./assets/fruits.json";
 
 export { carsData, fruitsData };
 

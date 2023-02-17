@@ -14,7 +14,7 @@
         imports: {
           "uu5charts-analytics": "/uu5charts-analytics.js",
           "uu5charts": "http://localhost:2222/uu5charts.js",
-          "uu5charts-data": "http://localhost:2224/uu5charts-data.js"
+          "uu5charts-data": "http://localhost:2224/uu5charts-data.js",
         },
       });
     </script>
@@ -82,7 +82,7 @@
               distance: (
                 <XyChart
                   {...restProps}
-                  data={dataModel.map(({ _distance, _outlier, ...item }) => ({
+                  data={dataModel.map(({ _distance, _outlier, _outlier2, ...item }) => ({
                     ...item,
                     [_outlier ? "_outlier" : "_distance"]: _distance,
                   }))}

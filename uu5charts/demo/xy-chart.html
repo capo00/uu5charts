@@ -117,6 +117,17 @@
                     labelAxis={{ dataKey: "monthName" }}
                   />
                 </Uu5Elements.Block>
+
+                <Uu5Elements.Block headerType="heading" header="sizeKey">
+                  <XyChart
+                    data={data}
+                    series={[{
+                      valueKey: "apples",
+                      point: { sizeKey: "apples" },
+                    }]}
+                    labelAxis={{ dataKey: "monthName" }}
+                  />
+                </Uu5Elements.Block>
               </div>
             </Uu5Elements.Block>
 
@@ -188,13 +199,47 @@
                   />
                 </Uu5Elements.Block>
 
-                <Uu5Elements.Block headerType="heading" header="barSize: 20">
+                <Uu5Elements.Block headerType="heading" header="width: 20">
                   <XyChart
                     data={data}
                     series={[{
                       valueKey: "apples",
-                      bar: { barSize: 20 },
+                      bar: { width: 20 },
                     }]}
+                    labelAxis={{ dataKey: "monthName" }}
+                  />
+                </Uu5Elements.Block>
+
+                <Uu5Elements.Block headerType="heading" header="series">
+                  <XyChart
+                    data={data}
+                    series={[
+                      {
+                        valueKey: "apples",
+                        bar: true,
+                      },
+                      {
+                        valueKey: "bananas",
+                        bar: true,
+                      }
+                    ]}
+                    labelAxis={{ dataKey: "monthName" }}
+                  />
+                </Uu5Elements.Block>
+
+                <Uu5Elements.Block headerType="heading" header="stackId">
+                  <XyChart
+                    data={data}
+                    series={[
+                      {
+                        valueKey: "apples",
+                        bar: { stackId: "1" },
+                      },
+                      {
+                        valueKey: "bananas",
+                        bar: { stackId: "1" },
+                      }
+                    ]}
                     labelAxis={{ dataKey: "monthName" }}
                   />
                 </Uu5Elements.Block>

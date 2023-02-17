@@ -2,6 +2,7 @@ import regression from "regression";
 import { mahalanobis } from "./mahalanobis";
 import { mean, median } from "./statistics";
 import TensorFlow from "./tensor-flow";
+import ChiSquare from "./mahalanobis/chi-square";
 
 export const getMahalanobisDistance = mahalanobis;
 
@@ -33,11 +34,21 @@ export function getHistogram(data, key, bins = 20) {
 
 class Values extends Array {
   constructor(values) {
-    Array.isArray(values) ? super(...values) : super(values);
+    if (Array.isArray(values)) {
+      super(...values);
+      this._isNumeric = typeof values.find((v) => v === 0 || v) === "number";
+    } else {
+      super(values);
+    }
 
     this._min = undefined;
     this._max = undefined;
     this._mean = undefined;
+    this._avgStep = undefined;
+  }
+
+  isNumeric() {
+    return this._isNumeric;
   }
 
   filled() {
@@ -45,24 +56,28 @@ class Values extends Array {
   }
 
   min() {
-    return this._min == null ? (this._min = Math.min(...this.filled())) : this._min;
+    return this.isNumeric() && this._min == null ? (this._min = Math.min(...this.filled())) : this._min;
   }
 
   max() {
-    return this._max == null ? (this._max = Math.max(...this.filled())) : this._max;
+    return this.isNumeric() && this._max == null ? (this._max = Math.max(...this.filled())) : this._max;
+  }
+
+  sum() {
+    return this.isNumeric() && this._sum == null ? (this._sum = this.filled().reduce((s, v) => s + v, 0)) : this._sum;
   }
 
   mean() {
-    return this._mean == null ? (this._mean = mean(...this.filled())) : this._mean;
+    return this.isNumeric() && this._mean == null ? (this._mean = mean(...this.filled())) : this._mean;
   }
 
   median() {
-    return this._median == null ? (this._median = median(...this.filled())) : this._median;
+    return this.isNumeric() && this._median == null ? (this._median = median(...this.filled())) : this._median;
   }
 
   // Median absolute deviation
   mad() {
-    if (this._mad == null) {
+    if (this.isNumeric() && this._mad == null) {
       // median(|xi - mean(x)|)
       const mean = this.mean();
       this._mad = median(...this.filled().map((xi) => Math.abs(xi - mean)));
@@ -71,25 +86,38 @@ class Values extends Array {
   }
 
   getHistogram(bins = 20) {
-    const min = Math.floor(this.min());
-    const max = Math.ceil(this.max());
-    const binSize = Math.ceil((max - min) / bins);
+    if (this.isNumeric()) {
+      const min = Math.floor(this.min());
+      const max = Math.ceil(this.max());
+      const binSize = Math.ceil((max - min) / bins);
 
-    const histData = [];
-    this.forEach((v, j) => {
-      for (let i = 0; i < bins; i++) {
-        const locMin = min + i * binSize;
-        const locMax = locMin + binSize;
+      const histData = [];
+      this.forEach((v, j) => {
+        for (let i = 0; i < bins; i++) {
+          const locMin = min + i * binSize;
+          const locMax = locMin + binSize;
 
-        histData[i] ||= { min: locMin, max: locMax, label: locMin + binSize / 2, binSize, value: 0, data: [] };
-        if (v >= locMin && v < locMax) {
-          histData[i].value++;
-          histData[i].data.push(j);
+          histData[i] ||= { min: locMin, max: locMax, label: locMin + binSize / 2, binSize, value: 0, data: [] };
+          if (v >= locMin && v < locMax) {
+            histData[i].value++;
+            histData[i].data.push(j);
+          }
         }
-      }
-    });
+      });
 
-    return histData;
+      return histData;
+    }
+  }
+
+  avgStep() {
+    if (this.isNumeric() && this._avgStep == null) {
+      let sum = 0;
+      for (let i = 1; i < this.length; i++) {
+        sum += this[i] - this[i - 1];
+      }
+      return sum / (this.length - 1);
+    }
+    return this._avgStep;
   }
 }
 
@@ -104,6 +132,8 @@ class Data extends Array {
 
     this._hasMahalanobisDistance = false;
     this._histogram = {};
+
+    this.outliersLimit = undefined;
   }
 
   values(key) {
@@ -198,11 +228,16 @@ class Data extends Array {
   removeOutliers(strict = false) {
     this.addMahalanobisDistance();
 
-    const values = this.values("_distance");
-    const median = values.median();
-    const mad = values.mad();
+    // const values = this.values("_distance");
+    // const median = values.median();
+    // const mad = values.mad();
+    // const min = 0;
+    // const max = median + 6 * mad; // 6 is chosen constant
+
     const min = 0;
-    const max = median + 6 * mad; // 6 is chosen constant
+    // higher alpha (0.001) means more outliers and power regression
+    const max = ChiSquare.inv(2, 0.0001);
+    this.outliersLimit = max;
 
     if (strict) {
       return this._removeIf((it) => !it._distance || min > it._distance || it._distance > max);

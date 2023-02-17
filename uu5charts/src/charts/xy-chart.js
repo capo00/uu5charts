@@ -17,6 +17,7 @@ import {
   ReferenceArea,
   ReferenceLine,
   LabelList,
+  ZAxis,
 } from "recharts";
 import { createComponent, createVisualComponent, PropTypes, useState, Utils } from "uu5g05";
 import Config from "../config/config.js";
@@ -215,6 +216,7 @@ const XyChart = withDataCorrector(
             PropTypes.bool,
             PropTypes.shape({
               shape: PropTypes.oneOf(["circle", "cross", "diamond", "square", "star", "triangle", "wye"]),
+              sizeKey: PropTypes.string,
             }),
           ]),
           line: PropTypes.oneOfType([
@@ -257,8 +259,8 @@ const XyChart = withDataCorrector(
             PropTypes.bool,
             PropTypes.shape({
               layout: PropTypes.oneOf(["horizontal", "vertical"]),
-              barSize: PropTypes.number,
-              maxBarSize: PropTypes.number,
+              width: PropTypes.number,
+              maxWidth: PropTypes.number,
               stackId: PropTypes.string,
             }),
           ]),
@@ -333,7 +335,7 @@ const XyChart = withDataCorrector(
       let isNumericY = typeof data.find((it) => it[series[0].valueKey] != null)[series[0].valueKey] === "number";
 
       let zeroLineProps;
-      const valueKeyList = Object.values(series).map(({ valueKey }) => valueKey);
+      const valueKeyList = series.map(({ valueKey }) => valueKey);
       for (let item of data) {
         if (valueKeyList.find((key) => item[key] < 0)) {
           zeroLineProps = { y: 0 };
@@ -365,6 +367,8 @@ const XyChart = withDataCorrector(
       let MainChart = ComposedChart;
       const typeSet = new Set(series.map((serie) => Object.keys(COMPONENTS).find((v) => serie[v])));
       if (typeSet.size === 1) MainChart = COMPONENTS[[...typeSet][0]] || MainChart;
+
+      let zAxis;
 
       return (
         <div style={{ width: "100%", height }} onDoubleClick={onDoubleClick}>
@@ -422,9 +426,6 @@ const XyChart = withDataCorrector(
                   if (typeof line === "object") {
                     const { point: dot, width: strokeWidth, ...restProps } = line;
                     componentProps = { dot, strokeWidth, ...restProps, ...componentProps };
-
-                    // if (label || labelContent)
-                    //   componentProps.label = <CustomLabel label={label} labelContent={labelContent} />;
                   }
                   componentProps = {
                     ...componentProps,
@@ -438,9 +439,6 @@ const XyChart = withDataCorrector(
                   if (typeof area === "object") {
                     const { point: dot, ...restProps } = area;
                     componentProps = { dot, ...restProps, ...componentProps };
-
-                    // if (label || labelContent)
-                    //   componentProps.label = <CustomLabel label={label} labelContent={labelContent} />;
                   }
 
                   const selectedColor = Color.getColor(color, currentColors);
@@ -455,11 +453,8 @@ const XyChart = withDataCorrector(
                 } else if (bar) {
                   Component = Bar;
                   if (typeof bar === "object") {
-                    const { ...restProps } = bar;
-                    componentProps = { ...restProps, ...componentProps };
-
-                    // if (label || labelContent)
-                    //   componentProps.label = <CustomLabel label={label} labelContent={labelContent} layout={layout} />;
+                    const { width: barSize, maxWidth: maxBarSize, ...restProps } = bar;
+                    componentProps = { barSize, maxBarSize, ...restProps, ...componentProps };
                   }
 
                   if (label && layout === "vertical") {
@@ -474,11 +469,10 @@ const XyChart = withDataCorrector(
                 } else {
                   Component = Scatter;
                   if (typeof point === "object") {
-                    const { ...restProps } = point;
+                    const { sizeKey, ...restProps } = point;
                     componentProps = { ...restProps, ...componentProps };
 
-                    // if (label || labelContent)
-                    //   componentProps.label = <CustomLabel label={label} labelContent={labelContent} />;
+                    if (sizeKey) zAxis = <ZAxis dataKey={sizeKey} range={[10, 100]} />;
                   }
                   componentProps = {
                     ...componentProps,
@@ -493,6 +487,8 @@ const XyChart = withDataCorrector(
                   </Component>
                 );
               })}
+
+              {zAxis}
 
               {displayCartesianGrid && <CartesianGrid strokeDasharray="3 3" />}
               {tooltip && Tooltip({ labelAxis, valueAxis, children: tooltip === true ? undefined : tooltip })}
