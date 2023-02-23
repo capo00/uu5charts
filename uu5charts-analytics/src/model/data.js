@@ -32,6 +32,8 @@ export function getHistogram(data, key, bins = 20) {
   return histData;
 }
 
+const ROUNDER = 10 ** 10;
+
 class Values extends Array {
   constructor(values) {
     if (Array.isArray(values)) {
@@ -44,6 +46,8 @@ class Values extends Array {
     this._min = undefined;
     this._max = undefined;
     this._mean = undefined;
+    this._sampleVariance = undefined;
+    this._sampleStandardDeviation = undefined;
     this._avgStep = undefined;
   }
 
@@ -52,7 +56,7 @@ class Values extends Array {
   }
 
   filled() {
-    return (this._filled ||= this.filter((it) => !!it));
+    return (this._filled ||= this.filter((it) => it != null && it !== ""));
   }
 
   min() {
@@ -64,15 +68,26 @@ class Values extends Array {
   }
 
   sum() {
-    return this.isNumeric() && this._sum == null ? (this._sum = this.filled().reduce((s, v) => s + v, 0)) : this._sum;
+    if (this.isNumeric() && this._sum == null) {
+      const value = this.filled().reduce((s, v) => s + v, 0);
+      this._sum = Math.round(value * ROUNDER) / ROUNDER;
+    }
+    return this._sum;
   }
 
   mean() {
-    return this.isNumeric() && this._mean == null ? (this._mean = mean(...this.filled())) : this._mean;
+    if (this.isNumeric() && this._mean == null) {
+      const value = mean(...this.filled());
+      this._mean = Math.round(value * ROUNDER) / ROUNDER;
+    }
+    return this._mean;
   }
 
   median() {
-    return this.isNumeric() && this._median == null ? (this._median = median(...this.filled())) : this._median;
+    if (this.isNumeric() && this._median == null) {
+      this._median = median(...this.filled());
+    }
+    return this._median;
   }
 
   // Median absolute deviation
@@ -80,9 +95,44 @@ class Values extends Array {
     if (this.isNumeric() && this._mad == null) {
       // median(|xi - mean(x)|)
       const mean = this.mean();
-      this._mad = median(...this.filled().map((xi) => Math.abs(xi - mean)));
+      const value = median(...this.filled().map((xi) => Math.abs(xi - mean)));
+      this._mad = Math.round(value * ROUNDER) / ROUNDER;
     }
     return this._mad;
+  }
+
+  // variance() {
+  //   const mean = this.reduce((acc, curr) => acc + curr, 0) / this.length;
+  //   return this.reduce((acc, curr) => acc + Math.pow(curr - mean, 2), 0) / this.length;
+  // }
+
+  sampleVariance() {
+    if (this.isNumeric() && this._sampleVariance == null) {
+      const mean = this.mean();
+
+      // Calculate the sum of the squared differences from the mean
+      const sumSquaredDiffs = this.reduce((acc, val) => acc + Math.pow(val - mean, 2), 0);
+
+      // Divide by n-1 to get the sample variance
+      this._sampleVariance = sumSquaredDiffs / (this.length - 1);
+    }
+    return this._sampleVariance;
+  }
+
+  // směrodatná odchylka
+  sampleStandardDeviation() {
+    if (this.isNumeric() && this._sampleStandardDeviation == null) {
+      this._sampleStandardDeviation = Math.pow(this.sampleVariance(), 0.5);
+    }
+    return this._sampleStandardDeviation;
+  }
+
+  // variační koeficient
+  sampleVarianceCoefficient() {
+    if (this.isNumeric() && this._varianceCoefficient == null) {
+      this._varianceCoefficient = this.sampleStandardDeviation() / this.mean();
+    }
+    return this._varianceCoefficient;
   }
 
   getHistogram(bins = 20) {
@@ -125,6 +175,7 @@ class Data extends Array {
   constructor(data) {
     Array.isArray(data) ? super(...data) : super(data);
 
+    this._keys = [];
     this._values = {};
 
     this._quantitativeKeys = undefined;
@@ -134,6 +185,16 @@ class Data extends Array {
     this._histogram = {};
 
     this.outliersLimit = undefined;
+  }
+
+  keys() {
+    if (!this._keys.length) {
+      const keys = new Set();
+      // TODO optimize (e.g. each forEach or map can prepare keys too)
+      this.forEach((item) => Object.keys(item).forEach((k) => keys.add(k)));
+      this._keys = [...keys];
+    }
+    return this._keys;
   }
 
   values(key) {
@@ -172,18 +233,7 @@ class Data extends Array {
 
   getQuantitativeKeys() {
     if (!this._quantitativeKeys) {
-      // keys with numeric values
-      const quantitativeKeys = new Set();
-
-      // find numeric keys
-      this.forEach((row) => {
-        Object.keys(row).forEach((k) => {
-          const v = row[k];
-          if (v == null || typeof v === "number") quantitativeKeys.add(k);
-        });
-      });
-
-      this._quantitativeKeys = [...quantitativeKeys];
+      this._quantitativeKeys = this.keys().filter((key) => this.values(key).isNumeric());
     }
 
     return this._quantitativeKeys;

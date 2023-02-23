@@ -1,14 +1,51 @@
 //@@viewOn:imports
-import { createVisualComponent, useMemo } from "uu5g05";
+import { createVisualComponent, useMemo, useState } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
-import Uu5Forms from "uu5g05-forms";
 import Uu5Tiles from "uu5tilesg02";
 import Uu5TilesElements from "uu5tilesg02-elements";
 import Uu5TilesControls from "uu5tilesg02-controls";
 import Config from "../config/config.js";
-import Data from "../model/data";
 
 //@@viewOff:imports
+
+const ROUNDER = 10 ** 5;
+
+function round(value) {
+  return typeof value === "number" ? Math.round(value * ROUNDER) / ROUNDER : value;
+}
+
+function isNA(value) {
+  return value == null || value === "";
+}
+
+function FooterEmptyValue(props) {
+  const { value, data, colName, onChange, columnList } = props;
+
+  const [open, setOpen] = useState(false);
+
+  return (
+    <>
+      <Uu5Elements.Button
+        icon="mdi-delete"
+        colorScheme="negative"
+        size="xxs"
+        onClick={() => onChange(data.filter((it) => !isNA(it[colName])))}
+        tooltip={{ cs: "Odebrat položky" }}
+        className={Config.Css.css({ marginRight: 8 })}
+      />
+
+      <Uu5Elements.Link tooltip={{ cs: "Zobraz položky" }} onClick={() => setOpen(true)}>
+        {value}
+      </Uu5Elements.Link>
+
+      <Uu5Elements.Modal width="100%" open={open} onClose={() => setOpen(false)}>
+        <Uu5Tiles.ControllerProvider data={data.filter((it) => isNA(it[colName]))}>
+          <Uu5TilesElements.List columnList={columnList} tileMinWidth={300} tileMaxWidth={350} />
+        </Uu5Tiles.ControllerProvider>
+      </Uu5Elements.Modal>
+    </>
+  );
+}
 
 const DataTable = createVisualComponent({
   //@@viewOn:statics
@@ -28,9 +65,10 @@ const DataTable = createVisualComponent({
 
   render(props) {
     //@@viewOn:private
-    const { data, ...blockProps } = props;
+    const { data, onChange, ...blockProps } = props;
 
-    const columnNames = Object.keys(data[0]);
+    const columnNames = [...data.keys()];
+    columnNames.shift(); // remove first column = name
 
     const stats = useMemo(() => {
       const stats = {};
@@ -47,27 +85,31 @@ const DataTable = createVisualComponent({
           sum: columnData.sum(),
           median: columnData.median(),
           mean: columnData.median(),
-          // var,
-          // std.dev,
-          // coef.var
+          variance: round(columnData.sampleVariance()),
+          standardDeviation: round(columnData.sampleStandardDeviation()),
+          varianceCoefficient: round(columnData.sampleVarianceCoefficient()),
         };
       });
 
       return stats;
     }, [data]);
 
+    const columnList = data.keys().map((colName) => ({
+      value: colName,
+      header: colName,
+      cellComponent: ({ children, ...params }) => (
+        <Uu5TilesElements.Table.Cell
+          {...params}
+          horizontalAlignment={typeof children === "number" ? "right" : undefined}
+        >
+          {children}
+        </Uu5TilesElements.Table.Cell>
+      ),
+    }));
+
     const rowNames = Object.keys(stats[columnNames[0]]);
 
-    const footerMap = {
-      empty: {},
-      classification: {
-        footerComponent: (
-          <Uu5TilesElements.Table.FooterCell horizontalAlignment="center" verticalAlignment="bottom">
-            Classification
-          </Uu5TilesElements.Table.FooterCell>
-        ),
-      },
-    };
+    const footerMap = {};
 
     const footerTemplate = [];
     rowNames.forEach((rowName, i) => {
@@ -80,13 +122,23 @@ const DataTable = createVisualComponent({
         ),
       };
 
-      columnNames.forEach((colName, j) => {
+      columnNames.forEach((colName) => {
         const name = [colName, rowName].join("-");
         row.push(name);
         footerMap[name] = {
           footerComponent: (
             <Uu5TilesElements.Table.FooterCell horizontalAlignment="right" verticalAlignment="center">
-              {stats[colName][rowName]}
+              {rowName === "empty" && stats[colName][rowName] > 0 ? (
+                <FooterEmptyValue
+                  value={stats[colName][rowName]}
+                  data={data}
+                  colName={colName}
+                  onChange={onChange}
+                  columnList={columnList}
+                />
+              ) : (
+                stats[colName][rowName]
+              )}
             </Uu5TilesElements.Table.FooterCell>
           ),
         };
@@ -107,12 +159,14 @@ const DataTable = createVisualComponent({
           actionList={[{ component: <Uu5TilesControls.SearchButton /> }, ...blockProps.actionList]}
         >
           <Uu5TilesElements.List
+            columnList={columnList}
             tileMinWidth={300}
             tileMaxWidth={350}
-            height={600}
-
+            height={800}
+            cellHoverExtent={["row", "column"]}
             footerTemplate={footerTemplate.join(",")}
             footerContentMap={footerMap}
+            sortable // not working yet
           />
         </Uu5Elements.Block>
       </Uu5Tiles.ControllerProvider>
