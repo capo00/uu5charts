@@ -442,6 +442,24 @@
                 </Uu5Elements.Block>
               </div>
             </Uu5Elements.Block>
+
+            <Uu5Elements.Block headerType="heading" level={4} header="Lines" collapsible>
+              <div className={Config.Css.css({
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+                gap: 16,
+              })}>
+                <XyChart
+                  data={data}
+                  series={[
+                    { valueKey: "apples", title: "Jablka", color: "red" },
+                    { valueKey: "bananas", title: "Banány", color: "yellow" },
+                  ]}
+                  labelAxis={{ dataKey: "monthName" }}
+                  lines={[{ y: 20, color: "red", title: "Optimum" }, { x: "Březen", color: "green", title: "Start" }]}
+                />
+              </div>
+            </Uu5Elements.Block>
           </div>
         );
       }

@@ -18,9 +18,8 @@ function isNA(value) {
   return value == null || value === "";
 }
 
-function FooterEmptyValue(props) {
-  const { value, data, colName, onChange, columnList } = props;
-
+function DeletedValue(props) {
+  const { value, data, onChange, columnList, onFilter } = props;
   const [open, setOpen] = useState(false);
 
   return (
@@ -29,7 +28,7 @@ function FooterEmptyValue(props) {
         icon="mdi-delete"
         colorScheme="negative"
         size="xxs"
-        onClick={() => onChange(data.filter((it) => !isNA(it[colName])))}
+        onClick={() => onChange(data.filter(onFilter))}
         tooltip={{ cs: "Odebrat položky" }}
         className={Config.Css.css({ marginRight: 8 })}
       />
@@ -39,7 +38,33 @@ function FooterEmptyValue(props) {
       </Uu5Elements.Link>
 
       <Uu5Elements.Modal width="100%" open={open} onClose={() => setOpen(false)}>
-        <Uu5Tiles.ControllerProvider data={data.filter((it) => isNA(it[colName]))}>
+        <Uu5Tiles.ControllerProvider data={data.filter((...args) => !onFilter(...args))}>
+          <Uu5TilesElements.List columnList={columnList} tileMinWidth={300} tileMaxWidth={350} />
+        </Uu5Tiles.ControllerProvider>
+      </Uu5Elements.Modal>
+    </>
+  );
+}
+
+function DuplicatedAlert(props) {
+  const { data, duplicated, columnList, onChange } = props;
+  const [open, setOpen] = useState(false);
+
+  return (
+    <>
+      <Uu5Elements.Alert header={`${duplicated.length} duplicitních záznamů`}>
+        <Uu5Elements.Button onClick={() => setOpen(true)}>Zobrazit</Uu5Elements.Button>
+        <Uu5Elements.Button
+          colorScheme="negative"
+          onClick={() => {
+            onChange(data.filter((it) => !duplicated.includes(it)));
+          }}
+        >
+          Odstranit
+        </Uu5Elements.Button>
+      </Uu5Elements.Alert>
+      <Uu5Elements.Modal width="100%" open={open} onClose={() => setOpen(false)}>
+        <Uu5Tiles.ControllerProvider data={duplicated}>
           <Uu5TilesElements.List columnList={columnList} tileMinWidth={300} tileMaxWidth={350} />
         </Uu5Tiles.ControllerProvider>
       </Uu5Elements.Modal>
@@ -67,15 +92,13 @@ const DataTable = createVisualComponent({
     //@@viewOn:private
     const { data, onChange, ...blockProps } = props;
 
-    const columnNames = [...data.keys()];
-    columnNames.shift(); // remove first column = name
-
     const stats = useMemo(() => {
       const stats = {};
 
-      columnNames.forEach((colName) => {
+      data.keys().forEach((colName) => {
         const columnData = data.values(colName);
-        const filled = columnData.filled().length;
+        const filledArr = columnData.filled();
+        const filled = filledArr.length;
         stats[colName] = {
           filled,
           empty: columnData.length - filled,
@@ -93,6 +116,11 @@ const DataTable = createVisualComponent({
 
       return stats;
     }, [data]);
+
+    const duplicatedData = data.getDuplicated();
+
+    const columnNames = [...data.keys()];
+    columnNames.shift(); // first column is Name
 
     const columnList = data.keys().map((colName) => ({
       value: colName,
@@ -128,13 +156,13 @@ const DataTable = createVisualComponent({
         footerMap[name] = {
           footerComponent: (
             <Uu5TilesElements.Table.FooterCell horizontalAlignment="right" verticalAlignment="center">
-              {rowName === "empty" && stats[colName][rowName] > 0 ? (
-                <FooterEmptyValue
+              {["empty"].includes(rowName) && stats[colName][rowName] > 0 ? (
+                <DeletedValue
                   value={stats[colName][rowName]}
                   data={data}
-                  colName={colName}
                   onChange={onChange}
                   columnList={columnList}
+                  onFilter={(it) => !isNA(it[colName])}
                 />
               ) : (
                 stats[colName][rowName]
@@ -158,6 +186,9 @@ const DataTable = createVisualComponent({
           {...blockProps}
           actionList={[{ component: <Uu5TilesControls.SearchButton /> }, ...blockProps.actionList]}
         >
+          {duplicatedData.length > 0 && (
+            <DuplicatedAlert data={data} duplicated={duplicatedData} columnList={columnList} onChange={onChange} />
+          )}
           <Uu5TilesElements.List
             columnList={columnList}
             tileMinWidth={300}

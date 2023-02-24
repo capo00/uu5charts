@@ -1,10 +1,12 @@
 import regression from "regression";
+import { Utils } from "uu5g05";
 import { mahalanobis } from "./mahalanobis";
 import { mean, median } from "./statistics";
 import TensorFlow from "./tensor-flow";
 import ChiSquare from "./mahalanobis/chi-square";
 
 export const getMahalanobisDistance = mahalanobis;
+export const OUTLIERS_ALPHA = 0.0001;
 
 export function getHistogram(data, key, bins = 20) {
   const values = data.map((item) => item[key]);
@@ -49,6 +51,7 @@ class Values extends Array {
     this._sampleVariance = undefined;
     this._sampleStandardDeviation = undefined;
     this._avgStep = undefined;
+    this._isUnique = undefined;
   }
 
   isNumeric() {
@@ -99,6 +102,13 @@ class Values extends Array {
       this._mad = Math.round(value * ROUNDER) / ROUNDER;
     }
     return this._mad;
+  }
+
+  isUnique() {
+    if (this._isUnique == null) {
+      this._isUnique = this.length === new Set(this).size;
+    }
+    return this._isUnique;
   }
 
   // variance() {
@@ -178,6 +188,8 @@ class Data extends Array {
     this._keys = [];
     this._values = {};
 
+    this._uniqueKeys = undefined;
+
     this._quantitativeKeys = undefined;
     this._hasQuantitative = false;
 
@@ -191,7 +203,7 @@ class Data extends Array {
     if (!this._keys.length) {
       const keys = new Set();
       // TODO optimize (e.g. each forEach or map can prepare keys too)
-      this.forEach((item) => Object.keys(item).forEach((k) => keys.add(k)));
+      this.forEach((item) => Object.keys(item).forEach((k) => !/^_/.test(k) && keys.add(k)));
       this._keys = [...keys];
     }
     return this._keys;
@@ -199,6 +211,24 @@ class Data extends Array {
 
   values(key) {
     return (this._values[key] ||= new Values(this.map((item) => item[key])));
+  }
+
+  getUniqueKeys() {
+    if (this._uniqueKeys == null) {
+      this._uniqueKeys = this.keys().filter((k) => this.values(k).isUnique());
+    }
+    return this._uniqueKeys;
+  }
+
+  getDuplicated() {
+    if (this._duplicated == null) {
+      const keys = this.keys();
+      const duplicates = this.filter(
+        (item, i, arr) => i !== arr.findIndex((it) => Utils.Object.shallowEqual(item, it))
+      );
+      this._duplicated = duplicates.sort((a, b) => (a[keys[0]] > b[keys[0]] ? 1 : a[keys[0]] < b[keys[0]] ? -1 : 0));
+    }
+    return this._duplicated;
   }
 
   getHistogram(key, bins = 10) {
@@ -275,7 +305,7 @@ class Data extends Array {
     return this;
   }
 
-  removeOutliers(strict = false) {
+  removeOutliers({ max, alpha = OUTLIERS_ALPHA, strict = false } = {}) {
     this.addMahalanobisDistance();
 
     // const values = this.values("_distance");
@@ -286,7 +316,7 @@ class Data extends Array {
 
     const min = 0;
     // higher alpha (0.001) means more outliers and power regression
-    const max = ChiSquare.inv(2, 0.0001);
+    max ||= ChiSquare.inv(2, alpha);
     this.outliersLimit = max;
 
     if (strict) {

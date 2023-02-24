@@ -47,7 +47,7 @@ const Color = {
   },
 
   getColor(color, colorList) {
-    return gdsColors[color]?.main || color || colorList.shift();
+    return gdsColors[color]?.main || color || colorList?.shift();
   },
 };
 

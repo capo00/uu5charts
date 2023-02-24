@@ -181,11 +181,15 @@ function useInteractiveLegend(series) {
   ];
 }
 
-function CustomLabel(props) {
-  const { label, dataKey: propsDataKey } = props;
-  const { dataKey, ...labelProps } = typeof label === "object" ? label : {};
+function CustomLineLabel(props) {
+  const { viewBox, title, offset, stroke } = props;
+  const { x, y, width } = viewBox;
 
-  return <LabelList dataKey={dataKey || propsDataKey} {...labelProps} />;
+  return (
+    <text x={width / 2 + x} y={y} dy={-offset} stroke={stroke} textAnchor="middle" opacity={0.4}>
+      {title}
+    </text>
+  );
 }
 
 const COMPONENTS = {
@@ -299,6 +303,16 @@ const XyChart = withDataCorrector(
       ]),
       tooltip: PropTypes.oneOfType([PropTypes.bool, PropTypes.element, PropTypes.func]),
 
+      lines: PropTypes.arrayOf(
+        PropTypes.shape({
+          x: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+          y: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+          title: PropTypes.node,
+          width: PropTypes.number,
+          color: PropTypes.string,
+        })
+      ),
+
       displayCartesianGrid: PropTypes.bool,
       height: PropTypes.number,
     },
@@ -310,6 +324,7 @@ const XyChart = withDataCorrector(
       series: [],
       tooltip: true,
       height: 300,
+      lines: [],
     },
     //@@viewOff:defaultProps
 
@@ -323,6 +338,7 @@ const XyChart = withDataCorrector(
         legend,
         tooltip,
         displayCartesianGrid,
+        lines,
         height,
 
         barGap,
@@ -375,7 +391,7 @@ const XyChart = withDataCorrector(
           <ResponsiveContainer>
             <ComposedChart
               data={data}
-              margin={{ top: 8, right: 8, bottom: 8, left: 8 }}
+              margin={{ top: 24, right: 8, bottom: 8, left: 8 }}
               barCategoryGap={barGap}
               layout={layout}
               {...chartAttrs}
@@ -497,6 +513,21 @@ const XyChart = withDataCorrector(
               {refArea?.left && refArea.right && (
                 <ReferenceArea yAxisId="1" x1={refArea.left} x2={refArea.right} strokeOpacity={0.3} />
               )}
+
+              {lines.map(({ x, y, title, color, width }) => {
+                const stroke = Color.getColor(color);
+                return (
+                  <ReferenceLine
+                    key={"" + x + y}
+                    yAxisId="1"
+                    x={x}
+                    y={y}
+                    label={<CustomLineLabel title={title} stroke={stroke} />}
+                    stroke={stroke}
+                    strokeWidth={width}
+                  />
+                );
+              })}
             </ComposedChart>
           </ResponsiveContainer>
         </div>
