@@ -72,6 +72,17 @@ function DuplicatedAlert(props) {
   );
 }
 
+function downloadByLink(href, name) {
+  let a = document.createElement("a");
+  a.style.cssText = "position: absolute; top:0; left: 0; height: 0; width: 0; overflow: hidden; display: block;";
+  document.body.appendChild(a);
+  a.rel = "noopener";
+  a.download = name;
+  a.href = href;
+  a.click();
+  a.remove();
+}
+
 const DataTable = createVisualComponent({
   //@@viewOn:statics
   uu5Tag: Config.TAG + "DataTable",
@@ -120,11 +131,10 @@ const DataTable = createVisualComponent({
     const duplicatedData = data.getDuplicated();
 
     const columnNames = [...data.keys()];
-    columnNames.shift(); // first column is Name
 
-    const columnList = data.keys().map((colName) => ({
+    const columnList = ["_i", ...data.keys()].map((colName) => ({
       value: colName,
-      header: colName,
+      header: colName === "_i" ? "#" : colName,
       cellComponent: ({ children, ...params }) => (
         <Uu5TilesElements.Table.Cell
           {...params}
@@ -140,7 +150,7 @@ const DataTable = createVisualComponent({
     const footerMap = {};
 
     const footerTemplate = [];
-    rowNames.forEach((rowName, i) => {
+    rowNames.forEach((rowName) => {
       const row = [rowName];
       footerMap[rowName] = {
         footerComponent: (
@@ -180,11 +190,43 @@ const DataTable = createVisualComponent({
 
     //@@viewOn:render
     return (
-      <Uu5Tiles.ControllerProvider data={data}>
+      <Uu5Tiles.ControllerProvider data={data.map((it, i) => ({ _i: i + 1, ...it }))}>
         <Uu5Elements.Block
           headerType="title"
           {...blockProps}
-          actionList={[{ component: <Uu5TilesControls.SearchButton /> }, ...blockProps.actionList]}
+          actionList={[
+            { component: <Uu5TilesControls.SearchButton /> },
+            ...blockProps.actionList,
+            {
+              icon: "mdi-download",
+              tooltip: { cs: "Stáhnout" },
+              itemList: [
+                {
+                  children: "Stáhnout json",
+                  onClick: () => {
+                    const file = new File([JSON.stringify(data, null, 2)], "data.json", {
+                      type: "application/json",
+                    });
+                    downloadByLink(URL.createObjectURL(file), file.name);
+                  },
+                },
+                {
+                  children: "Stáhnout csv",
+                  onClick: () => {
+                    const keys = data.keys();
+                    const rows = [
+                      keys.join(";"),
+                      ...data.map((it) =>
+                        keys.map((k) => (typeof it[k] === "string" ? `"${it[k]}"` : it[k] ?? "")).join(";")
+                      ),
+                    ];
+                    const file = new File([rows.join("\n")], "data.csv", { type: "text/csv" });
+                    downloadByLink(URL.createObjectURL(file), file.name);
+                  },
+                },
+              ],
+            },
+          ]}
         >
           {duplicatedData.length > 0 && (
             <DuplicatedAlert data={data} duplicated={duplicatedData} columnList={columnList} onChange={onChange} />

@@ -1,6 +1,6 @@
 //@@viewOn:imports
 import { XyChart } from "uu5charts";
-import { createComponent, createVisualComponent, useState, useUpdateEffect, Utils } from "uu5g05";
+import { createComponent, createVisualComponent, useEffect, useState, useUpdateEffect, Utils } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
 import Uu5Forms from "uu5g05-forms";
 import { useFormApi } from "uu5g05-forms";
@@ -11,33 +11,35 @@ import Histogram from "../charts/histogram";
 //@@viewOff:imports
 
 function prepareData(data, opts) {
-  data.removeOutliers(opts);
+  data.selectOutliers(opts);
   return data;
 }
 
-function withControlledInput(Component) {
-  return createComponent({
-    uu5Tag: `withControlledInput(${Component.uu5Tag || "noname"})`,
+function Card(props) {
+  const { header, value } = props;
 
-    render({ onChange, onBlur, ...props }) {
-      const [value, setValue] = useState(props.value);
-
-      return (
-        <Component
-          {...props}
-          value={value}
-          onChange={(e) => {
-            setValue(e.data.value);
-            typeof onChange === "function" && onChange(e);
-          }}
-          onBlur={(e) => typeof onBlur === "function" && onBlur(new Utils.Event({ ...e.data, value }, e))}
-        />
-      );
-    },
-  });
+  return (
+    <Uu5Elements.Box
+      aspectRatio="1x1"
+      size="s"
+      borderRadius="moderate"
+      className={Config.Css.css({
+        display: "inline-flex",
+        gap: 16,
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+      })}
+    >
+      <Uu5Elements.Text category="interface" segment="title" type="minor" colorScheme="dim" significance="subdued">
+        {header}
+      </Uu5Elements.Text>
+      <Uu5Elements.Text category="interface" segment="title" type="main" colorScheme="building">
+        {value}
+      </Uu5Elements.Text>
+    </Uu5Elements.Box>
+  );
 }
-
-const ControlledNumber = withControlledInput(Uu5Forms.Number);
 
 const DataAnalysis = createVisualComponent({
   //@@viewOn:statics
@@ -54,17 +56,17 @@ const DataAnalysis = createVisualComponent({
 
   render(props) {
     //@@viewOn:private
-    const { value } = useFormApi();
+    const { value, setItemValue } = useFormApi();
+    const { mahalAlpha: alpha, mahalMax: max } = value;
 
     const [activeCode, setActiveCode] = useState("distance");
-    const [alpha, setAlpha] = useState(OUTLIERS_ALPHA);
-    const [max, setMax] = useState();
 
-    const [data, setData] = useState(() => prepareData(value.data));
+    const [data, setData] = useState(() => prepareData(value.data, { alpha, max }));
 
-    useUpdateEffect(() => {
-      setData(prepareData(new Data(value.data), { alpha, max }));
-    }, [value.data, alpha, max]);
+    const cleanData = data.filter(({ _outlier }) => !_outlier);
+
+    // unmount is later than mount of next component
+    useEffect(() => () => setItemValue("cleanData", new Data(cleanData), []));
 
     // TODO format by user preferences
     const outliersLimitToDisplay = Math.round(data.outliersLimit * 100) / 100;
@@ -77,37 +79,48 @@ const DataAnalysis = createVisualComponent({
     return (
       <div>
         <Uu5Elements.Block headerType="title" header="Mahalanobis">
-          <ControlledNumber
+          <Uu5Forms.FormNumber
+            name="mahalAlpha"
             label={{ cs: "Hladina významnosti" }}
-            value={alpha}
+            initialValue={OUTLIERS_ALPHA}
             min={0}
             max={1}
             step={0.0001}
-            onBlur={(e) => setAlpha(e.data.value)}
+            onBlur={() => setData(prepareData(data, { alpha, max }))}
             disabled={max != null}
           />
-          <ControlledNumber label={{ cs: "Maximální hodnota" }} value={max} onBlur={(e) => setMax(e.data.value)} />
+          <Uu5Forms.FormNumber
+            name="mahalMax"
+            label={{ cs: "Maximální hodnota" }}
+            onBlur={() => setData(prepareData(data, { alpha, max }))}
+          />
 
           <Uu5Elements.Tabs
             itemList={[
               { label: "Vzdálenost", code: "distance" },
               { label: "Histogram", code: "histogram" },
-              // { label: "Cumulative", code: "cumulative" },
             ]}
             activeCode={activeCode}
             onChange={(e) => setActiveCode(e.data.activeCode)}
           />
           {activeCode === "distance" ? (
-            <XyChart
-              data={data.map(({ _distance, _outlier, _outlier2, ...item }) => ({
-                ...item,
-                [_outlier ? "_outlier" : "_distance"]: _distance,
-              }))}
-              series={[{ valueKey: "_distance" }, { valueKey: "_outlier", color: "red" }]}
-              labelAxis={{ dataKey: "Name" }}
-              valueAxis={{ title: "Vzdálenost" }}
-              lines={[{ color: "red", y: data.outliersLimit, title: `Hranice odlehlosti ${outliersLimitToDisplay}` }]}
-            />
+            <>
+              <div className={Config.Css.css({ display: "flex", gap: 16, padding: 16 })}>
+                <Card header="Všechna data" value={data.length} />
+                <Card header="Očištěná data" value={cleanData.length} />
+                <Card header="Odlehlá data" value={data.length - cleanData.length} />
+              </div>
+              <XyChart
+                data={data.map(({ _distance, _outlier, _outlier2, ...item }) => ({
+                  ...item,
+                  [_outlier ? "_outlier" : "_distance"]: _distance,
+                }))}
+                series={[{ valueKey: "_distance" }, { valueKey: "_outlier", color: "red" }]}
+                labelAxis={{ dataKey: "Name" }}
+                valueAxis={{ title: "Vzdálenost" }}
+                lines={[{ color: "red", y: data.outliersLimit, title: `Hranice odlehlosti ${outliersLimitToDisplay}` }]}
+              />
+            </>
           ) : (
             <Histogram
               data={data}

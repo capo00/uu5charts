@@ -4,6 +4,7 @@ import { mahalanobis } from "./mahalanobis";
 import { mean, median } from "./statistics";
 import TensorFlow from "./tensor-flow";
 import ChiSquare from "./mahalanobis/chi-square";
+import shapiroWilk from "./shapiro-wilk";
 
 export const getMahalanobisDistance = mahalanobis;
 export const OUTLIERS_ALPHA = 0.0001;
@@ -52,6 +53,7 @@ class Values extends Array {
     this._sampleStandardDeviation = undefined;
     this._avgStep = undefined;
     this._isUnique = undefined;
+    this._shapiroWilk = undefined;
   }
 
   isNumeric() {
@@ -145,7 +147,14 @@ class Values extends Array {
     return this._varianceCoefficient;
   }
 
-  getHistogram(bins = 20) {
+  shapiroWilk() {
+    if (this._shapiroWilk == null) {
+      this._shapiroWilk = shapiroWilk(this);
+    }
+    return this._shapiroWilk;
+  }
+
+  getHistogram(bins = 10) {
     if (this.isNumeric()) {
       const min = Math.floor(this.min());
       const max = Math.ceil(this.max());
@@ -199,11 +208,23 @@ class Data extends Array {
     this.outliersLimit = undefined;
   }
 
+  refresh() {
+    this._keys = [];
+    this._values = {};
+    this._uniqueKeys = undefined;
+
+    this._histogram = {};
+  }
+
+  relevantData() {
+    return this.outliersLimit == null ? this : this.filter(({ _outlier, _deleted }) => !_deleted && !_outlier);
+  }
+
   keys() {
     if (!this._keys.length) {
       const keys = new Set();
       // TODO optimize (e.g. each forEach or map can prepare keys too)
-      this.forEach((item) => Object.keys(item).forEach((k) => !/^_/.test(k) && keys.add(k)));
+      this.relevantData().forEach((item) => Object.keys(item).forEach((k) => !/^_/.test(k) && keys.add(k)));
       this._keys = [...keys];
     }
     return this._keys;
@@ -305,34 +326,54 @@ class Data extends Array {
     return this;
   }
 
-  removeOutliers({ max, alpha = OUTLIERS_ALPHA, strict = false } = {}) {
+  selectOutliers({ alpha = OUTLIERS_ALPHA, max = ChiSquare.inv(2, Math.min(alpha, 1)) } = {}, callback) {
     this.addMahalanobisDistance();
-
-    // const values = this.values("_distance");
-    // const median = values.median();
-    // const mad = values.mad();
-    // const min = 0;
-    // const max = median + 6 * mad; // 6 is chosen constant
 
     const min = 0;
     // higher alpha (0.001) means more outliers and power regression
-    max ||= ChiSquare.inv(2, alpha);
     this.outliersLimit = max;
 
-    if (strict) {
-      return this._removeIf((it) => !it._distance || min > it._distance || it._distance > max);
-    } else {
-      const outliers = [];
-      this.forEach((it) => {
-        it._outlier = !it._distance || min > it._distance || it._distance > max;
-        if (it._outlier) outliers.push(it);
+    const outliers = [];
+    this.forEach((it, ...args) => {
+      if (!it._distance || min > it._distance || it._distance > max) {
+        it._outlier = { min, max };
+        outliers.push(it);
+      } else if (it._outlier) {
+        delete it._outlier;
+      }
+      typeof callback === "function" && callback(it, ...args);
+    });
+
+    this._values = {};
+    return outliers;
+  }
+
+  removeOutliers(params) {
+    let outliers = [];
+
+    if (params) {
+      outliers = this.selectOutliers(params, (it) => {
+        if (!it._deleted && it._outlier) {
+          it._deleted = { type: "outlier", params: it._outlier };
+          delete it._outlier;
+        }
       });
-      return outliers;
+    } else {
+      this.forEach((it) => {
+        if (it._outlier) {
+          it._deleted = { type: "outlier", params: it._outlier };
+          delete it._outlier;
+        }
+      });
     }
+
+    return outliers;
   }
 
   addRegression(y, x, { key = `${y}~${x}`, predict } = {}) {
-    const regData = this.map((it) => (it._outlier || it._predict ? undefined : [it[x], it[y]])).filter(Boolean);
+    const regData = this.map((it) => (it._deleted || it._outlier || it._predict ? undefined : [it[x], it[y]])).filter(
+      Boolean
+    );
     const regressions = ["linear", "exponential", "logarithmic", "power", "polynomial"].map((name) => {
       const reg = regression[name](regData);
       reg.name = name;
