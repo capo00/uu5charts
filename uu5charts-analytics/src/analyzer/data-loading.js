@@ -34,7 +34,7 @@ const DataLoading = createVisualComponent({
 
     //@@viewOn:render
     return (
-      <div>
+      <Uu5Elements.Block headerType="heading" header="Data loading" level={2} {...props}>
         {!initialData && (
           <>
             <Uu5Forms.FormLink
@@ -86,7 +86,7 @@ const DataLoading = createVisualComponent({
           </>
         )}
         {data && <DataTable data={data} onChange={(data) => setItemValue("data", new Data(data))} />}
-      </div>
+      </Uu5Elements.Block>
     );
     //@@viewOff:render
   },

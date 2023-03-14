@@ -30,6 +30,7 @@ importers:
   uu5charts-analytics:
     specifiers:
       '@tensorflow/tfjs': ^4.2.0
+      jstat: ^1.9.6
       regression: ^2.0.1
       uu_appg01_devkit: ^5.2.2
       uu5g05: ^1.0.0
@@ -42,6 +43,7 @@ importers:
       uu5tilesg02-elements: ^2.0.0
     dependencies:
       '@tensorflow/tfjs': 4.2.0
+      jstat: 1.9.6
       regression: 2.0.1
       uu5g05: 1.15.1
       uu5g05-elements: 1.15.1
@@ -6226,6 +6228,10 @@ packages:
       ms: 2.1.3
       semver: 7.3.8
     dev: true
+
+  /jstat/1.9.6:
+    resolution: {integrity: sha512-rPBkJbK2TnA8pzs93QcDDPlKcrtZWuuCo2dVR0TFLOJSxhqfWOVCSp8aV3/oSbn+4uY4yw1URtLpHQedtmXfug==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/jstat/-/jstat-1.9.6.tgz}
+    dev: false
 
   /jsx-ast-utils/3.3.3:
     resolution: {integrity: sha512-fYQHZTZ8jSfmWZ0iyzfwiU4WDX4HpHbMCZ3gPlWYiCl3BoeOTsqKBqnTVfH2rYT7eP5c3sVbeSPHnnJOaTrWiw==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/jsx-ast-utils/-/jsx-ast-utils-3.3.3.tgz}

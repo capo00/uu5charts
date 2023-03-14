@@ -7,7 +7,7 @@ import ChiSquare from "./mahalanobis/chi-square";
 import shapiroWilk from "./shapiro-wilk";
 
 export const getMahalanobisDistance = mahalanobis;
-export const OUTLIERS_ALPHA = 0.0001;
+export const OUTLIERS_ALPHA = 0.01;
 
 export function getHistogram(data, key, bins = 20) {
   const values = data.map((item) => item[key]);
@@ -149,7 +149,7 @@ class Values extends Array {
 
   shapiroWilk() {
     if (this._shapiroWilk == null) {
-      this._shapiroWilk = shapiroWilk(this);
+      this._shapiroWilk = shapiroWilk([...this]);
     }
     return this._shapiroWilk;
   }
@@ -326,11 +326,13 @@ class Data extends Array {
     return this;
   }
 
-  selectOutliers({ alpha = OUTLIERS_ALPHA, max = ChiSquare.inv(2, Math.min(alpha, 1)) } = {}, callback) {
+  selectOutliers(
+    { alpha = OUTLIERS_ALPHA, max = ChiSquare.inv(this.getQuantitativeKeys().length - 1, Math.min(alpha, 1)) } = {},
+    callback
+  ) {
     this.addMahalanobisDistance();
 
     const min = 0;
-    // higher alpha (0.001) means more outliers and power regression
     this.outliersLimit = max;
 
     const outliers = [];
@@ -386,17 +388,15 @@ class Data extends Array {
 
     let i = 0;
     this.forEach((it) => {
-      if (!it._outlier) {
+      if (!(it._deleted || it._outlier || it._predict)) {
         it[key] = reg.points[i][1];
         i++;
       }
     });
 
     if (predict) {
-      const a = [];
       predict.forEach((v) => {
         const r = reg.predict(v)[1];
-        a.push(r);
         this.push({
           [x]: v,
           [key + "$predict"]: r,

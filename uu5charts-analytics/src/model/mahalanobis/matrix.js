@@ -58,6 +58,41 @@ export function cov(columns, means) {
   });
 }
 
+export function cor(columns) {
+  const n = columns[0].length;
+  const corrs = Array(columns.length)
+    .fill()
+    .map(() => Array(columns.length).fill(NaN));
+  for (let i = 0; i < columns.length; i++) {
+    for (let j = i; j < columns.length; j++) {
+      let sumX = 0,
+        sumY = 0,
+        sumXY = 0,
+        sumX2 = 0,
+        sumY2 = 0;
+      for (let k = 0; k < n; k++) {
+        const x = columns[i][k];
+        const y = columns[j][k];
+        if (Number.isFinite(x) && Number.isFinite(y)) {
+          sumX += x;
+          sumY += y;
+          sumXY += x * y;
+          sumX2 += x * x;
+          sumY2 += y * y;
+        }
+      }
+      const denom = Math.sqrt((n * sumX2 - sumX * sumX) * (n * sumY2 - sumY * sumY));
+      if (denom === 0) {
+        corrs[i][j] = corrs[j][i] = NaN;
+      } else {
+        const corr = (n * sumXY - sumX * sumY) / denom;
+        corrs[i][j] = corrs[j][i] = corr;
+      }
+    }
+  }
+  return corrs;
+}
+
 export function invert(matrix) {
   var size = matrix.length,
     base,

@@ -24,9 +24,9 @@
 
 // The inverse of cdf.
 function normalQuantile(p, mu, sigma) {
-  var p, q, r, val;
+  let q, r, val;
   if (sigma < 0) return -1;
-  if (sigma == 0) return mu;
+  if (sigma === 0) return mu;
 
   q = p - 0.5;
 
@@ -113,7 +113,6 @@ function normalQuantile(p, mu, sigma) {
     }
 
     if (q < 0.0) val = -val;
-    /* return (q >= 0.)? r : -r ;*/
   }
   return mu + sigma * val;
 }
@@ -143,7 +142,7 @@ function normalQuantile(p, mu, sigma) {
  */
 
 function sign(x) {
-  if (x == 0) return 0;
+  if (x === 0) return 0;
   return x > 0 ? 1 : -1;
 }
 
@@ -152,8 +151,8 @@ function shapiroWilk(x) {
     /* Algorithm AS 181.2	Appl. Statist.	(1982) Vol. 31, No. 2
     Calculates the algebraic polynomial of order nord-1 with array of coefficients cc.
     Zero order coefficient is cc(1) = cc[0] */
-    var p;
-    var ret_val;
+    let p;
+    let ret_val;
 
     ret_val = cc[0];
     if (nord > 1) {
@@ -167,42 +166,42 @@ function shapiroWilk(x) {
   x = x.sort(function (a, b) {
     return a - b;
   });
-  var n = x.length;
+  let n = x.length;
   if (n < 3) return undefined;
-  var nn2 = Math.floor(n / 2);
-  var a = new Array(Math.floor(nn2) + 1); /* 1-based */
+  let nn2 = Math.floor(n / 2);
+  let a = new Array(Math.floor(nn2) + 1); /* 1-based */
 
   /*	ALGORITHM AS R94 APPL. STATIST. (1995) vol.44, no.4, 547-551.
     Calculates the Shapiro-Wilk W test and its significance level
   */
-  var small = 1e-19;
+  let small = 1e-19;
 
   /* polynomial coefficients */
-  var g = [-2.273, 0.459];
-  var c1 = [0, 0.221157, -0.147981, -2.07119, 4.434685, -2.706056];
-  var c2 = [0, 0.042981, -0.293762, -1.752461, 5.682633, -3.582633];
-  var c3 = [0.544, -0.39978, 0.025054, -6.714e-4];
-  var c4 = [1.3822, -0.77857, 0.062767, -0.0020322];
-  var c5 = [-1.5861, -0.31082, -0.083751, 0.0038915];
-  var c6 = [-0.4803, -0.082676, 0.0030302];
+  let g = [-2.273, 0.459];
+  let c1 = [0, 0.221157, -0.147981, -2.07119, 4.434685, -2.706056];
+  let c2 = [0, 0.042981, -0.293762, -1.752461, 5.682633, -3.582633];
+  let c3 = [0.544, -0.39978, 0.025054, -6.714e-4];
+  let c4 = [1.3822, -0.77857, 0.062767, -0.0020322];
+  let c5 = [-1.5861, -0.31082, -0.083751, 0.0038915];
+  let c6 = [-0.4803, -0.082676, 0.0030302];
 
   /* Local variables */
-  var i, j, i1;
+  let i, j, i1;
 
-  var ssassx, summ2, ssumm2, gamma, range;
-  var a1, a2, an, m, s, sa, xi, sx, xx, y, w1;
-  var fac, asa, an25, ssa, sax, rsn, ssx, xsx;
+  let ssassx, summ2, ssumm2, gamma, range;
+  let a1, a2, an, m, s, sa, xi, sx, xx, y, w1;
+  let fac, asa, an25, ssa, sax, rsn, ssx, xsx;
 
-  var pw = 1;
+  let pw;
   an = n;
 
-  if (n == 3) a[1] = 0.70710678; /* = sqrt(1/2) */
+  if (n === 3) a[1] = 0.70710678; /* = sqrt(1/2) */
   else {
     an25 = an + 0.25;
     summ2 = 0.0;
     for (i = 1; i <= nn2; i++) {
       a[i] = normalQuantile((i - 0.375) / an25, 0, 1); // p(X <= x),
-      var r__1 = a[i];
+      let r__1 = a[i];
       summ2 += r__1 * r__1;
     }
     summ2 *= 2;
@@ -245,7 +244,7 @@ function shapiroWilk(x) {
     }
     sx += xi;
     i++;
-    if (i != j) sa += sign(i - j) * a[Math.min(i, j)];
+    if (i !== j) sa += sign(i - j) * a[Math.min(i, j)];
     xx = xi;
   }
   if (n > 5000) {
@@ -260,7 +259,7 @@ function shapiroWilk(x) {
   sx /= n;
   ssa = ssx = sax = 0;
   for (i = 0, j = n - 1; i < n; i++, j--) {
-    if (i != j) asa = sign(i - j) * a[1 + Math.min(i, j)] - sa;
+    if (i !== j) asa = sign(i - j) * a[1 + Math.min(i, j)] - sa;
     else asa = -sa;
     xsx = x[i] / range - sx;
     ssa += asa * asa;
@@ -273,49 +272,49 @@ function shapiroWilk(x) {
 
   ssassx = Math.sqrt(ssa * ssx);
   w1 = ((ssassx - sax) * (ssassx + sax)) / (ssa * ssx);
-  var w = 1 - w1;
+  let w = 1 - w1;
 
   /*	Calculate significance level for W */
 
-  if (n == 3) {
+  if (n === 3) {
     /* exact P value : */
-    var pi6 = 1.90985931710274; /* = 6/pi */
-    var stqr = 1.0471975511966; /* = asin(sqrt(3/4)) */
-    pw = pi6 * (asin(sqrt(w)) - stqr);
+    let pi6 = 1.90985931710274; /* = 6/pi */
+    let stqr = 1.0471975511966; /* = asin(sqrt(3/4)) */
+    pw = pi6 * (Math.asin(Math.sqrt(w)) - stqr);
     if (pw < 0) pw = 0;
-    return w;
-  }
-  y = Math.log(w1);
-  xx = Math.log(an);
-  if (n <= 11) {
-    gamma = poly(g, 2, an);
-    if (y >= gamma) {
-      pw = 1e-99; /* an "obvious" value, was 'small' which was 1e-19f */
-      return w;
-    }
-    y = -Math.log(gamma - y);
-    m = poly(c3, 4, an);
-    s = Math.exp(poly(c4, 4, an));
   } else {
-    /* n >= 12 */
-    m = poly(c5, 4, xx);
-    s = Math.exp(poly(c6, 3, xx));
+    y = Math.log(w1);
+    xx = Math.log(an);
+    if (n <= 11) {
+      gamma = poly(g, 2, an);
+      if (y >= gamma) {
+        pw = 1e-99; /* an "obvious" value, was 'small' which was 1e-19f */
+      } else {
+        y = -Math.log(gamma - y);
+        m = poly(c3, 4, an);
+        s = Math.exp(poly(c4, 4, an));
+      }
+    } else {
+      /* n >= 12 */
+      m = poly(c5, 4, xx);
+      s = Math.exp(poly(c6, 3, xx));
+    }
+
+    pw ??= pnorm(y, m, s, false, false);
   }
 
-  pw = pnorm(y, m, s, false, false);
-
-  return { W: w, pValue: pw };
+  return { W: w, pValue: pw ?? 1 };
 }
 
 // added by me Ondřej Čapek
 function pnorm(q, mean = 0, sd = 1, lowerTail = true, logP = false) {
   let x = (q - mean) / sd;
   let k = 1.0 / (1.0 + 0.2316419 * Math.abs(x));
-  let k_sum = k * (0.31938153 + k * (-0.356563782 + k * (1.781477937 + k * (-1.821255978 + 1.330274429 * k))));
+  let kSum = k * (0.31938153 + k * (-0.356563782 + k * (1.781477937 + k * (-1.821255978 + 1.330274429 * k))));
 
   let p;
   if (x >= 0.0) {
-    p = 1.0 - (1.0 / Math.sqrt(2 * Math.PI)) * Math.exp(-0.5 * x * x) * k_sum;
+    p = 1.0 - (1.0 / Math.sqrt(2 * Math.PI)) * Math.exp(-0.5 * x * x) * kSum;
   } else {
     p = 1.0 - pnorm(-x, 0, 1, true, false);
   }

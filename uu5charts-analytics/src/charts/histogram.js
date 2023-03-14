@@ -52,10 +52,10 @@ const Histogram = createVisualComponent({
         {...propsToPass}
         data={histData.data}
         series={[{ valueKey: "value", bar: true }]}
-        valueAxis={{ title: "Count", ...valueAxis }}
+        valueAxis={{ title: "Počet", ...valueAxis }}
         labelAxis={{
           ...labelAxis,
-          title: "Range",
+          title: "Rozsah",
           dataKey: "label",
           ticks: histData.ticks,
         }}

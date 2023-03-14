@@ -5,6 +5,7 @@ import Uu5Tiles from "uu5tilesg02";
 import Uu5TilesElements from "uu5tilesg02-elements";
 import Uu5TilesControls from "uu5tilesg02-controls";
 import Config from "../config/config.js";
+import List from "./list";
 
 //@@viewOff:imports
 
@@ -19,35 +20,35 @@ function isNA(value) {
 }
 
 function DeletedValue(props) {
-  const { value, data, onChange, columnList, onFilter } = props;
+  const { value, data, onChange, onFilter } = props;
   const [open, setOpen] = useState(false);
 
   return (
     <>
-      <Uu5Elements.Button
-        icon="mdi-delete"
-        colorScheme="negative"
-        size="xxs"
-        onClick={() => onChange(data.filter(onFilter))}
-        tooltip={{ cs: "Odebrat položky" }}
-        className={Config.Css.css({ marginRight: 8 })}
-      />
+      {onChange && (
+        <Uu5Elements.Button
+          icon="mdi-delete"
+          colorScheme="negative"
+          size="xxs"
+          onClick={() => onChange(data.filter(onFilter))}
+          tooltip={{ cs: "Odebrat položky" }}
+          className={Config.Css.css({ marginRight: 8 })}
+        />
+      )}
 
       <Uu5Elements.Link tooltip={{ cs: "Zobraz položky" }} onClick={() => setOpen(true)}>
         {value}
       </Uu5Elements.Link>
 
       <Uu5Elements.Modal width="100%" open={open} onClose={() => setOpen(false)}>
-        <Uu5Tiles.ControllerProvider data={data.filter((...args) => !onFilter(...args))}>
-          <Uu5TilesElements.List columnList={columnList} tileMinWidth={300} tileMaxWidth={350} />
-        </Uu5Tiles.ControllerProvider>
+        <List data={data.filter((...args) => !onFilter(...args))} tileMinWidth={300} tileMaxWidth={350} />
       </Uu5Elements.Modal>
     </>
   );
 }
 
 function DuplicatedAlert(props) {
-  const { data, duplicated, columnList, onChange } = props;
+  const { data, duplicated, onChange } = props;
   const [open, setOpen] = useState(false);
 
   return (
@@ -64,9 +65,7 @@ function DuplicatedAlert(props) {
         </Uu5Elements.Button>
       </Uu5Elements.Alert>
       <Uu5Elements.Modal width="100%" open={open} onClose={() => setOpen(false)}>
-        <Uu5Tiles.ControllerProvider data={duplicated}>
-          <Uu5TilesElements.List columnList={columnList} tileMinWidth={300} tileMaxWidth={350} />
-        </Uu5Tiles.ControllerProvider>
+        <List data={duplicated} tileMinWidth={300} tileMaxWidth={350} />
       </Uu5Elements.Modal>
     </>
   );
@@ -81,6 +80,20 @@ function downloadByLink(href, name) {
   a.href = href;
   a.click();
   a.remove();
+}
+
+function ControlledControllerProvider({ data, children }) {
+  const [sorterList, setSorterList] = useState();
+
+  return (
+    <Uu5Tiles.ControllerProvider
+      data={data}
+      sorterList={sorterList}
+      onSorterChange={(e) => setSorterList(e.data.sorterList)}
+    >
+      {children}
+    </Uu5Tiles.ControllerProvider>
+  );
 }
 
 const DataTable = createVisualComponent({
@@ -113,6 +126,7 @@ const DataTable = createVisualComponent({
         stats[colName] = {
           filled,
           empty: columnData.length - filled,
+          type: columnData.isNumeric() ? "numeric" : "categorical",
           min: columnData.min(),
           max: columnData.max(),
           range: columnData.isNumeric() ? columnData.max() - columnData.min() : undefined,
@@ -132,9 +146,10 @@ const DataTable = createVisualComponent({
 
     const columnNames = [...data.keys()];
 
-    const columnList = ["_i", ...data.keys()].map((colName) => ({
+    const columnListWithOrder = ["_i", ...data.keys()].map((colName) => ({
       value: colName,
       header: colName === "_i" ? "#" : colName,
+      sortable: true,
       cellComponent: ({ children, ...params }) => (
         <Uu5TilesElements.Table.Cell
           {...params}
@@ -171,7 +186,6 @@ const DataTable = createVisualComponent({
                   value={stats[colName][rowName]}
                   data={data}
                   onChange={onChange}
-                  columnList={columnList}
                   onFilter={(it) => !isNA(it[colName])}
                 />
               ) : (
@@ -190,7 +204,7 @@ const DataTable = createVisualComponent({
 
     //@@viewOn:render
     return (
-      <Uu5Tiles.ControllerProvider data={data.map((it, i) => ({ _i: i + 1, ...it }))}>
+      <ControlledControllerProvider data={data.map((it, i) => ({ _i: i + 1, ...it }))}>
         <Uu5Elements.Block
           headerType="title"
           {...blockProps}
@@ -228,21 +242,20 @@ const DataTable = createVisualComponent({
             },
           ]}
         >
-          {duplicatedData.length > 0 && (
-            <DuplicatedAlert data={data} duplicated={duplicatedData} columnList={columnList} onChange={onChange} />
+          {duplicatedData.length > 0 && onChange && (
+            <DuplicatedAlert data={data} duplicated={duplicatedData} onChange={onChange} />
           )}
           <Uu5TilesElements.List
-            columnList={columnList}
+            columnList={columnListWithOrder}
             tileMinWidth={300}
             tileMaxWidth={350}
             height={800}
             cellHoverExtent={["row", "column"]}
             footerTemplate={footerTemplate.join(",")}
             footerContentMap={footerMap}
-            sortable // not working yet
           />
         </Uu5Elements.Block>
-      </Uu5Tiles.ControllerProvider>
+      </ControlledControllerProvider>
     );
     //@@viewOff:render
   },
