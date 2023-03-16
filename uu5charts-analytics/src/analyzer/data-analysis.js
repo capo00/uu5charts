@@ -95,45 +95,36 @@ const DataAnalysis = createVisualComponent({
           />
         </div>
 
-        <Uu5Elements.Tabs
-          itemList={[
-            { label: "Vzdálenost", code: "distance" },
-            { label: "Histogram", code: "histogram" },
-          ]}
-          activeCode={activeCode}
-          onChange={(e) => setActiveCode(e.data.activeCode)}
-        />
-        {activeCode === "distance" ? (
-          <>
-            <div className={Config.Css.css({ display: "flex", gap: 16, padding: 16 })}>
-              <Card header="Všechna data" value={data.length} />
-              <Card header="Očištěná data" value={cleanData.length} valueColorScheme="primary" />
-              <OutliersCard
-                header="Odlehlá data"
-                value={data.length - cleanData.length}
-                valueColorScheme="red"
-                data={data.filter((it) => it._outlier)}
-              />
-            </div>
-            <XyChart
-              data={data.map(({ _distance, _outlier, _outlier2, ...item }) => ({
-                ...item,
-                [_outlier ? "_outlier" : "_distance"]: _distance,
-              }))}
-              series={[{ valueKey: "_distance" }, { valueKey: "_outlier", color: "red" }]}
-              labelAxis={{ dataKey: "Name" }}
-              valueAxis={{ title: "Vzdálenost" }}
-              lines={[{ color: "red", y: data.outliersLimit, title: `Hranice odlehlosti ${outliersLimitToDisplay}` }]}
-            />
-          </>
-        ) : (
+        <div className={Config.Css.css({ display: "flex", gap: 16, padding: 16 })}>
+          <Card header="Všechna data" value={data.length} />
+          <Card header="Očištěná data" value={cleanData.length} valueColorScheme="primary" />
+          <OutliersCard
+            header="Odlehlá data"
+            value={data.length - cleanData.length}
+            valueColorScheme="red"
+            data={data.filter((it) => it._outlier)}
+          />
+        </div>
+
+        <Uu5Elements.Grid templateColumns="repeat(auto-fit, minmax(450px, 1fr))">
+          <XyChart
+            data={data.map(({ _distance, _outlier, _outlier2, ...item }) => ({
+              ...item,
+              [_outlier ? "_outlier" : "_distance"]: _distance,
+            }))}
+            series={[{ valueKey: "_distance" }, { valueKey: "_outlier", color: "red" }]}
+            labelAxis={{ dataKey: "Name" }}
+            valueAxis={{ title: "Vzdálenost" }}
+            lines={[{ color: "red", y: data.outliersLimit, title: `Hranice odlehlosti ${outliersLimitToDisplay}` }]}
+          />
+
           <Histogram
             data={data}
             valueAxis={{ dataKey: "_distance" }}
             binSize={20}
             lines={[{ color: "red", x: data.outliersLimit, title: `Hranice odlehlosti ${outliersLimitToDisplay}` }]}
           />
-        )}
+        </Uu5Elements.Grid>
 
         <Uu5Forms.FormCheckbox name="removeOutliers" label={{ cs: "Odebrat odlehlá pozorování" }} initialValue={true} />
       </Uu5Elements.Block>

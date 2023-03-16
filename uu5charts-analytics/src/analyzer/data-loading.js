@@ -1,12 +1,42 @@
 //@@viewOn:imports
-import { createVisualComponent, useEffect, useMemo, useRef } from "uu5g05";
+import { createVisualComponent, useEffect, useMemo, useRef, useState, Utils } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
 import Uu5Forms, { useFormApi } from "uu5g05-forms";
 import Config from "../config/config.js";
 import DataTable from "./data-table";
 import Data from "../model/data";
+import withControlledInput from "./with-controlled-input";
 
 //@@viewOff:imports
+
+function parseCsvValue(value) {
+  return /^"|"$/g.test(value) ? value.replace(/^"|"$/g, "") : value && +value == value ? +value : value;
+}
+
+function parseData(text) {
+  let keys;
+  let data;
+  try {
+    data = JSON.parse(text);
+  } catch (e) {
+    // no json, but csv
+  }
+  if (!data) {
+    data = [];
+    text.split("\n").forEach((row, i) => {
+      row = row.trim().split(/\s*;\s*/);
+      if (i === 0) keys = row.map(parseCsvValue);
+      else {
+        const item = {};
+        keys.forEach((k, i) => {
+          item[k] = parseCsvValue(row[i]);
+        });
+        data.push(item);
+      }
+    });
+  }
+  return data;
+}
 
 const DataLoading = createVisualComponent({
   //@@viewOn:statics
@@ -23,10 +53,31 @@ const DataLoading = createVisualComponent({
 
   render(props) {
     //@@viewOn:private
-    const { value, setItemValue } = useFormApi();
+    const { data: propsData, onChange, omitEmpty, initialUri } = props;
+    let data = propsData;
+    if (propsData && !(propsData instanceof Data)) {
+      data = new Data(propsData);
+      if (omitEmpty) data = data.removeEmpty();
+    }
 
-    const { data } = value;
+    const [dataUri, setDataUri] = useState(initialUri);
+    const [dataFile, setDataFile] = useState();
     const initialData = useRef(data).current;
+
+    async function loadData(e) {
+      let data = null;
+      if (dataUri) {
+        const res = await fetch(dataUri);
+        const text = await res.text();
+        data = new Data(parseData(text));
+        if (omitEmpty) data = data.removeEmpty();
+      }
+      onChange(new Utils.Event({ data }, e));
+    }
+
+    useEffect(() => {
+      if (initialUri) loadData();
+    }, []);
     //@@viewOff:private
 
     //@@viewOn:interface
@@ -36,56 +87,40 @@ const DataLoading = createVisualComponent({
     return (
       <Uu5Elements.Block headerType="heading" header="Data loading" level={2} {...props}>
         {!initialData && (
-          <>
-            <Uu5Forms.FormLink
+          <Uu5Elements.Grid templateColumns={{ xs: "1fr", m: "2fr 1fr" }} rowGap={16} columnGap={16}>
+            <Uu5Forms.Link
               name="dataUri"
               label="Data URI"
-              disabled={!!value.dataFile}
-              onBlur={async (e) => {
-                if (e.data.value) {
-                  const res = await fetch(e.data.value);
-                  const loadedData = await res.json();
-                  setItemValue("data", new Data(loadedData));
-                } else {
-                  setItemValue("data", null);
-                }
-              }}
+              disabled={!!dataFile}
+              value={dataUri}
+              onChange={(e) => setDataUri(e.data.value)}
+              onBlur={loadData}
             />
-            <Uu5Forms.FormFile
+            <Uu5Forms.File
               name="dataFile"
               label="Data file (csv)"
-              accept=".csv"
-              disabled={!!value.dataUri}
+              accept=".csv,.json"
+              disabled={!!dataUri}
+              value={dataFile}
               onChange={async (e) => {
                 if (e.data.value) {
                   const reader = new FileReader();
                   reader.onload = () => {
-                    let keys;
-                    const rows = [];
-                    reader.result.split("\n").forEach((row, i) => {
-                      row = row.trim().split(/\s*;\s*/);
-                      if (i === 0) keys = row;
-                      else {
-                        const item = {};
-                        keys.forEach((k, i) => {
-                          let value = row[i];
-                          item[k] = value && +value == value ? +value : value;
-                        });
-                        rows.push(item);
-                      }
-                    });
-                    setItemValue("data", new Data(rows));
+                    let data = new Data(parseData(reader.result));
+                    if (omitEmpty) data = data.removeEmpty();
+                    onChange(new Utils.Event({ data }, e));
                   };
                   // start reading the file. When it is done, calls the onload event defined above.
                   reader.readAsBinaryString(e.data.value);
                 } else {
-                  setItemValue("data", null);
+                  onChange(new Utils.Event({ data: null }, e));
                 }
+                setDataFile(e.data.value);
               }}
             />
-          </>
+          </Uu5Elements.Grid>
         )}
-        {data && <DataTable data={data} onChange={(data) => setItemValue("data", new Data(data))} />}
+        {data && <DataTable data={data} onChange={(data) => onChange(new Utils.Event({ data: new Data(data) }))} />}
       </Uu5Elements.Block>
     );
     //@@viewOff:render

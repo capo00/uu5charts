@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Analyzer</title>
+    <title>Analyzer.DataLoading</title>
 
     <script src="https://cdn.plus4u.net/uu-uu5loaderg01/1.0.0/uu5loaderg01.min.js" crossorigin="anonymous"></script>
     <script src="https://cdn.plus4u.net/uu-uu5g05/1.0.0/assets/example-config.js" crossorigin="anonymous"></script>
@@ -23,11 +23,6 @@
       body {
         padding: 16px 32px;
       }
-      @media screen and (max-width: 480px) {
-        body {
-          padding: 8px;
-        }
-      }
     </style>
   </head>
   <body>
@@ -43,9 +38,16 @@
       import { carsData } from "uu5charts-data";
 
       function Page() {
+        const [data, setData] = useState(carsData);
+
         return (
           <div>
-            <Analyzer data={carsData} />
+            <Analyzer.DataLoading
+              //initialUri="http://localhost:2224/assets/cars.csv"
+              data={data}
+              onChange={(e) => setData(e.data.data)}
+              omitEmpty
+            />
           </div>
         );
       }

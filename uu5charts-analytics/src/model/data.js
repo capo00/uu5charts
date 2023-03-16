@@ -372,6 +372,10 @@ class Data extends Array {
     return outliers;
   }
 
+  removeEmpty() {
+    return new Data(this.filter((item) => !Object.entries(item).find(([_, v]) => v == null || v === "")));
+  }
+
   addRegression(yAxes, xAxes, { key = `${yAxes}~${xAxes}`, predict } = {}) {
     const data = this.filter((it) => !it._deleted && !it._outlier && !it._predict);
     const regressions = ["linear", "exponential", "logarithmic", "power", "polynomial"].map((name) => {

@@ -1,18 +1,16 @@
 //@@viewOn:imports
-import { createVisualComponent, useMemo, useState } from "uu5g05";
+import { createVisualComponent, useMemo, useScreenSize, useState, Utils } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
 import Uu5Tiles from "uu5tilesg02";
 import Uu5TilesElements from "uu5tilesg02-elements";
 import Uu5TilesControls from "uu5tilesg02-controls";
 import Config from "../config/config.js";
 import List from "./list";
+import { round } from "../model/tools";
 
 //@@viewOff:imports
-
-const ROUNDER = 10 ** 5;
-
-function round(value) {
-  return typeof value === "number" ? Math.round(value * ROUNDER) / ROUNDER : value;
+function roundNumber(value) {
+  return typeof value === "number" ? round(value) : value;
 }
 
 function isNA(value) {
@@ -116,6 +114,8 @@ const DataTable = createVisualComponent({
     //@@viewOn:private
     const { data, onChange, ...blockProps } = props;
 
+    const [screenSize] = useScreenSize();
+
     const stats = useMemo(() => {
       const stats = {};
 
@@ -133,9 +133,9 @@ const DataTable = createVisualComponent({
           sum: columnData.sum(),
           median: columnData.median(),
           mean: columnData.median(),
-          variance: round(columnData.sampleVariance()),
-          standardDeviation: round(columnData.sampleStandardDeviation()),
-          varianceCoefficient: round(columnData.sampleVarianceCoefficient()),
+          variance: columnData.sampleVariance(),
+          standardDeviation: columnData.sampleStandardDeviation(),
+          varianceCoefficient: columnData.sampleVarianceCoefficient(),
         };
       });
 
@@ -160,43 +160,57 @@ const DataTable = createVisualComponent({
       ),
     }));
 
-    const rowNames = Object.keys(stats[columnNames[0]]);
+    let footerMap, footerTemplate, summary;
 
-    const footerMap = {};
+    if (["xs", "s"].includes(screenSize)) {
+      summary = (
+        <Uu5TilesElements.List height={800} data={Object.entries(stats).map(([k, v]) => ({ name: k, ...v }))} />
+      );
+    } else {
+      const rowNames = Object.keys(stats[columnNames[0]]);
 
-    const footerTemplate = [];
-    rowNames.forEach((rowName) => {
-      const row = [rowName];
-      footerMap[rowName] = {
-        footerComponent: (
-          <Uu5TilesElements.Table.FooterCell horizontalAlignment="left" verticalAlignment="center">
-            {rowName}
-          </Uu5TilesElements.Table.FooterCell>
-        ),
-      };
+      footerMap = {};
 
-      columnNames.forEach((colName) => {
-        const name = [colName, rowName].join("-");
-        row.push(name);
-        footerMap[name] = {
+      footerTemplate = [];
+      rowNames.forEach((rowName) => {
+        const row = [rowName];
+        footerMap[rowName] = {
           footerComponent: (
-            <Uu5TilesElements.Table.FooterCell horizontalAlignment="right" verticalAlignment="center">
-              {["empty"].includes(rowName) && stats[colName][rowName] > 0 ? (
-                <DeletedValue
-                  value={stats[colName][rowName]}
-                  data={data}
-                  onChange={onChange}
-                  onFilter={(it) => !isNA(it[colName])}
-                />
-              ) : (
-                stats[colName][rowName]
-              )}
+            <Uu5TilesElements.Table.FooterCell horizontalAlignment="left" verticalAlignment="center">
+              {rowName}
             </Uu5TilesElements.Table.FooterCell>
           ),
         };
+
+        columnNames.forEach((colName) => {
+          const name = [colName, rowName].join("-");
+          row.push(name);
+          footerMap[name] = {
+            footerComponent: (
+              <Uu5TilesElements.Table.FooterCell horizontalAlignment="right" verticalAlignment="center">
+                {["empty"].includes(rowName) && stats[colName][rowName] > 0 ? (
+                  <DeletedValue
+                    value={stats[colName][rowName]}
+                    data={data}
+                    onChange={onChange}
+                    onFilter={(it) => !isNA(it[colName])}
+                  />
+                ) : (
+                  <span
+                    title={`Zkopírovat ${stats[colName][rowName]}`}
+                    onClick={() => Utils.Clipboard.write(stats[colName][rowName] + "")}
+                    className={Config.Css.css({ cursor: "copy" })}
+                  >
+                    {roundNumber(stats[colName][rowName])}
+                  </span>
+                )}
+              </Uu5TilesElements.Table.FooterCell>
+            ),
+          };
+        });
+        footerTemplate.push(row.join(" "));
       });
-      footerTemplate.push(row.join(" "));
-    });
+    }
     //@@viewOff:private
 
     //@@viewOn:interface
@@ -251,9 +265,11 @@ const DataTable = createVisualComponent({
             tileMaxWidth={350}
             height={800}
             cellHoverExtent={["row", "column"]}
-            footerTemplate={footerTemplate.join(",")}
+            footerTemplate={footerTemplate?.join(",")}
             footerContentMap={footerMap}
           />
+
+          {summary}
         </Uu5Elements.Block>
       </ControlledControllerProvider>
     );

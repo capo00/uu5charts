@@ -1,6 +1,6 @@
 //@@viewOn:imports
 import { createVisualComponent } from "uu5g05";
-import Uu5Forms from "uu5g05-forms";
+import Uu5Forms, { useFormApi } from "uu5g05-forms";
 import Config from "./config/config.js";
 import DataLoading from "./analyzer/data-loading";
 import DataAnalysis from "./analyzer/data-analysis";
@@ -13,8 +13,12 @@ import Data from "./model/data";
 
 const STEP_LIST = [
   {
-    component: DataLoading,
     title: "Načtení",
+    component: () => {
+      const { value, setItemValue } = useFormApi();
+
+      return <DataLoading data={value.data} onChange={(e) => setItemValue("data", e.data.data)} />;
+    },
   },
   {
     component: DataAnalysis,
@@ -81,6 +85,8 @@ const Analyzer = createVisualComponent({
     //@@viewOff:render
   },
 });
+
+Analyzer.DataLoading = DataLoading;
 
 //@@viewOn:helpers
 //@@viewOff:helpers
