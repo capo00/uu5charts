@@ -1,10 +1,10 @@
 //@@viewOn:imports
 import { XyChart } from "uu5charts";
-import regression from "regression";
 import { createVisualComponent, useState, Utils } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
 import Uu5Forms, { useFormApi } from "uu5g05-forms";
 import Config from "../config/config.js";
+import Regression from "../model/regression";
 
 //@@viewOff:imports
 
@@ -62,10 +62,9 @@ const DataPrediction = createVisualComponent({
         }
     }
 
-    const regData = testData.map((it) => [it[xAxes], it[yAxes]]);
-    const reg = regression[regressionType](regData);
+    const reg = Regression[regressionType](testData, xAxes, yAxes);
 
-    let displayedData = testData.map((it, i) => ({ ...it, _regression: reg.points[i][1] }));
+    let displayedData = testData.map((it, i) => ({ ...it, _regression: reg.points[i] }));
 
     const series = [
       { valueKey: yAxes },
@@ -77,7 +76,7 @@ const DataPrediction = createVisualComponent({
         displayedData = [
           ...predData.map((it) => ({
             ...it,
-            _regression$predict: reg.predict(it[xAxes])[1],
+            _regression$predict: reg.predict(it[xAxes]),
           })),
           ...displayedData,
         ];
@@ -85,7 +84,7 @@ const DataPrediction = createVisualComponent({
         displayedData.push(
           ...predData.map((it) => ({
             ...it,
-            _regression$predict: reg.predict(it[xAxes])[1],
+            _regression$predict: reg.predict(it[xAxes]),
           }))
         );
       }

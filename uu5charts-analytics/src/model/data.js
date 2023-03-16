@@ -1,10 +1,10 @@
-import regression from "regression";
 import { Utils } from "uu5g05";
 import { mahalanobis } from "./mahalanobis";
 import { mean, median } from "./statistics";
 import TensorFlow from "./tensor-flow";
 import ChiSquare from "./mahalanobis/chi-square";
 import shapiroWilk from "./shapiro-wilk";
+import Regression from "./regression";
 
 export const getMahalanobisDistance = mahalanobis;
 export const OUTLIERS_ALPHA = 0.01;
@@ -372,12 +372,10 @@ class Data extends Array {
     return outliers;
   }
 
-  addRegression(y, x, { key = `${y}~${x}`, predict } = {}) {
-    const regData = this.map((it) => (it._deleted || it._outlier || it._predict ? undefined : [it[x], it[y]])).filter(
-      Boolean
-    );
+  addRegression(yAxes, xAxes, { key = `${yAxes}~${xAxes}`, predict } = {}) {
+    const data = this.filter((it) => !it._deleted && !it._outlier && !it._predict);
     const regressions = ["linear", "exponential", "logarithmic", "power", "polynomial"].map((name) => {
-      const reg = regression[name](regData);
+      const reg = Regression[name](data, xAxes, yAxes);
       reg.name = name;
       return reg;
     });
@@ -388,17 +386,17 @@ class Data extends Array {
 
     let i = 0;
     this.forEach((it) => {
-      if (!(it._deleted || it._outlier || it._predict)) {
-        it[key] = reg.points[i][1];
+      if (!it._deleted && !it._outlier && !it._predict) {
+        it[key] = reg.points[i];
         i++;
       }
     });
 
     if (predict) {
       predict.forEach((v) => {
-        const r = reg.predict(v)[1];
+        const r = reg.predict(v);
         this.push({
-          [x]: v,
+          [xAxes]: v,
           [key + "$predict"]: r,
           _predict: true,
         });

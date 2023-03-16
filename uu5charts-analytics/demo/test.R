@@ -20,7 +20,7 @@ getMahalanobis = function(data) {
 }
 dataMh = getMahalanobis(kvantitativeData)
 
-outliers = which(dataMh >= 16.81)
+outliers = which(dataMh >= 15.09)
 
 # vylouceni odlehlych pozorovani
 cleanData = data[-as.vector(outliers),]
@@ -38,23 +38,62 @@ getVIFValues <- function(data) {
 }
 
 cleanKvantitativeData = as.matrix(cleanData[,2:7])
+nrow(cleanKvantitativeData)
 vif = getVIFValues(cleanKvantitativeData)
 
 # Regrese
-reg1 <- lm(Miles_per_Gallon~Horsepower, data = cleanData)
+plot(cleanData$Miles_per_Gallon, cleanData$Horsepower)
+
+# lineární
+reg1 <- lm(Horsepower~Miles_per_Gallon, data = cleanData)
 summary(reg1)
+SSR <- sum(resid(reg1)^2)
+sigma(reg1)
+logLik(reg1)
+AIC(reg1)
+p <- predict(reg1, interval = "confidence", level = 0.95)
+abline(reg1, col = "red")
 
-reg2 <-lm(Miles_per_Gallon ~ Horsepower + I(Horsepower^2), data = cleanData)
+# kvadratická / polynomiální
+reg2 <-lm(Horsepower ~ Miles_per_Gallon + I(Miles_per_Gallon^2), data = cleanData)
 summary(reg2)
+plot(reg2$residuals)
+AIC(reg2)
+curve(reg2, col = "blue")
 
-reg3 <- lm(log(Miles_per_Gallon) ~ log(Horsepower), data = cleanData) # exp(pred.i)
+# inverzní / hyperbola
+reg3 <- lm(Horsepower ~ 1/Miles_per_Gallon, data = cleanData)
 summary(reg3)
+AIC(reg3)
+abline(reg3, col = "green")
+
+# logaritmická
+reg4 <- lm(Horsepower ~ log(Miles_per_Gallon), data = cleanData) # exp(pred.i)
+summary(reg4)
+AIC(reg4)
+exp(reg4$coef[2])
+abline(exp(reg4$coef[1]), reg4$coef[2], col = "purple")
+
+# mocninná
+reg5 <- lm(log(Horsepower) ~ log(Miles_per_Gallon), data = cleanData) # exp(pred.i)
+summary(reg5)
+plot(reg5$residuals)
+AIC(reg5)
+abline(reg5, col = "pink")
+
+# exponenciální
+reg6 <- lm(log(Horsepower) ~ Miles_per_Gallon, data = cleanData) # exp(pred.i)
+summary(reg6)
+AIC(reg6)
+abline(reg6, col = "brown")
+
 n-p+1
 plot(reg1)
 
 library(forecast) 
-f= forecast(fit, mtcars) 
-str(odhad) 
+f = forecast(reg1, cleanData) 
+str(f) 
 plot(f) 
+summary(f)
 
 fit = auto.arima(diff(AirPassengers)[1:10]) f = forecast(fit,h=10) plot(f)
