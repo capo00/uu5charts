@@ -2,16 +2,8 @@ import jStat from "jstat";
 import { Utils } from "uu5g05";
 import { round } from "./tools";
 
-function bias(predicted, actual) {
-  return predicted.reduce((sum, v, i) => sum + v - actual[i], 0) / predicted.length;
-}
-
 function mae(predicted, actual) {
   return predicted.reduce((sum, v, i) => sum + Math.abs(v - actual[i]), 0) / predicted.length;
-}
-
-function maeNorm(predicted, actual) {
-  return predicted.reduce((sum, v, i) => sum + Math.abs(v - actual[i]), 0) / actual.reduce((sum, v) => sum + v, 0);
 }
 
 function mape(predicted, actual) {
@@ -47,7 +39,6 @@ function summary(model, { name, formula, predict }) {
     predictMax: predict(...t.interval95.map((arr) => arr[1])),
     points,
     mae: mae(points, endog),
-    maeNorm: maeNorm(points, endog),
     mape: mape(points, endog),
     rmse: Math.sqrt(SSR / nobs),
     _model: model,

@@ -49,8 +49,6 @@ const DataAnalysis = createVisualComponent({
     const { value, setItemValue } = useFormApi();
     const { mahalAlpha: alpha, mahalMax: max, removeOutliers } = value;
 
-    const [activeCode, setActiveCode] = useState("distance");
-
     const [data, setData] = useState(() => prepareData(value.data, { alpha, max }));
 
     const cleanData = data.filter(({ _outlier }) => !_outlier);
@@ -71,7 +69,7 @@ const DataAnalysis = createVisualComponent({
     //@@viewOn:render
     return (
       <Uu5Elements.Block headerType="heading" header="Mahalanobis" level={2} {...props}>
-        <div className={Config.Css.css({ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 })}>
+        <Uu5Elements.Grid templateColumns={{ xs: "1fr", s: "1fr 1fr" }} columnGap={16} rowGap={16}>
           <Uu5Forms.FormNumber
             name="mahalAlpha"
             label={{ cs: "Hladina významnosti" }}
@@ -93,7 +91,7 @@ const DataAnalysis = createVisualComponent({
               cs: "Maximální vzdálenost, které mohou položky dosáhnout, aby nešlo o odlehlá pozorování.",
             }}
           />
-        </div>
+        </Uu5Elements.Grid>
 
         <div className={Config.Css.css({ display: "flex", gap: 16, padding: 16 })}>
           <Card header="Všechna data" value={data.length} />

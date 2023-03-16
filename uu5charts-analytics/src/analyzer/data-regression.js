@@ -7,6 +7,16 @@ import Config from "../config/config.js";
 import { round } from "../model/tools";
 import Regression from "../model/regression";
 
+const REG_TYPE_MAP = {
+  linear: "Lineární",
+  polynomial: "Polynomiální",
+  logarithmic: "Logaritmická",
+  exponential: "Exponenciální",
+  power: "Mocninná",
+};
+
+const regTypeKeys = Object.keys(REG_TYPE_MAP);
+
 //@@viewOff:imports
 
 const DataRegression = createVisualComponent({
@@ -32,7 +42,7 @@ const DataRegression = createVisualComponent({
 
     const setRegression = useCallback(
       (xAxes, yAxes) => {
-        const regressions = ["linear", "exponential", "logarithmic", "power", "polynomial"]
+        const regressions = regTypeKeys
           .map((name) => {
             return Regression[name](data, xAxes, yAxes);
           })
@@ -59,7 +69,7 @@ const DataRegression = createVisualComponent({
     //@@viewOn:render
     return (
       <Uu5Elements.Block headerType="heading" header="Regrese" level={2} {...props}>
-        <div className={Config.Css.css({ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 })}>
+        <Uu5Elements.Grid templateColumns={{ xs: "1fr", m: "1fr 1fr" }} columnGap={16} rowGap={16}>
           <Uu5Forms.FormSelect
             name="xAxes"
             label={{ cs: "Data x" }}
@@ -78,7 +88,7 @@ const DataRegression = createVisualComponent({
             }}
             itemList={quantitativeKeys.filter((k) => k !== xAxes).map((k) => ({ value: k }))}
           />
-        </div>
+        </Uu5Elements.Grid>
 
         {regList && (
           <Uu5Forms.FormSelect
@@ -88,7 +98,7 @@ const DataRegression = createVisualComponent({
             onChange={(e) => setReg(regList.find(({ name }) => name === e.data.value))}
             itemList={regList.map(({ name, formula, r2Adj }) => ({
               value: name,
-              children: `${name} (${round(r2Adj)}): ${formula}`,
+              children: `${REG_TYPE_MAP[name]} (${round(r2Adj)}): ${formula}`,
             }))}
           />
         )}
@@ -98,17 +108,19 @@ const DataRegression = createVisualComponent({
             data={data.map((it, i) => ({
               ...it,
               _regression: reg.points[i],
-              _regressionMin: reg.predictMin(it[xAxes]),
-              _regressionMax: reg.predictMax(it[xAxes]),
             }))}
             series={[
               { valueKey: yAxes },
-              { valueKey: "_regression", color: "red", line: { strokeWidth: 5 }, title: "Regrese" },
-              { valueKey: "_regressionMin", color: "orange", line: { strokeWidth: 1 }, title: "Regrese min" },
-              { valueKey: "_regressionMax", color: "orange", line: { strokeWidth: 1 }, title: "Regrese max" },
+              {
+                valueKey: "_regression",
+                color: "purple",
+                line: { strokeWidth: 5 },
+                title: REG_TYPE_MAP[reg.name] + " regrese",
+              },
             ]}
             labelAxis={{ dataKey: xAxes, title: xAxes }}
             valueAxis={{ title: yAxes }}
+            legend
           />
         )}
 
