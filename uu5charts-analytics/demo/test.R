@@ -97,3 +97,13 @@ plot(f)
 summary(f)
 
 fit = auto.arima(diff(AirPassengers)[1:10]) f = forecast(fit,h=10) plot(f)
+
+
+list(
+  linear = c(AIC(reg1), BIC(reg1)),
+  polynomial = c(AIC(reg2), BIC(reg2)),
+  inverse = c(AIC(reg3), BIC(reg3)),
+  logarithmic = c(AIC(reg4), BIC(reg4)),
+  power = c(AIC(reg5), BIC(reg5)),
+  exponencial = c(AIC(reg6), BIC(reg6))
+)

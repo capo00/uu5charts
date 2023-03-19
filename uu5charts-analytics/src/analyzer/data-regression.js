@@ -7,15 +7,7 @@ import Config from "../config/config.js";
 import { round } from "../model/tools";
 import Regression from "../model/regression";
 
-const REG_TYPE_MAP = {
-  linear: "Lineární",
-  polynomial: "Polynomiální",
-  logarithmic: "Logaritmická",
-  exponential: "Exponenciální",
-  power: "Mocninná",
-};
-
-const regTypeKeys = Object.keys(REG_TYPE_MAP);
+const regTypeKeys = Object.keys(Config.REG_TYPE_MAP);
 
 //@@viewOff:imports
 
@@ -46,21 +38,64 @@ const DataRegression = createVisualComponent({
           .map((name) => {
             return Regression[name](data, xAxes, yAxes);
           })
-          .sort((a, b) => b.r2Adj - a.r2Adj);
+          .sort((a, b) => a.aic + a.bic - (b.aic + b.bic));
 
         console.log(regressions);
+
+        // const R = {
+        //   power: {
+        //     aic: -255.2237,
+        //     bic: -243.467,
+        //   },
+        //   polynomial: {
+        //     aic: 3200.269,
+        //     bic: 3215.944,
+        //   },
+        //   logarithmic: {
+        //     aic: 3236.157,
+        //     bic: 3247.914,
+        //   },
+        //   exponential: {
+        //     aic: -199.0434,
+        //     bic: -187.2867,
+        //   },
+        //   linear: {
+        //     aic: 3314.565,
+        //     bic: 3326.322,
+        //   },
+        // };
+        //
+        // const tableAic = [];
+        // regressions.forEach((reg) =>
+        //   tableAic.push({
+        //     name: reg.name,
+        //     aic: reg.aic,
+        //     aicR: R[reg.name].aic,
+        //   })
+        // );
+        // console.table(tableAic);
+        //
+        // const tableBic = [];
+        // regressions.forEach((reg) =>
+        //   tableBic.push({
+        //     name: reg.name,
+        //     bic: reg.bic,
+        //     bicR: R[reg.name].bic,
+        //   })
+        // );
+        // console.table(tableBic);
 
         setRegList(regressions);
         setReg(regressions[0]);
       },
-      [data, setReg, setRegList]
+      [data]
     );
 
     useEffect(() => {
-      if (!reg && xAxes && yAxes) {
+      if (xAxes && yAxes) {
         setRegression(xAxes, yAxes);
       }
-    }, [reg, setRegression, xAxes, yAxes]);
+    }, [setRegression, xAxes, yAxes]);
     //@@viewOff:private
 
     //@@viewOn:interface
@@ -74,18 +109,12 @@ const DataRegression = createVisualComponent({
             name="xAxes"
             label={{ cs: "Data x" }}
             required
-            onChange={(e) => {
-              if (e.data.value && yAxes) setRegression(e.data.value, yAxes);
-            }}
             itemList={quantitativeKeys.filter((k) => k !== yAxes).map((k) => ({ value: k }))}
           />
           <Uu5Forms.FormSelect
             name="yAxes"
             label={{ cs: "Data y" }}
             required
-            onChange={(e) => {
-              if (e.data.value && xAxes) setRegression(xAxes, e.data.value);
-            }}
             itemList={quantitativeKeys.filter((k) => k !== xAxes).map((k) => ({ value: k }))}
           />
         </Uu5Elements.Grid>
@@ -98,7 +127,7 @@ const DataRegression = createVisualComponent({
             onChange={(e) => setReg(regList.find(({ name }) => name === e.data.value))}
             itemList={regList.map(({ name, formula, r2Adj }) => ({
               value: name,
-              children: `${REG_TYPE_MAP[name]} (${round(r2Adj)}): ${formula}`,
+              children: `${Config.REG_TYPE_MAP[name]} (${round(r2Adj * 100, 0)}%): ${formula}`,
             }))}
           />
         )}
@@ -115,7 +144,7 @@ const DataRegression = createVisualComponent({
                 valueKey: "_regression",
                 color: "purple",
                 line: { strokeWidth: 5 },
-                title: REG_TYPE_MAP[reg.name] + " regrese",
+                title: Config.REG_TYPE_MAP[reg.name] + " regrese",
               },
             ]}
             labelAxis={{ dataKey: xAxes, title: xAxes }}
@@ -127,9 +156,9 @@ const DataRegression = createVisualComponent({
         {regList && (
           <XyChart
             data={data.map((it, i) => ({ ...it, _residuals: reg.residuals[i], _i: i }))}
-            series={[{ valueKey: "_residuals" }]}
+            series={[{ valueKey: "_residuals", title: "Residua" }]}
             labelAxis={{ dataKey: "_i", title: "Pořadí" }}
-            valueAxis={{ title: "Residua" }}
+            valueAxis={{ title: "Vzdálenost" }}
           />
         )}
       </Uu5Elements.Block>

@@ -10,6 +10,16 @@ function mape(predicted, actual) {
   return (predicted.reduce((sum, v, i) => sum + Math.abs(v - actual[i]) / actual[i], 0) / predicted.length) * 100;
 }
 
+function aic(n, k, ssr) {
+  const logLik = -(n / 2) * Math.log(2 * Math.PI) - (n / 2) * Math.log(ssr / n) - n / 2;
+  return -2 * logLik + 2 * k;
+}
+
+function bic(n, k, ssr) {
+  const logLik = -(n / 2) * Math.log(2 * Math.PI) - (n / 2) * Math.log(ssr / n) - n / 2;
+  return -2 * logLik + k * Math.log(n);
+}
+
 function summary(model, { name, formula, predict }) {
   const { coef, t, R2, adjust_R2, f, resid, predict: points, endog, SSR, SSE, SST, nobs } = model;
   const variables = coef.map((estimate, i) => ({
@@ -34,10 +44,13 @@ function summary(model, { name, formula, predict }) {
     pValue: f.pvalue,
     residuals: resid,
     sigma: t.sigmaHat, // residual standard error
+    points,
+    aic: aic(nobs, variables.length + 1, SSR),
+    bic: bic(nobs, variables.length + 1, SSR),
+
     predict: predict(...coef),
     predictMin: predict(...t.interval95.map((arr) => arr[0])),
     predictMax: predict(...t.interval95.map((arr) => arr[1])),
-    points,
     mae: mae(points, endog),
     mape: mape(points, endog),
     rmse: Math.sqrt(SSR / nobs),
@@ -61,7 +74,11 @@ const Regression = {
     });
 
     const model = jStat.models.ols(y, x);
-    return summary(model, { name: "linear", formula: "y = ${b0} + ${b1}x", predict: (b0, b1) => (x) => b0 + b1 * x });
+    return summary(model, {
+      name: "linear",
+      formula: "y = ${b0} + ${b1}x",
+      predict: (b0, b1) => (x) => b0 + b1 * x,
+    });
   },
 
   polynomial(data, xAxes, yAxes) {
@@ -91,7 +108,11 @@ const Regression = {
     });
 
     const model = jStat.models.ols(y, x);
-    return summary(model, { name: "invert", formula: "y = ${b0} + ${b1}/x", predict: (b0, b1) => (x) => b0 + b1 / x });
+    return summary(model, {
+      name: "invert",
+      formula: "y = ${b0} + ${b1}/x",
+      predict: (b0, b1) => (x) => b0 + b1 / x,
+    });
   },
 
   logarithmic(data, xAxes, yAxes) {
@@ -124,7 +145,7 @@ const Regression = {
     const sum = summary(model, {
       name: "power",
       formula: "y = ${b0} + x^${b1}",
-      predict: (b0, b1) => (x) => b0 + x ** b1,
+      predict: (b0, b1) => (x) => Math.exp(b0 + b1 * Math.log(x)),
     });
 
     sum.points = sum.points.map(Math.exp);
@@ -145,7 +166,7 @@ const Regression = {
     const sum = summary(model, {
       name: "exponential",
       formula: "y = ${b0} + e^(${b1}x)",
-      predict: (b0, b1) => (x) => b0 + Math.exp(b1 * x),
+      predict: (b0, b1) => (x) => Math.exp(b0 + b1 * x),
     });
 
     sum.points = sum.points.map(Math.exp);

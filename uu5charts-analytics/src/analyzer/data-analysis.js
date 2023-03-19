@@ -53,11 +53,10 @@ const DataAnalysis = createVisualComponent({
 
     const cleanData = data.filter(({ _outlier }) => !_outlier);
 
-    // TOTO render is cyclic
-    // console.log("render")
-
     // unmount is later than mount of next component
-    useEffect(() => () => setItemValue("cleanData", removeOutliers ? new Data(cleanData) : value.data, []));
+    useEffect(() => {
+      setItemValue("cleanData", removeOutliers ? new Data(cleanData) : value.data);
+    }, [data, value.data, removeOutliers, setItemValue]);
 
     // TODO format by user preferences
     const outliersLimitToDisplay = Math.round(data.outliersLimit * 100) / 100;

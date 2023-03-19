@@ -31,7 +31,7 @@ class DataModel {
 
     this._xAxes = xAxes;
     this._yAxes = yAxes;
-    this._reg = reg;
+    this.reg = reg;
     this._predictData = predictData;
   }
 
@@ -39,9 +39,9 @@ class DataModel {
     if (data?.length && this._predictDataFull !== data) {
       this._predictDataFull = data.map((it) => ({
         ...it,
-        _regression$predict: this._reg.predict(it[this._xAxes]),
-        _regression$min: this._reg.predictMin(it[this._xAxes]),
-        _regression$max: this._reg.predictMax(it[this._xAxes]),
+        _regression$predict: this.reg.predict(it[this._xAxes]),
+        _regression$min: this.reg.predictMin(it[this._xAxes]),
+        _regression$max: this.reg.predictMax(it[this._xAxes]),
       }));
     }
     return this._predictDataFull;
@@ -87,10 +87,6 @@ function buildDataMap(data, xAxes, yAxes, regressionType) {
 }
 
 function findTheBestPrediction(dataMap) {
-  console.log(
-    "findTheBestPrediction",
-    Object.entries(dataMap).map(([name, { mae, mape, rmse }]) => [mae, mape, rmse])
-  );
   return Object.keys(dataMap).sort((a, b) => a.mae + a.mape + a.rmse - (b.mae + b.mape + b.rmse))[0];
 }
 
@@ -166,13 +162,18 @@ const DataPrediction = createVisualComponent({
 
     //@@viewOn:render
     return (
-      <Uu5Elements.Block headerType="heading" header="Predikce" level={2} {...props}>
+      <Uu5Elements.Block
+        headerType="heading"
+        header={"Predikce - " + Config.REG_TYPE_MAP[regressionType] + " regrese"}
+        level={2}
+        {...props}
+      >
         <Uu5Elements.Grid templateColumns={{ xs: "1fr", m: "1fr 1fr" }} columnGap={16} rowGap={16}>
           <Uu5Forms.FormSwitchSelect
             name="prediction"
             label={{ cs: "Predikce" }}
             initialValue={prediction}
-            itemList={predTypeKeys.map((value) => ({ value, label: PRED_TYPE_MAP[value] }))}
+            itemList={predTypeKeys.map((value) => ({ value, children: PRED_TYPE_MAP[value] }))}
           />
           {prediction === "custom" && (
             <TextInput

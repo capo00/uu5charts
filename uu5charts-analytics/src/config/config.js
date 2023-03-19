@@ -13,4 +13,12 @@ export default {
       .replace(/[^a-z-]/g, ""),
     process.env.NAME + "/" + process.env.OUTPUT_NAME + "@" + process.env.VERSION // this helps preserve proper order of styles among loaded libraries
   ),
+
+  REG_TYPE_MAP: {
+    linear: "Lineární",
+    polynomial: "Polynomiální",
+    logarithmic: "Logaritmická",
+    exponential: "Exponenciální",
+    power: "Mocninná",
+  },
 };
