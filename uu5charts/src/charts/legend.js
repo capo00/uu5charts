@@ -1,12 +1,13 @@
 //@@viewOn:imports
 import { Legend as RechartsLegend } from "recharts";
 import Uu5Elements from "uu5g05-elements";
+import { Utils } from "uu5g05";
 import Config from "../config/config.js";
 
 //@@viewOff:imports
 
 //@@viewOn:helpers
-function CustomLegend(props) {
+function DefaultLegend(props) {
   const { title, payload, layout, align, onClick, onMouseEnter, onMouseLeave } = props;
   const activeLength = payload.filter(({ inactive }) => !inactive).length;
 
@@ -60,6 +61,23 @@ function CustomLegend(props) {
   );
 }
 
+function CustomLegend(props) {
+  const { layout, payload, align, verticalAlign, children } = props;
+
+  const propsToPass = {
+    layout,
+    align,
+    verticalAlign,
+    series: payload.map(({ dataKey, value, color, payload }) => ({
+      valueKey: dataKey,
+      title: value,
+      color: color ?? payload.fill,
+    })),
+  };
+
+  return typeof children === "function" ? children(propsToPass) : Utils.Element.clone(children, propsToPass);
+}
+
 //@@viewOff:helpers
 
 function Legend(props) {
@@ -79,7 +97,7 @@ function Legend(props) {
       verticalAlign={verticalAlign}
       align={align}
       layout={layout}
-      content={children || <CustomLegend title={title} />}
+      content={children ? <CustomLegend>{children}</CustomLegend> : <DefaultLegend title={title} />}
     />
   );
   //@@viewOff:render

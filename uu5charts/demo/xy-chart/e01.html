@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>XyChart</title>
+    <title>XyChart props</title>
 
     <script src="https://cdn.plus4u.net/uu-uu5loaderg01/1.0.0/uu5loaderg01.min.js" crossorigin="anonymous"></script>
     <script src="https://cdn.plus4u.net/uu-uu5g05/1.0.0/assets/example-config.js" crossorigin="anonymous"></script>
@@ -43,12 +43,46 @@
               <pre>{"[\n  " + JSON.stringify(data, null, 4).replace(/}/, "  }") + ",\n  ...\n]"}</pre>
             </Uu5Elements.Block>
 
-            <Uu5Elements.Block headerType="heading" level={4} header="default" collapsible>
+            <Uu5Elements.Block headerType="heading" level={4} header="Default" collapsible>
               <XyChart
                 data={data}
                 series={[{ valueKey: "apples" }]}
                 labelAxis={{ dataKey: "monthName" }}
               />
+            </Uu5Elements.Block>
+
+            <Uu5Elements.Block headerType="heading" level={4} header="Data" collapsible>
+              <div className={Config.Css.css({
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+                gap: 16,
+              })}>
+                <Uu5Elements.Block headerType="heading" header="Pole objektů">
+                  <XyChart data={[
+                    { month: "Leden", count: 20, optimal: 10, maximal: 30 },
+                    { month: "Únor", count: 30, optimal: 20, maximal: 40 },
+                    { month: "Březen", count: 40, optimal: 30, maximal: 50 },
+                    { month: "Duben", count: 50, optimal: 40, maximal: 60 },
+                    { month: "Květen", count: 60, optimal: 50, maximal: 70 },
+                    { month: "Červen", count: 70, optimal: 60, maximal: 80 },
+                  ]} />
+                </Uu5Elements.Block>
+
+                <Uu5Elements.Block headerType="heading" header="Pouze čísla">
+                  <XyChart data={[20, 30, 40, 50, 60, 70]} />
+                </Uu5Elements.Block>
+
+                <Uu5Elements.Block headerType="heading" header="Pole polí (jako tabulka)">
+                  <XyChart data={[
+                    ["Leden", 20],
+                    ["Únor", 30],
+                    ["Březen", 40],
+                    ["Duben", 50],
+                    ["Květen", 60],
+                    ["Červen", 70],
+                  ]} />
+                </Uu5Elements.Block>
+              </div>
             </Uu5Elements.Block>
 
             <Uu5Elements.Block headerType="heading" level={4} header="Series" collapsible>
@@ -57,7 +91,7 @@
                 gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
                 gap: 16,
               })}>
-                <Uu5Elements.Block headerType="heading" header="color, title, onClick, label">
+                <Uu5Elements.Block headerType="heading" header="color, title, onClick, label, unit">
                   <XyChart
                     data={data}
                     series={[
@@ -66,7 +100,8 @@
                         color: "red",
                         title: "Jablka",
                         onClick: (e) => console.log("click", e),
-                        label: true
+                        label: true,
+                        unit: "ks",
                       },
                       {
                         valueKey: "bananas",
@@ -84,7 +119,8 @@
                               </text>
                             );
                           },
-                        }
+                        },
+                        unit: "ks",
                       },
                     ]}
                     labelAxis={{ dataKey: "monthName" }}
@@ -93,7 +129,7 @@
               </div>
             </Uu5Elements.Block>
 
-            <Uu5Elements.Block headerType="heading" level={4} header="Point" collapsible>
+            <Uu5Elements.Block headerType="heading" level={5} header="Point" collapsible>
               <div className={Config.Css.css({
                 display: "grid",
                 gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
@@ -131,7 +167,7 @@
               </div>
             </Uu5Elements.Block>
 
-            <Uu5Elements.Block headerType="heading" level={4} header="Line" collapsible>
+            <Uu5Elements.Block headerType="heading" level={5} header="Line" collapsible>
               <div className={Config.Css.css({
                 display: "grid",
                 gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
@@ -158,7 +194,7 @@
               </div>
             </Uu5Elements.Block>
 
-            <Uu5Elements.Block headerType="heading" level={4} header="Area" collapsible>
+            <Uu5Elements.Block headerType="heading" level={5} header="Area" collapsible>
               <div className={Config.Css.css({
                 display: "grid",
                 gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
@@ -185,7 +221,7 @@
               </div>
             </Uu5Elements.Block>
 
-            <Uu5Elements.Block headerType="heading" level={4} header="Bar" collapsible>
+            <Uu5Elements.Block headerType="heading" level={5} header="Bar" collapsible>
               <div className={Config.Css.css({
                 display: "grid",
                 gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
@@ -258,7 +294,7 @@
               </div>
             </Uu5Elements.Block>
 
-            <Uu5Elements.Block headerType="heading" level={4} header="Combinations" collapsible>
+            <Uu5Elements.Block headerType="heading" level={5} header="Combinations" collapsible>
               <div className={Config.Css.css({
                 display: "grid",
                 gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
@@ -365,19 +401,19 @@
                       position: "middle-right",
                       children: (props) => {
                         // console.log("custom legend props", props);
-                        const { payload } = props;
+                        const { series } = props;
                         return (
                           <Uu5Elements.Tile header="Legenda">
-                            {payload.map((item, i) => {
+                            {series.map((item, i) => {
                               // console.log("custom legend item", item);
-                              const { color, value } = item;
+                              const { color, title } = item;
                               return (
                                 <Uu5Elements.MenuItem key={i}>
                                   <Uu5Elements.Badge
                                     borderRadius="full"
                                     style={{ backgroundColor: color, marginRight: 8 }}
                                   />
-                                  {value}
+                                  {title}
                                 </Uu5Elements.MenuItem>
                               )
                             })}
@@ -418,19 +454,19 @@
                     labelAxis={{ dataKey: "monthName" }}
                     tooltip={(props) => {
                       // console.log("custom tooltip props", props);
-                      const { payload } = props;
+                      const { series } = props;
                       return (
                         <Uu5Elements.Tile header="Tooltip">
-                          {payload.map((item, i) => {
-                            console.log("custom tooltip item", item);
-                            const { color, name, value, payload } = item;
+                          {series.map((item, i) => {
+                            // console.log("custom tooltip item", item);
+                            const { color, title, value } = item;
                             return (
                               <Uu5Elements.MenuItem key={i}>
                                 <Uu5Elements.Badge
                                   borderRadius="full"
-                                  style={{ backgroundColor: color || payload.fill, marginRight: 8 }}
+                                  style={{ backgroundColor: color, marginRight: 8 }}
                                 />
-                                {name}: {value}
+                                {title}: {value}
                               </Uu5Elements.MenuItem>
                             )
                           })}

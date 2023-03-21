@@ -16,13 +16,13 @@ import {
   BarChart,
   ReferenceArea,
   ReferenceLine,
-  LabelList,
   ZAxis,
 } from "recharts";
-import { createComponent, createVisualComponent, PropTypes, useState, Utils } from "uu5g05";
+import { createComponent, createVisualComponent, PropTypes, useState } from "uu5g05";
 import Config from "../config/config.js";
 import Tooltip from "./tooltip";
 import Legend from "./legend";
+import DefaultLabel from "./label";
 import Color from "./color";
 
 //@@viewOff:imports
@@ -35,46 +35,86 @@ function withDataCorrector(Component) {
 
     //@@viewOn:propTypes
     propTypes: {
-      data: PropTypes.arrayOf(PropTypes.oneOfType([PropTypes.object, PropTypes.array])).isRequired,
+      data: PropTypes.arrayOf(PropTypes.oneOfType([PropTypes.number, PropTypes.object, PropTypes.array])).isRequired,
     },
     //@@viewOff:propTypes
 
     //@@viewOn:defaultProps
-    defaultProps: {},
+    defaultProps: {
+      data: [],
+    },
     //@@viewOff:defaultProps
 
     render(props) {
       //@@viewOn:private
       let { data, series = [], labelAxis = {}, ...restProps } = props;
 
-      if (typeof data[0] === "number") {
+      const firstItem = data[0];
+      let itemKeys;
+
+      if (typeof firstItem === "number") {
+        // array of numbers
+
         data = data.map((v, i) => ({ label: i, value: v }));
         labelAxis.dataKey = "label";
         series[0] ||= {};
         series[0].valueKey = "value";
-      } else if (Array.isArray(data[0])) {
+      } else if (Array.isArray(firstItem)) {
+        // array of arrays
+
         data = data.map((arr) => Object.fromEntries(arr.map((v, i) => [i, v])));
         labelAxis.dataKey ??= 0;
         series[0] ||= {};
         series[0].valueKey ??= 1;
       }
 
-      if (series.length === 0) {
-        let valueKey;
-        for (let i = 0; i < data.length && !valueKey; i++) {
-          valueKey = Object.keys(data[i]).find((k, _, arr) => typeof arr[k] === "number");
+      // array of objects
+
+      let firstNumberKey;
+      if (labelAxis.dataKey == null) {
+        let firstStringKey;
+        itemKeys ??= Object.keys(firstItem);
+        const seriesKeys = series.map(({ valueKey }) => valueKey);
+
+        for (let i = 0; i < itemKeys.length && !labelAxis.dataKey; i++) {
+          const k = itemKeys[i];
+          if (!seriesKeys.includes(k)) {
+            if (typeof firstItem[k] === "string") {
+              const keyValues = data.map(({ [k]: v }) => v);
+              // find unique values
+              if (new Set(keyValues).size === keyValues.length) {
+                labelAxis.dataKey = k;
+                break;
+              } else if (!firstStringKey) firstStringKey = k;
+            } else if (typeof firstItem[k] === "number" && firstNumberKey == null) {
+              firstNumberKey = k;
+            }
+          }
         }
-        if (!valueKey) throw new Error("Data does not contain any number values for y axis");
-        series[0] = { valueKey };
+
+        // set default if not found optimal solution
+        if (!labelAxis.dataKey) {
+          if (firstStringKey) labelAxis.dataKey = firstStringKey;
+          else if (firstNumberKey) labelAxis.dataKey = firstNumberKey;
+          else throw new Error("Data does not contain any string or number values for x axis.");
+        }
       }
 
-      if (!labelAxis?.dataKey) {
-        let dataKey;
-        const keys = Object.keys(data[0]);
-        const values = keys.map((k) => data.map(({ [k]: v }) => v)); // TODO find uniq values as label
-        for (let i = 0; i < data.length && !dataKey; i++) {
-          dataKey = Object.keys(data[i]).find((k, _, arr) => typeof arr[k] === "number");
+      if (series.length === 0) {
+        let valueKey;
+        if (firstNumberKey && firstNumberKey !== labelAxis.dataKey) {
+          valueKey = firstNumberKey;
+        } else {
+          for (let i = 0; i < data.length && !valueKey; i++) {
+            const k = itemKeys[i];
+            if (typeof firstItem[k] === "number" && k !== firstNumberKey) {
+              valueKey = k;
+              break;
+            }
+          }
+          if (!valueKey) throw new Error("Data does not contain any number values for y axis.");
         }
+        series.push({ valueKey });
       }
       //@@viewOff:private
 
@@ -181,12 +221,26 @@ function useInteractiveLegend(series) {
   ];
 }
 
-function CustomLineLabel(props) {
-  const { viewBox, title, offset, stroke } = props;
+function DefaultLineLabel(props) {
+  const { viewBox, title, titlePosition = "middle", offset, stroke } = props;
   const { x, y, width } = viewBox;
 
+  let posX;
+
+  switch (titlePosition) {
+    case "middle":
+      posX = x + width / 2;
+      break;
+    case "start":
+      posX = x;
+      break;
+    case "end":
+      posX = x + width;
+      break;
+  }
+
   return (
-    <text x={width / 2 + x} y={y} dy={-offset} stroke={stroke} textAnchor="middle" opacity={0.4}>
+    <text x={posX} y={y} dy={-offset} stroke={stroke} textAnchor={titlePosition} opacity={0.4}>
       {title}
     </text>
   );
@@ -199,6 +253,16 @@ const COMPONENTS = {
   bar: BarChart,
 };
 
+function handleSerieClick(onClick) {
+  return typeof onClick === "function"
+    ? ({ payload }) => onClick({ ...(payload ? { data: payload } : null) })
+    : undefined;
+}
+
+function dashToCamel(str) {
+  return str.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
+}
+
 const XyChart = withDataCorrector(
   createVisualComponent({
     //@@viewOn:statics
@@ -210,11 +274,34 @@ const XyChart = withDataCorrector(
       data: PropTypes.arrayOf(PropTypes.object).isRequired,
       series: PropTypes.arrayOf(
         PropTypes.shape({
-          valueKey: PropTypes.string.isRequired,
+          valueKey: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
           title: PropTypes.node,
           color: PropTypes.string,
           onClick: PropTypes.func,
-          label: PropTypes.oneOfType([PropTypes.bool, PropTypes.object]),
+          label: PropTypes.oneOfType([
+            PropTypes.bool,
+            PropTypes.shape({
+              position: PropTypes.oneOf([
+                "center",
+                "top",
+                "left",
+                "right",
+                "bottom",
+                "inside",
+                "outside",
+                "inside-top",
+                "inside-left",
+                "inside-right",
+                "inside-bottom",
+                "inside-top-left",
+                "inside-bottom-left",
+                "inside-top-right",
+                "inside-bottom-right",
+              ]),
+              children: PropTypes.oneOfType([PropTypes.element, PropTypes.func]),
+            }),
+          ]),
+          unit: PropTypes.string,
 
           point: PropTypes.oneOfType([
             PropTypes.bool,
@@ -268,15 +355,14 @@ const XyChart = withDataCorrector(
               stackId: PropTypes.string,
             }),
           ]),
-          //labelKey: PropTypes.string, // for Pie and Radar
         })
-      ).isRequired,
+      ),
 
       labelAxis: PropTypes.shape({
-        dataKey: PropTypes.string.isRequired,
+        dataKey: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
         title: PropTypes.string,
         unit: PropTypes.string,
-      }).isRequired,
+      }),
       valueAxis: PropTypes.shape({
         title: PropTypes.string,
         unit: PropTypes.string,
@@ -308,13 +394,15 @@ const XyChart = withDataCorrector(
           x: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
           y: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
           title: PropTypes.node,
+          titlePosition: PropTypes.oneOf(["start", "middle", "end"]),
           width: PropTypes.number,
           color: PropTypes.string,
         })
       ),
 
       displayCartesianGrid: PropTypes.bool,
-      height: PropTypes.number,
+      width: PropTypes.unit,
+      height: PropTypes.unit,
     },
     //@@viewOff:propTypes
 
@@ -339,6 +427,7 @@ const XyChart = withDataCorrector(
         tooltip,
         displayCartesianGrid,
         lines,
+        width = "100%",
         height,
 
         barGap,
@@ -387,7 +476,7 @@ const XyChart = withDataCorrector(
       let zAxis;
 
       return (
-        <div style={{ width: "100%", height }} onDoubleClick={onDoubleClick}>
+        <div style={{ width, height, display: props.width ? "inline-block" : undefined }} onDoubleClick={onDoubleClick}>
           <ResponsiveContainer>
             <ComposedChart
               data={data}
@@ -427,15 +516,22 @@ const XyChart = withDataCorrector(
 
               {zeroLineProps && <ReferenceLine {...zeroLineProps} yAxisId="1" stroke="#000" />}
 
-              {series.map(({ id, valueKey, title, color, onClick, label, point, line, area, bar }, i) => {
+              {series.map(({ id, valueKey, title, color, onClick, label, unit, point, line, area, bar }, i) => {
                 id ??= "id-" + i;
                 let Component;
-                let componentProps = { onClick, id, hide: !visibilityMap[id], yAxisId: "1" };
+                let componentProps = {
+                  onClick: handleSerieClick(onClick),
+                  id,
+                  unit,
+                  hide: !visibilityMap[id],
+                  yAxisId: "1",
+                };
                 if (title) componentProps.name = title;
 
                 const opacity = hoverId && hoverId !== id ? 0.4 : undefined;
 
                 if (label === true) label = {};
+                else if (label && label.position) label.position = dashToCamel(label.position);
 
                 if (line) {
                   Component = Line;
@@ -474,7 +570,7 @@ const XyChart = withDataCorrector(
                   }
 
                   if (label && layout === "vertical") {
-                    label = { ...label, position: label.position || "right" };
+                    label = { ...label, position: label.position ?? "right" };
                   }
 
                   componentProps = {
@@ -499,7 +595,7 @@ const XyChart = withDataCorrector(
 
                 return (
                   <Component {...componentProps} key={valueKey} dataKey={valueKey}>
-                    {label && <LabelList position="top" {...label} dataKey={label.dataKey ?? valueKey} />}
+                    {label && DefaultLabel({ dataKey: valueKey, ...label })}
                   </Component>
                 );
               })}
@@ -514,7 +610,7 @@ const XyChart = withDataCorrector(
                 <ReferenceArea yAxisId="1" x1={refArea.left} x2={refArea.right} strokeOpacity={0.3} />
               )}
 
-              {lines.map(({ x, y, title, color, width }) => {
+              {lines.map(({ x, y, title, titlePosition, color, width }) => {
                 const stroke = Color.getColor(color);
                 return (
                   <ReferenceLine
@@ -522,7 +618,7 @@ const XyChart = withDataCorrector(
                     yAxisId="1"
                     x={x}
                     y={y}
-                    label={<CustomLineLabel title={title} stroke={stroke} />}
+                    label={<DefaultLineLabel title={title} titlePosition={titlePosition} stroke={stroke} />}
                     stroke={stroke}
                     strokeWidth={width}
                   />

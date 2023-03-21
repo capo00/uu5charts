@@ -94,7 +94,7 @@ const DataAnalysis = createVisualComponent({
 
         <div className={Config.Css.css({ display: "flex", gap: 16, padding: 16 })}>
           <Card header="Všechna data" value={data.length} />
-          <Card header="Očištěná data" value={cleanData.length} valueColorScheme="primary" />
+          <Card header="Očištěná data" value={cleanData.length} valueColorScheme="positive" />
           <OutliersCard
             header="Odlehlá data"
             value={data.length - cleanData.length}

@@ -1,12 +1,13 @@
-import { sum, isNumeric } from "./math";
+import jStat from "jstat";
+import { isNumeric } from "./math";
 
 function dot(a, b) {
   if (a.length !== b.length) {
     throw new TypeError("Vectors are of different sizes");
   }
 
-  return sum(
-    a.map(function(x, i) {
+  return jStat.sum(
+    a.map(function (x, i) {
       return x * b[i];
     })
   );
@@ -20,40 +21,32 @@ export function multiply(a, b) {
     if (bSize === 1) {
       return dot(a, b);
     }
-    return b.map(function(row) {
+    return b.map(function (row) {
       return dot(a, row);
     });
   }
 
   if (bSize === 1) {
-    return a.map(function(row) {
+    return a.map(function (row) {
       return dot(row, b);
     });
   }
 
-  return a.map(function(x) {
-    return transpose(b).map(function(y) {
+  return a.map(function (x) {
+    return jStat.transpose(b).map(function (y) {
       return dot(x, y);
     });
   });
 }
 
-export function transpose(matrix) {
-  return matrix[0].map(function(d, i) {
-    return matrix.map(function(row) {
-      return row[i];
-    });
-  });
-}
-
 export function cov(columns, means) {
-  return columns.map(function(c1, i) {
-    return columns.map(function(c2, j) {
-      var terms = c1.map(function(x, k) {
+  return columns.map(function (c1, i) {
+    return columns.map(function (c2, j) {
+      var terms = c1.map(function (x, k) {
         return (x - means[i]) * (c2[k] - means[j]);
       });
 
-      return sum(terms) / (c1.length - 1);
+      return jStat.sum(terms) / (c1.length - 1);
     });
   });
 }
@@ -100,9 +93,9 @@ export function invert(matrix) {
     augmented;
 
   // Augment w/ identity matrix
-  augmented = matrix.map(function(row, i) {
+  augmented = matrix.map(function (row, i) {
     return row.slice(0).concat(
-      row.slice(0).map(function(d, j) {
+      row.slice(0).map(function (d, j) {
         return j === i ? 1 : 0;
       })
     );
@@ -147,7 +140,7 @@ export function invert(matrix) {
     }
   }
 
-  return augmented.map(function(row) {
+  return augmented.map(function (row) {
     return row.slice(size);
   });
 }

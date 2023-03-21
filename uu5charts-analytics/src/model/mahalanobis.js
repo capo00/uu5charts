@@ -1,5 +1,6 @@
-import { mean, isNumeric } from "./mahalanobis/math.js";
-import { invert, cov, transpose, multiply } from "./mahalanobis/matrix.js";
+import { isNumeric } from "./mahalanobis/math.js";
+import { cov, multiply } from "./mahalanobis/matrix.js";
+import jStat from "jstat";
 
 // used from https://github.com/veltman/mahalanobis
 export function mahalanobis(data) {
@@ -29,9 +30,9 @@ export function mahalanobis(data) {
     );
   }
 
-  var columns = transpose(data),
-    means = columns.map(mean),
-    invertedCovariance = invert(cov(columns, means));
+  var columns = jStat.transpose(data),
+    means = columns.map(jStat.mean),
+    invertedCovariance = jStat.inv(cov(columns, means));
 
   var distance = function(row) {
     var deltas = row.map(function(d, i) {

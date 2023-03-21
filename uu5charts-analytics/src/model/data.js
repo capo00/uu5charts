@@ -1,8 +1,8 @@
+import jStat from "jstat";
 import { Utils } from "uu5g05";
 import { mahalanobis } from "./mahalanobis";
 import { mean, median } from "./statistics";
 import TensorFlow from "./tensor-flow";
-import ChiSquare from "./mahalanobis/chi-square";
 import shapiroWilk from "./shapiro-wilk";
 import Regression from "./regression";
 
@@ -327,7 +327,10 @@ class Data extends Array {
   }
 
   selectOutliers(
-    { alpha = OUTLIERS_ALPHA, max = ChiSquare.inv(this.getQuantitativeKeys().length - 1, Math.min(alpha, 1)) } = {},
+    {
+      alpha = OUTLIERS_ALPHA,
+      max = jStat.chisquare.inv(1 - Math.min(alpha, 1), this.getQuantitativeKeys().length - 1),
+    } = {},
     callback
   ) {
     this.addMahalanobisDistance();

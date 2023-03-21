@@ -1,12 +1,13 @@
 //@@viewOn:imports
 import { Tooltip as RechartsTooltip } from "recharts";
 import Uu5Elements from "uu5g05-elements";
+import { Utils } from "uu5g05";
 import Config from "../config/config.js";
 
 //@@viewOff:imports
 
 //@@viewOn:helpers
-function CustomTooltip(props) {
+function DefaultTooltip(props) {
   const { active, payload, label, labelTitle, labelUnit, valueUnit } = props;
 
   if (active && payload && payload.length) {
@@ -24,14 +25,14 @@ function CustomTooltip(props) {
       >
         <div className={Config.Css.css({ display: "flex", flexDirection: "column", gap: 4 })}>
           {payload.map((item, i) => {
-            const { fill, dataKey, name, value, payload: data } = item;
+            const { fill, name, value, payload: data, unit = valueUnit } = item;
             if (value != null) {
               const formattedValue = typeof value === "number" ? <Uu5Elements.Number value={value} /> : value;
               return (
                 <div key={i} className={Config.Css.css({ paddingLeft: 8 })}>
                   <Uu5Elements.Badge size="xs" borderRadius="full" style={{ backgroundColor: fill || data.fill }} />{" "}
                   {name}: <b>{formattedValue}</b>
-                  {valueUnit}
+                  {unit}
                 </div>
               );
             }
@@ -44,11 +45,35 @@ function CustomTooltip(props) {
   return null;
 }
 
+function CustomTooltip(props) {
+  const { active, payload, label, children, unit: propsUnit } = props;
+
+  let result = null;
+
+  if (active) {
+    const propsToPass = {
+      label,
+      series: payload.map(({ dataKey, value, color, name, payload, unit = propsUnit }) => ({
+        valueKey: dataKey,
+        title: name,
+        value,
+        unit,
+        color: color ?? payload.fill,
+        data: payload,
+      })),
+    };
+
+    result = typeof children === "function" ? children(propsToPass) : Utils.Element.clone(children, propsToPass);
+  }
+
+  return result;
+}
+
 //@@viewOff:helpers
 
 function Tooltip(props) {
   //@@viewOn:private
-  const { labelAxis, valueAxis, children, ...propsToPass } = props;
+  const { labelAxis, valueAxis, children } = props;
   // do not use hooks, this is not used like react component, but like function
   //@@viewOff:private
 
@@ -60,11 +85,12 @@ function Tooltip(props) {
     <RechartsTooltip
       offset={8}
       cursor={false}
-      allowEscapeViewBox={{ x: true, y: true }}
-      {...propsToPass}
+      allowEscapeViewBox={{ x: false, y: true }}
       content={
-        children || (
-          <CustomTooltip labelTitle={labelAxis?.title} labelUnit={labelAxis?.unit} valueUnit={valueAxis?.unit} />
+        children ? (
+          <CustomTooltip unit={valueAxis?.unit}>{children}</CustomTooltip>
+        ) : (
+          <DefaultTooltip labelTitle={labelAxis?.title} labelUnit={labelAxis?.unit} valueUnit={valueAxis?.unit} />
         )
       }
     />

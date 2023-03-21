@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>XyChart</title>
+
+    <script src="https://cdn.plus4u.net/uu-uu5loaderg01/1.0.0/uu5loaderg01.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.plus4u.net/uu-uu5g05/1.0.0/assets/example-config.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.plus4u.net/uu-uu5tilesg02/2.0.0/assets/example-config.js" crossorigin="anonymous"></script>
+
+    <script>
+      Uu5Loader.config({
+        imports: {
+          "uu5charts": "/uu5charts.js",
+          "uu5charts-data": "http://localhost:2224/uu5charts-data.js"
+        },
+      });
+    </script>
+
+    <style>
+      body {
+        padding: 16px 32px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="uu5">Loading...</div>
+
+    <script type="text/babel">
+      import { Utils } from "uu5g05";
+      import Uu5Elements from "uu5g05-elements";
+      import { Config } from "uu5g05-dev";
+      import { XyChart } from "uu5charts";
+      import { fruitsData } from "uu5charts-data";
+
+      const data = [
+        { month: "Leden", optimal: 10, count: 20, maximal: 30 },
+        { month: "Únor", optimal: 20, count: 30, maximal: 40 },
+        { month: "Březen", optimal: 30, count: 40, maximal: 50 },
+        { month: "Duben", optimal: 40, count: 50, maximal: 60 },
+        { month: "Květen", optimal: 50, count: 60, maximal: 70 },
+        { month: "Červen", optimal: 60, count: 70, maximal: 80 },
+      ];
+
+      function Page() {
+        return (
+          <XyChart
+            data={data}
+            series={[
+              {
+                valueKey: "count",
+                color: "blue",
+                title: "Počet",
+                onClick: (e) => console.log("count click", e),
+                label: {
+                  children: (props) => {
+                    // console.log("label.content props", props);
+                    const { x, y, offset, value } = props;
+
+                    return (
+                      <text x={x} y={y} dx={offset / 2} dy={-offset} fill="#000" textAnchor="top">
+                        {value}
+                      </text>
+                    );
+                  },
+                },
+                bar: { width: 20 },
+              },
+              {
+                valueKey: "optimal",
+                color: "#ffeb3b",
+                title: "Optimum",
+                onClick: (e) => console.log("point click", e),
+                point: { shape: "star", sizeKey: "optimal" },
+              },
+              {
+                valueKey: "maximal",
+                color: "red",
+                title: "Maximum",
+                onClick: (e) => console.log("line click", e),
+                unit: "ks/den",
+                line: { type: "basis", width: 2, },
+              },
+            ]}
+            labelAxis={{ dataKey: "month", title: "Měsíc" }}
+            valueAxis={{ title: "Počet", unit: "ks" }}
+            displayCartesianGrid
+            legend={{
+              position: "middle-right",
+              children: (props) => {
+                // console.log("custom legend props", props);
+                const { series } = props;
+                return (
+                  <Uu5Elements.Tile header="Legenda">
+                    {series.map((item, i) => {
+                      // console.log("custom legend item", item);
+                      const { color, title } = item;
+                      return (
+                        <Uu5Elements.MenuItem key={i}>
+                          <Uu5Elements.Badge borderRadius="full" style={{ backgroundColor: color, marginRight: 8 }} />
+                          {title}
+                        </Uu5Elements.MenuItem>
+                      )
+                    })}
+                  </Uu5Elements.Tile>
+                )
+              }
+            }}
+            tooltip={(props) => {
+              // console.log("custom tooltip props", props);
+              const { label, series } = props;
+              return (
+                <Uu5Elements.Tile header={label}>
+                  {series.map((item, i) => {
+                    // console.log("custom tooltip item", item);
+                    const { color, title, value, unit } = item;
+                    return (
+                      <Uu5Elements.MenuItem key={i}>
+                        <Uu5Elements.Badge borderRadius="full" style={{ backgroundColor: color, marginRight: 8 }} />
+                        {title}: {value}{unit}
+                      </Uu5Elements.MenuItem>
+                    )
+                  })}
+                </Uu5Elements.Tile>
+              )
+            }}
+            lines={[
+              { y: 35, color: "green", title: "Optimum", titlePosition: "start" },
+              { x: "Březen", color: "orange", title: "Start" }
+            ]}
+          />
+        );
+      }
+
+      Utils.Dom.render(<Page />, document.getElementById("uu5"));
+    </script>
+  </body>
+</html>
+<!--<script>-->
+<!--const data = [-->
+<!--  { month: "Leden", optimal: 10, count: 20, maximal: 30 },-->
+<!--  { month: "Únor", optimal: 20, count: 30, maximal: 40 },-->
+<!--  { month: "Březen", optimal: 30, count: 40, maximal: 50 },-->
+<!--  { month: "Duben", optimal: 40, count: 50, maximal: 60 },-->
+<!--  { month: "Květen", optimal: 50, count: 60, maximal: 70 },-->
+<!--  { month: "Červen", optimal: 60, count: 70, maximal: 80 },-->
+<!--];-->
+
+<!--<XyChart-->
+<!--  data={data}-->
+<!--  series={[-->
+<!--    {-->
+<!--      valueKey: "count",-->
+<!--      color: "blue",-->
+<!--      title: "Počet",-->
+<!--      onClick: (e) => console.log("count click", e),-->
+<!--      label: {-->
+<!--        content: (props) => {-->
+<!--          const { x, y, offset, value } = props;-->
+
+<!--          return (-->
+<!--            <text x={x} y={y} dx={offset / 2} dy={-offset} fill="#000" textAnchor="top">-->
+<!--              {value}-->
+<!--            </text>-->
+<!--          );-->
+<!--        },-->
+<!--      },-->
+<!--      bar: { width: 20 },-->
+<!--    },-->
+<!--    {-->
+<!--      valueKey: "optimal",-->
+<!--      color: "#ffeb3b",-->
+<!--      title: "Optimum",-->
+<!--      onClick: (e) => console.log("point click", e),-->
+<!--      point: { shape: "star", sizeKey: "optimal" },-->
+<!--    },-->
+<!--    {-->
+<!--      valueKey: "maximal",-->
+<!--      color: "red",-->
+<!--      title: "Maximum",-->
+<!--      onClick: (e) => console.log("line click", e),-->
+<!--      unit: "ks/den",-->
+<!--      line: { type: "basis", width: 2 },-->
+<!--    },-->
+<!--  ]}-->
+<!--  labelAxis={{ dataKey: "month", title: "Měsíc" }}-->
+<!--  valueAxis={{ title: "Počet", unit: "ks" }}-->
+<!--  displayCartesianGrid-->
+<!--  legend={{-->
+<!--    position: "middle-right",-->
+<!--    children: (props) => {-->
+<!--      const { series } = props;-->
+<!--      return (-->
+<!--        <Uu5Elements.Tile header="Legenda">-->
+<!--          {series.map((item, i) => {-->
+<!--            const { color, title } = item;-->
+<!--            return (-->
+<!--              <Uu5Elements.MenuItem key={i}>-->
+<!--                <Uu5Elements.Badge borderRadius="full" style={{ backgroundColor: color, marginRight: 8 }} />-->
+<!--                {title}-->
+<!--              </Uu5Elements.MenuItem>-->
+<!--            )-->
+<!--          })}-->
+<!--        </Uu5Elements.Tile>-->
+<!--      )-->
+<!--    }-->
+<!--  }}-->
+<!--  tooltip={(props) => {-->
+<!--    const { label, series } = props;-->
+<!--    return (-->
+<!--      <Uu5Elements.Tile header={label}>-->
+<!--        {series.map((item, i) => {-->
+<!--          const { color, title, value, unit } = item;-->
+<!--          return (-->
+<!--            <Uu5Elements.MenuItem key={i}>-->
+<!--              <Uu5Elements.Badge borderRadius="full" style={{ backgroundColor: color, marginRight: 8 }} />-->
+<!--              {title}: {value}{unit}-->
+<!--            </Uu5Elements.MenuItem>-->
+<!--          )-->
+<!--        })}-->
+<!--      </Uu5Elements.Tile>-->
+<!--    )-->
+<!--  }}-->
+<!--  lines={[-->
+<!--    { y: 35, color: "green", title: "Optimum", titlePosition: "start" },-->
+<!--    { x: "Březen", color: "orange", title: "Start" }-->
+<!--  ]}-->
+<!--/>-->
+<!--</script>-->
