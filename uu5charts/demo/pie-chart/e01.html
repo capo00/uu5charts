@@ -312,18 +312,18 @@
                       children: (props) => {
                         // console.log("custom legend props", props);
                         const { series } = props;
-                        const legendData = [];
+                        const legendData = {};
                         series.forEach((item) => {
                           // console.log("custom legend item", item);
                           const { color, title } = item;
-                          legendData.push({ title, color });
+                          legendData[title + color] ||= { title, color };
                         })
 
                         return (
                           <Uu5Elements.Tile header="Legenda">
-                            {legendData.map(({ title, color }) => {
+                            {Object.values(legendData).map(({ title, color }, i) => {
                               return (
-                                <Uu5Elements.MenuItem key={title}>
+                                <Uu5Elements.MenuItem key={i}>
                                   <Uu5Elements.Badge
                                     borderRadius="full"
                                     style={{ backgroundColor: color, marginRight: 8 }}

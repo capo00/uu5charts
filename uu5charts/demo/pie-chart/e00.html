@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PieChart props</title>
+
+    <script src="https://cdn.plus4u.net/uu-uu5loaderg01/1.0.0/uu5loaderg01.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.plus4u.net/uu-uu5g05/1.0.0/assets/example-config.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.plus4u.net/uu-uu5tilesg02/2.0.0/assets/example-config.js" crossorigin="anonymous"></script>
+
+    <script>
+      Uu5Loader.config({
+        imports: {
+          "uu5charts": "/uu5charts.js",
+          "uu5charts-data": "http://localhost:2224/uu5charts-data.js"
+        },
+      });
+    </script>
+
+    <style>
+      body {
+        padding: 16px 32px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="uu5">Loading...</div>
+
+    <script type="text/babel">
+      import { Utils } from "uu5g05";
+      import Uu5Elements from "uu5g05-elements";
+      import { Config } from "uu5g05-dev";
+      import { PieChart } from "uu5charts";
+      import { fruitsData } from "uu5charts-data";
+
+      const data = fruitsData.map((item) => ({ ...item, sum: item.apples + item.bananas }));
+      const data2 = data.map(({ apples, bananas, sum, ...item }) => ([
+        { ...item, name: "Jablka", label: "apples", value: apples },
+        { ...item, name: "Banány", label: "bananas", value: bananas },
+      ])).flat();
+
+      function Page() {
+        return (
+          <div className={Config.Css.css({
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+            gap: 16,
+          })}>
+            <Uu5Elements.Block headerType="heading" level={4} header="Default">
+              <PieChart
+                data={[data, data2]}
+                series={[
+                  { valueKey: "sum", labelKey: "monthName" },
+                  { valueKey: "value", labelKey: "name" }
+                ]}
+              />
+            </Uu5Elements.Block>
+
+            <Uu5Elements.Block headerType="heading" level={4} header="Vlastní nastavení">
+              <PieChart
+                data={[data, data2]}
+                series={[
+                  {
+                    valueKey: "sum",
+                    labelKey: "monthName",
+                    innerRadius: "45%",
+                    outerRadius: "70%",
+                    gap: 2,
+                    onClick: (e) => console.log("click", e),
+                    label: true,
+                    children: data.reduce((result, { sum }) => result + sum, 0),
+                  },
+                  {
+                    valueKey: "value",
+                    labelKey: "name",
+                    color: (item) => {
+                      // console.log("color item", item);
+                      const { label } = item;
+                      switch (label) {
+                        case "apples":
+                          return "red";
+                        case "bananas":
+                          return "yellow";
+                      }
+                    },
+                    innerRadius: "70%",
+                    gap: 2,
+                    onClick: (e) => console.log("click", e),
+                    label: {
+                      children: (props) => {
+                        // console.log("label.content props", props);
+                        const { value, viewBox } = props;
+                        const { cx, cy, startAngle, endAngle, innerRadius, outerRadius } = viewBox;
+
+                        const RADIAN = Math.PI / 180;
+                        const midAngle = (startAngle + endAngle) / 2;
+                        const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+                        const x = cx + radius * Math.cos(-midAngle * RADIAN);
+                        const y = cy + radius * Math.sin(-midAngle * RADIAN);
+
+                        return (
+                          <text x={x} y={y} fill="black" textAnchor="middle" dominantBaseline="central">
+                            {value}
+                          </text>
+                        );
+                      },
+                    },
+                  }
+                ]}
+                tooltip={(props) => {
+                  // console.log("custom tooltip props", props);
+                  const { series } = props;
+                  return (
+                    <Uu5Elements.Tile header="Tooltip">
+                      {series.map((item, i) => {
+                        const { color, title, value } = item;
+                        return (
+                          <Uu5Elements.MenuItem key={i}>
+                            <Uu5Elements.Badge
+                              borderRadius="full"
+                              style={{ backgroundColor: color, marginRight: 8 }}
+                            />
+                            {title}: {value}
+                          </Uu5Elements.MenuItem>
+                        )
+                      })}
+                    </Uu5Elements.Tile>
+                  )
+                }}
+                legend={{
+                  position: "middle-right",
+                  children: (props) => {
+                    // console.log("custom legend props", props);
+                    const { series } = props;
+                    const legendData = {};
+                    series.forEach((item) => {
+                      const { color, title } = item;
+                      legendData[title + color] ||= { title, color };
+                    })
+
+                    return (
+                      <Uu5Elements.Tile header="Legenda">
+                        {Object.values(legendData).map(({ title, color }, i) => (
+                          <Uu5Elements.MenuItem key={i}>
+                            <Uu5Elements.Badge
+                              borderRadius="full"
+                              style={{ backgroundColor: color, marginRight: 8 }}
+                            />
+                            {title}
+                          </Uu5Elements.MenuItem>
+                        ))}
+                      </Uu5Elements.Tile>
+                    )
+                  }
+                }}
+              />
+            </Uu5Elements.Block>
+          </div>
+        );
+      }
+
+      Utils.Dom.render(<Page />, document.getElementById("uu5"));
+    </script>
+  </body>
+</html>
+<script>
+  <PieChart
+    data={[data, data2]}
+    series={[
+      {
+        valueKey: "sum",
+        labelKey: "monthName",
+        innerRadius: "45%",
+        outerRadius: "70%",
+        gap: 2,
+        onClick: (e) => console.log("click", e),
+        label: true,
+        children: data.reduce((result, { sum }) => result + sum, 0),
+      },
+      {
+        valueKey: "value",
+        labelKey: "name",
+        color: (item) => {
+          const { label } = item;
+          switch (label) {
+            case "apples":
+              return "red";
+            case "bananas":
+              return "yellow";
+          }
+        },
+        innerRadius: "70%",
+        gap: 2,
+        onClick: (e) => console.log("click", e),
+        label: {
+          children: (props) => {
+            const { value, viewBox } = props;
+            const { cx, cy, startAngle, endAngle, innerRadius, outerRadius } = viewBox;
+
+            const RADIAN = Math.PI / 180;
+            const midAngle = (startAngle + endAngle) / 2;
+            const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+            const x = cx + radius * Math.cos(-midAngle * RADIAN);
+            const y = cy + radius * Math.sin(-midAngle * RADIAN);
+
+            return (
+              <text x={x} y={y} fill="black" textAnchor="middle" dominantBaseline="central">
+                {value}
+              </text>
+            );
+          },
+        },
+      }
+    ]}
+    tooltip={(props) => {
+      const { series } = props;
+      return (
+        <Uu5Elements.Tile header="Tooltip">
+          {series.map((item, i) => {
+            const { color, title, value } = item;
+            return (
+              <Uu5Elements.MenuItem key={i}>
+                <Uu5Elements.Badge
+                  borderRadius="full"
+                  style={{ backgroundColor: color, marginRight: 8 }}
+                />
+                {title}: {value}
+              </Uu5Elements.MenuItem>
+            )
+          })}
+        </Uu5Elements.Tile>
+      )
+    }}
+    legend={{
+      position: "middle-right",
+      children: (props) => {
+        const { series } = props;
+        const legendData = {};
+        series.forEach((item) => {
+          const { color, title } = item;
+          legendData[title + color] ||= { title, color };
+        })
+
+        return (
+          <Uu5Elements.Tile header="Legenda">
+            {Object.values(legendData).map(({ title, color }, i) => {
+              return (
+                <Uu5Elements.MenuItem key={i}>
+                  <Uu5Elements.Badge
+                    borderRadius="full"
+                    style={{ backgroundColor: color, marginRight: 8 }}
+                  />
+                  {title}
+                </Uu5Elements.MenuItem>
+              )
+            })}
+          </Uu5Elements.Tile>
+        )
+      }
+    }}
+  />
+</script>

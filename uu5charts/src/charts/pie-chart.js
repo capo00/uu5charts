@@ -52,7 +52,6 @@ function withDataCorrector(Component) {
 
       // array of objects
 
-
       if (series.length === 0) {
         let firstNumberKeys = [];
         let firstStringKey;
@@ -139,6 +138,7 @@ const PieChart = withDataCorrector(
           color: PropTypes.func,
           onClick: PropTypes.func,
           label: PropTypes.oneOfType([PropTypes.bool, PropTypes.object]),
+          unit: PropTypes.string,
           innerRadius: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
           outerRadius: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
           startAngle: PropTypes.number,
@@ -209,12 +209,19 @@ const PieChart = withDataCorrector(
                   onClick,
                   label = true,
                   innerRadius,
-                  outerRadius = "95%",
+                  outerRadius = "100%",
                   startAngle = 0,
                   endAngle = startAngle + 360,
                   gap: paddingAngle,
                   children,
                 } = serie;
+
+                if (series.length > 1 && !innerRadius && !serie.outerRadius) {
+                  // first has 2/n and rest have only 1/n;
+                  const part = 100 / (series.length + 1);
+                  innerRadius = Math.round((i ? i + 1 : i) * part) + "%";
+                  outerRadius = Math.round((i + 2) * part) + "%";
+                }
 
                 let componentProps = {
                   onClick,
