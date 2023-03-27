@@ -1,5 +1,5 @@
 //@@viewOn:imports
-import { createVisualComponent, useEffect, useMemo, useState } from "uu5g05";
+import { createVisualComponent, useEffect, useMemo, useState, useValueChange } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
 import Uu5Forms, { useFormApi } from "uu5g05-forms";
 import Config from "../config/config.js";
@@ -89,7 +89,7 @@ function NormalityBlock(props) {
             </Item>
           ))}
         </div>
-        <Histogram data={data} valueAxis={{ dataKey: key }} />
+        <Histogram data={data} valueAxis={{ dataKey: key }} labelAxis={{ title: key }} />
       </Uu5Elements.Grid>
     </Uu5Elements.Block>
   );
@@ -98,12 +98,14 @@ function NormalityBlock(props) {
 function MulticollinearityBlock(props) {
   const { data, keys = data.getQuantitativeKeys(), onKeysChange, ...blockProps } = props;
 
+  const [keyList, setKeyList] = useValueChange(keys, onKeysChange);
+
   const vifData = useMemo(() => {
-    const vifData = keys.map((key) => data.values(key));
+    const vifData = keyList.map((key) => data.values(key));
     const vifResult = vif(vifData);
 
-    return Object.fromEntries(keys.map((k, i) => [k, vifResult[i]]));
-  }, [data, keys]);
+    return Object.fromEntries(keyList.map((k, i) => [k, vifResult[i]]));
+  }, [data, keyList]);
 
   return (
     <Uu5Elements.Block
@@ -115,7 +117,7 @@ function MulticollinearityBlock(props) {
     >
       <div className={Config.Css.css({ display: "flex", flexDirection: "column", gap: 4, width: "max-content" })}>
         {data.getQuantitativeKeys().map((key) => {
-          const selected = keys.includes(key);
+          const selected = keyList.includes(key);
           return (
             <Item
               key={key}
@@ -124,10 +126,10 @@ function MulticollinearityBlock(props) {
               passed={selected ? vifData[key] <= 5 : undefined}
               selected={selected}
               onSelect={() => {
-                const newKeys = [...keys];
+                const newKeys = [...keyList];
                 const i = newKeys.indexOf(key);
                 i > -1 ? newKeys.splice(i, 1) : newKeys.push(key);
-                onKeysChange({ data: { keys: newKeys } });
+                setKeyList(newKeys);
               }}
               elementAttrs={{ title: (vifData[key] <= 5 ? "Není" : "Je") + " multikolinearita dat" }}
             >
@@ -155,8 +157,8 @@ const DataTesting = createVisualComponent({
 
   render(props) {
     //@@viewOn:private
-    const { value, setItemValue } = useFormApi();
-    const { cleanData: data, quantitativeKeys } = value;
+    const { value } = useFormApi();
+    const { cleanData: data } = value;
     //@@viewOff:private
 
     //@@viewOn:interface
@@ -169,11 +171,7 @@ const DataTesting = createVisualComponent({
       data && (
         <Uu5Elements.Block headerType="heading" header="Testování předpokladů regrese" level={2} {...props}>
           <NormalityBlock data={data} />
-          <MulticollinearityBlock
-            data={data}
-            keys={quantitativeKeys}
-            onKeysChange={(e) => setItemValue("quantitativeKeys", e.data.keys)}
-          />
+          <MulticollinearityBlock data={data} />
         </Uu5Elements.Block>
       )
     );

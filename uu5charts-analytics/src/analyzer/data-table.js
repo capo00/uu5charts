@@ -94,6 +94,20 @@ function ControlledControllerProvider({ data, children }) {
   );
 }
 
+const STATS_NAME = {
+  filled: "Vyplněno",
+  empty: "Prázdno",
+  min: "Min",
+  max: "Max",
+  range: "Rozsah",
+  sum: "Součet",
+  median: "Medián",
+  mean: "Průměr",
+  variance: "Rozptyl",
+  standardDeviation: "Směrodatná odchylka",
+  varianceCoefficient: "Koeficient variability",
+};
+
 const DataTable = createVisualComponent({
   //@@viewOn:statics
   uu5Tag: Config.TAG + "DataTable",
@@ -177,7 +191,7 @@ const DataTable = createVisualComponent({
         footerMap[rowName] = {
           footerComponent: (
             <Uu5TilesElements.Table.FooterCell horizontalAlignment="left" verticalAlignment="center">
-              {rowName}
+              {STATS_NAME[rowName]}
             </Uu5TilesElements.Table.FooterCell>
           ),
         };

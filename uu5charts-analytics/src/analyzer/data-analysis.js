@@ -118,6 +118,7 @@ const DataAnalysis = createVisualComponent({
           <Histogram
             data={data}
             valueAxis={{ dataKey: "_distance" }}
+            labelAxis={{ title: "Vzdálenosti" }}
             binSize={20}
             lines={[{ color: "red", x: data.outliersLimit, title: `Hranice odlehlosti ${outliersLimitToDisplay}` }]}
           />

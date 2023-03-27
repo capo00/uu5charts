@@ -1,11 +1,12 @@
 //@@viewOn:imports
 import { XyChart } from "uu5charts";
-import { createVisualComponent, useMemo, Utils } from "uu5g05";
+import { createVisualComponent, useMemo, Utils, Fragment } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
 import Uu5Forms, { useFormApi } from "uu5g05-forms";
 import Config from "../config/config.js";
 import Regression from "../model/regression";
 import withControlledInput from "./with-controlled-input";
+import { round } from "../model/tools";
 
 //@@viewOff:imports
 
@@ -28,6 +29,7 @@ class DataModel {
     this.mae = reg.mae;
     this.mape = reg.mape;
     this.rmse = reg.rmse;
+    this.formula = reg.formula;
 
     this._xAxes = xAxes;
     this._yAxes = yAxes;
@@ -122,15 +124,15 @@ const DataPrediction = createVisualComponent({
     const predData = dataModel.predictData(
       prediction === "custom"
         ? predictValue
-            ?.replace(",", ".")
-            ?.split(/\s*;\s*/)
-            ?.map((v) => ({ [xAxes]: +v }))
+          ?.replace(",", ".")
+          ?.split(/\s*;\s*/)
+          ?.map((v) => ({ [xAxes]: +v }))
         : undefined
     );
 
     const series = [
       { valueKey: yAxes },
-      { valueKey: "_regression", color: "purple", line: { strokeWidth: 2 }, title: "Regrese" },
+      { valueKey: "_regression", color: "purple", line: { strokeWidth: 2, type: "monotone" }, title: "Regrese" },
     ];
 
     let isTwoCharts = ["random", "custom"].includes(prediction);
@@ -138,13 +140,13 @@ const DataPrediction = createVisualComponent({
     let displayedData = testData;
 
     const predSeries = [
-      { valueKey: "_regression$max", color: "orange", area: { fillOpacity: 0.2 }, title: "max 95%" },
-      { valueKey: "_regression$min", color: "#fff", area: { fillOpacity: 1 }, title: "min 95%" },
+      { valueKey: "_regression$max", color: "orange", area: { fillOpacity: 0.2, type: "monotone" }, title: "max 95%" },
+      { valueKey: "_regression$min", color: "#fff", area: { fillOpacity: 1, type: "monotone" }, title: "min 95%" },
       {
         valueKey: "_regression$predict",
         color: "orange",
         title: "Predikce",
-        line: { strokeWidth: 5, point: isTwoCharts },
+        line: { strokeWidth: 5, type: "monotone", point: prediction === "custom" },
       },
     ];
 
@@ -154,7 +156,11 @@ const DataPrediction = createVisualComponent({
     } else if (prediction === "next") {
       displayedData.push(...predData);
       series.push(...predSeries);
+    } else if (prediction === "random") {
+      predSeries.unshift({ valueKey: yAxes });
     }
+
+    const customLabel = `Vlastní hodnoty pro ${xAxes}`;
     //@@viewOff:private
 
     //@@viewOn:interface
@@ -168,42 +174,82 @@ const DataPrediction = createVisualComponent({
         level={2}
         {...props}
       >
-        <Uu5Elements.Grid templateColumns={{ xs: "1fr", m: "1fr 1fr" }} columnGap={16} rowGap={16}>
+        <Uu5Elements.Grid
+          templateColumns={{ xs: "1fr", m: "1fr 1fr" }}
+          columnGap={16}
+          rowGap={16}
+          templateAreas={{ xs: "prediction, stats, predictValue", m: "prediction predictValue, stats ." }}
+        >
           <Uu5Forms.FormSwitchSelect
             name="prediction"
-            label={{ cs: "Predikce" }}
             initialValue={prediction}
             itemList={predTypeKeys.map((value) => ({ value, children: PRED_TYPE_MAP[value] }))}
+            className={Config.Css.css({ gridArea: "prediction" })}
           />
           {prediction === "custom" && (
             <TextInput
               name="predictValue"
-              label={{ cs: `Vlastní hodnoty pro ${xAxes}` }}
+              placeholder={{ cs: customLabel }}
               value={predictValue}
-              onBlur={(e) => {
-                setItemValue("predictValue", e.data.value);
-              }}
+              onBlur={(e) => setItemValue("predictValue", e.data.value)}
+              className={Config.Css.css({ gridArea: "predictValue" })}
             />
           )}
+          <Uu5Elements.Grid
+            templateColumns="repeat(4, 1fr)"
+            columnGap={4}
+            rowGap={4}
+            className={Config.Css.css({ gridArea: "stats", padding: 8, justifyItems: "end" })}
+          >
+            {["MAE", "MAPE", "RMSE"].map((fn) => (
+              <Fragment key={fn}>
+                {predTypeKeys.map((predKey, i) => {
+                  const v = dataMap[predKey][fn.toLowerCase()];
+                  const value = round(v, 5);
+                  return (
+                    <span
+                      key={predKey}
+                      className={
+                        i
+                          ? undefined
+                          : Config.Css.css({ display: "flex", justifyContent: "space-between", width: "100%" })
+                      }
+                    >
+                      {!i && <span>{fn}</span>}
+                      <span
+                        title={`Zkopírovat ${v}`}
+                        onClick={() => Utils.Clipboard.write(v + "")}
+                        className={Config.Css.css({ cursor: "copy" })}
+                      >
+                        {value}
+                      </span>
+                    </span>
+                  );
+                })}
+              </Fragment>
+            ))}
+          </Uu5Elements.Grid>
         </Uu5Elements.Grid>
 
-        <XyChart
-          data={displayedData}
-          series={series}
-          labelAxis={{ dataKey: xAxes, title: xAxes }}
-          valueAxis={{ title: yAxes }}
-          legend
-        />
-
-        {isTwoCharts && predData && (
+        <Uu5Elements.Block headerType="heading" header={dataModel.formula}>
           <XyChart
-            data={predData}
-            series={predSeries}
+            data={displayedData}
+            series={series}
             labelAxis={{ dataKey: xAxes, title: xAxes }}
             valueAxis={{ title: yAxes }}
             legend
           />
-        )}
+
+          {isTwoCharts && predData && (
+            <XyChart
+              data={predData}
+              series={predSeries}
+              labelAxis={{ dataKey: xAxes, title: xAxes }}
+              valueAxis={{ title: yAxes }}
+              legend
+            />
+          )}
+        </Uu5Elements.Block>
       </Uu5Elements.Block>
     );
     //@@viewOff:render

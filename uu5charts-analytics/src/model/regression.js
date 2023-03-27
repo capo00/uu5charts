@@ -10,14 +10,16 @@ function mape(predicted, actual) {
   return (predicted.reduce((sum, v, i) => sum + Math.abs(v - actual[i]) / actual[i], 0) / predicted.length) * 100;
 }
 
+function logLik(n, ssr) {
+  return -(n / 2) * Math.log(2 * Math.PI) - (n / 2) * Math.log(ssr / n) - n / 2;
+}
+
 function aic(n, k, ssr) {
-  const logLik = -(n / 2) * Math.log(2 * Math.PI) - (n / 2) * Math.log(ssr / n) - n / 2;
-  return -2 * logLik + 2 * k;
+  return -2 * logLik(n, ssr) + 2 * k;
 }
 
 function bic(n, k, ssr) {
-  const logLik = -(n / 2) * Math.log(2 * Math.PI) - (n / 2) * Math.log(ssr / n) - n / 2;
-  return -2 * logLik + k * Math.log(n);
+  return -2 * logLik(n, ssr) + k * Math.log(n);
 }
 
 function summary(model, { name, formula, predict }) {
@@ -46,7 +48,7 @@ function summary(model, { name, formula, predict }) {
     sigma: t.sigmaHat, // residual standard error
     points,
     aic: aic(nobs, variables.length + 1, SSR),
-    bic: bic(nobs, variables.length + 1, SSR),
+    //bic: bic(nobs, variables.length + 1, SSR),
 
     predict: predict(...coef),
     predictMin: predict(...t.interval95.map((arr) => arr[0])),
@@ -149,6 +151,7 @@ const Regression = {
     });
 
     sum.points = sum.points.map(Math.exp);
+    sum.residuals = sum.residuals.map(Math.exp);
 
     return sum;
   },
@@ -170,6 +173,7 @@ const Regression = {
     });
 
     sum.points = sum.points.map(Math.exp);
+    sum.residuals = sum.residuals.map(Math.exp);
 
     return sum;
   },

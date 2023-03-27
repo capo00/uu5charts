@@ -27,7 +27,8 @@ const DataRegression = createVisualComponent({
   render(props) {
     //@@viewOn:private
     const { value } = useFormApi();
-    const { cleanData: data, xAxes, yAxes, quantitativeKeys = data.getQuantitativeKeys() } = value;
+    const { cleanData: data, xAxes, yAxes } = value;
+    const quantitativeKeys = data.getQuantitativeKeys();
 
     const [reg, setReg] = useState();
     const [regList, setRegList] = useState();
@@ -35,55 +36,10 @@ const DataRegression = createVisualComponent({
     const setRegression = useCallback(
       (xAxes, yAxes) => {
         const regressions = regTypeKeys
-          .map((name) => {
-            return Regression[name](data, xAxes, yAxes);
-          })
-          .sort((a, b) => a.aic + a.bic - (b.aic + b.bic));
+          .map((name) => Regression[name](data, xAxes, yAxes))
+          .sort((a, b) => a.aic - b.aic);
 
         console.log(regressions);
-
-        // const R = {
-        //   power: {
-        //     aic: -255.2237,
-        //     bic: -243.467,
-        //   },
-        //   polynomial: {
-        //     aic: 3200.269,
-        //     bic: 3215.944,
-        //   },
-        //   logarithmic: {
-        //     aic: 3236.157,
-        //     bic: 3247.914,
-        //   },
-        //   exponential: {
-        //     aic: -199.0434,
-        //     bic: -187.2867,
-        //   },
-        //   linear: {
-        //     aic: 3314.565,
-        //     bic: 3326.322,
-        //   },
-        // };
-        //
-        // const tableAic = [];
-        // regressions.forEach((reg) =>
-        //   tableAic.push({
-        //     name: reg.name,
-        //     aic: reg.aic,
-        //     aicR: R[reg.name].aic,
-        //   })
-        // );
-        // console.table(tableAic);
-        //
-        // const tableBic = [];
-        // regressions.forEach((reg) =>
-        //   tableBic.push({
-        //     name: reg.name,
-        //     bic: reg.bic,
-        //     bicR: R[reg.name].bic,
-        //   })
-        // );
-        // console.table(tableBic);
 
         setRegList(regressions);
         setReg(regressions[0]);
@@ -110,12 +66,18 @@ const DataRegression = createVisualComponent({
             label={{ cs: "Data x" }}
             required
             itemList={quantitativeKeys.filter((k) => k !== yAxes).map((k) => ({ value: k }))}
+            info={{
+              cs: "Vysvětlující nezávislá proměnná",
+            }}
           />
           <Uu5Forms.FormSelect
             name="yAxes"
             label={{ cs: "Data y" }}
             required
             itemList={quantitativeKeys.filter((k) => k !== xAxes).map((k) => ({ value: k }))}
+            info={{
+              cs: "Vysvětlovaná závislá proměnná",
+            }}
           />
         </Uu5Elements.Grid>
 
@@ -143,7 +105,7 @@ const DataRegression = createVisualComponent({
               {
                 valueKey: "_regression",
                 color: "purple",
-                line: { strokeWidth: 5 },
+                line: { strokeWidth: 5, type: "monotone" },
                 title: Config.REG_TYPE_MAP[reg.name] + " regrese",
               },
             ]}

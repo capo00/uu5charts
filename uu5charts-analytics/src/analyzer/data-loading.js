@@ -1,11 +1,10 @@
 //@@viewOn:imports
-import { createVisualComponent, useEffect, useMemo, useRef, useState, Utils } from "uu5g05";
+import { createVisualComponent, useEffect, useRef, useState, Utils } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
-import Uu5Forms, { useFormApi } from "uu5g05-forms";
+import Uu5Forms from "uu5g05-forms";
 import Config from "../config/config.js";
 import DataTable from "./data-table";
 import Data from "../model/data";
-import withControlledInput from "./with-controlled-input";
 
 //@@viewOff:imports
 
@@ -85,7 +84,7 @@ const DataLoading = createVisualComponent({
 
     //@@viewOn:render
     return (
-      <Uu5Elements.Block headerType="heading" header="Data loading" level={2} {...props}>
+      <Uu5Elements.Block headerType="heading" header="Načtení dat" level={2} {...props}>
         {!initialData && (
           <Uu5Elements.Grid templateColumns={{ xs: "1fr", m: "2fr 1fr" }} rowGap={16} columnGap={16}>
             <Uu5Forms.Link
