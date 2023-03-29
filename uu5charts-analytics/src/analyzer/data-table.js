@@ -1,5 +1,5 @@
 //@@viewOn:imports
-import { createVisualComponent, useMemo, useScreenSize, useState, Utils } from "uu5g05";
+import { createVisualComponent, useMemo, useScreenSize, useState, Utils, Fragment } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
 import Uu5Tiles from "uu5tilesg02";
 import Uu5TilesElements from "uu5tilesg02-elements";
@@ -97,6 +97,7 @@ function ControlledControllerProvider({ data, children }) {
 const STATS_NAME = {
   filled: "Vyplněno",
   empty: "Prázdno",
+  type: "Datový typ",
   min: "Min",
   max: "Max",
   range: "Rozsah",
@@ -107,6 +108,38 @@ const STATS_NAME = {
   standardDeviation: "Směrodatná odchylka",
   varianceCoefficient: "Koeficient variability",
 };
+
+function renderStatsValue(key, value, data, onChange, name) {
+  return ["empty"].includes(key) && value > 0 ? (
+    <DeletedValue value={value} data={data} onChange={onChange} onFilter={(it) => !isNA(it[name])} />
+  ) : (
+    <span
+      title={`Zkopírovat ${value}`}
+      onClick={() => Utils.Clipboard.write(value + "")}
+      className={Config.Css.css({ cursor: "copy" })}
+    >
+      {roundNumber(value)}
+    </span>
+  );
+}
+
+function SummaryTile({ data, selectable, dataArr, onChange, ...props }) {
+  const { name, ...stats } = data;
+  return (
+    <Uu5Elements.Tile {...props} header={name}>
+      <Uu5Elements.Grid templateColumns="repeat(2, minmax(100px, 1fr))" rowGap={4} columnGap={4}>
+        {Object.entries(stats).map(([k, v]) => (
+          <Fragment key={k}>
+            <div>{STATS_NAME[k]}</div>
+            <div className={Config.Css.css({ alignSelf: "end" })}>
+              {renderStatsValue(k, v, dataArr, onChange, name)}
+            </div>
+          </Fragment>
+        ))}
+      </Uu5Elements.Grid>
+    </Uu5Elements.Tile>
+  );
+}
 
 const DataTable = createVisualComponent({
   //@@viewOn:statics
@@ -174,11 +207,18 @@ const DataTable = createVisualComponent({
       ),
     }));
 
-    let footerMap, footerTemplate, summary;
+    let footerMap,
+      footerTemplate,
+      summary,
+      isSmall = ["xs", "s"].includes(screenSize);
 
-    if (["xs", "s"].includes(screenSize)) {
+    if (isSmall) {
       summary = (
-        <Uu5TilesElements.List height={800} data={Object.entries(stats).map(([k, v]) => ({ name: k, ...v }))} />
+        <Uu5Elements.Block headerType="title" header="Přehled">
+          <Uu5TilesElements.Grid height={800} data={Object.entries(stats).map(([k, v]) => ({ name: k, ...v }))}>
+            <SummaryTile dataArr={data} onChange={onChange} />
+          </Uu5TilesElements.Grid>
+        </Uu5Elements.Block>
       );
     } else {
       const rowNames = Object.keys(stats[columnNames[0]]);
@@ -202,22 +242,7 @@ const DataTable = createVisualComponent({
           footerMap[name] = {
             footerComponent: (
               <Uu5TilesElements.Table.FooterCell horizontalAlignment="right" verticalAlignment="center">
-                {["empty"].includes(rowName) && stats[colName][rowName] > 0 ? (
-                  <DeletedValue
-                    value={stats[colName][rowName]}
-                    data={data}
-                    onChange={onChange}
-                    onFilter={(it) => !isNA(it[colName])}
-                  />
-                ) : (
-                  <span
-                    title={`Zkopírovat ${stats[colName][rowName]}`}
-                    onClick={() => Utils.Clipboard.write(stats[colName][rowName] + "")}
-                    className={Config.Css.css({ cursor: "copy" })}
-                  >
-                    {roundNumber(stats[colName][rowName])}
-                  </span>
-                )}
+                {renderStatsValue(rowName, stats[colName][rowName], data, onChange, colName)}
               </Uu5TilesElements.Table.FooterCell>
             ),
           };
@@ -235,6 +260,7 @@ const DataTable = createVisualComponent({
       <ControlledControllerProvider data={data.map((it, i) => ({ _i: i + 1, ...it }))}>
         <Uu5Elements.Block
           headerType="title"
+          collapsible={isSmall}
           {...blockProps}
           actionList={[
             { component: <Uu5TilesControls.SearchButton /> },
@@ -282,9 +308,9 @@ const DataTable = createVisualComponent({
             footerTemplate={footerTemplate?.join(",")}
             footerContentMap={footerMap}
           />
-
-          {summary}
         </Uu5Elements.Block>
+
+        {summary}
       </ControlledControllerProvider>
     );
     //@@viewOff:render

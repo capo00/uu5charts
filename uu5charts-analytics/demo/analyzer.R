@@ -1,6 +1,7 @@
 # nacteni dat
 data = read.csv2("http://localhost:2224/assets/cars.csv", header = T, sep = ";", quote = "\"", dec = ".")
 str(data)
+library(pastecs)
 stat.desc(data)
 nrow(data)
 

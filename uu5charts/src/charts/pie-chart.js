@@ -1,5 +1,5 @@
 //@@viewOn:imports
-import { ResponsiveContainer, Pie, PieChart as RechartsPieChart, Cell, LabelList, Label } from "recharts";
+import { ResponsiveContainer, Pie, PieChart as RechartsPieChart, Cell, Label } from "recharts";
 import { createComponent, createVisualComponent, PropTypes, useState } from "uu5g05";
 import Config from "../config/config.js";
 import Tooltip from "./tooltip";
@@ -179,7 +179,6 @@ const PieChart = withDataCorrector(
       data: [],
       series: [],
       tooltip: true,
-      height: 300,
     },
     //@@viewOff:defaultProps
 
@@ -197,70 +196,68 @@ const PieChart = withDataCorrector(
 
       //@@viewOn:render
       return (
-        <div style={{ width, height, display: props.width ? "inline-block" : undefined }}>
-          <ResponsiveContainer>
-            <RechartsPieChart margin={{ top: 8, right: 8, bottom: 8, left: 8 }}>
-              {series.map((serie, i) => {
-                let {
-                  id = "id-" + i,
-                  valueKey,
-                  labelKey,
-                  color,
-                  onClick,
-                  label = true,
-                  innerRadius,
-                  outerRadius = "100%",
-                  startAngle = 0,
-                  endAngle = startAngle + 360,
-                  gap: paddingAngle,
-                  children,
-                } = serie;
+        <ResponsiveContainer aspect={!width || !height ? 1 / 1 : undefined} width={width} height={height} minWidth={0}>
+          <RechartsPieChart margin={{ top: 8, right: 8, bottom: 8, left: 8 }}>
+            {series.map((serie, i) => {
+              let {
+                id = "id-" + i,
+                valueKey,
+                labelKey,
+                color,
+                onClick,
+                label = true,
+                innerRadius,
+                outerRadius = "100%",
+                startAngle = 0,
+                endAngle = startAngle + 360,
+                gap: paddingAngle,
+                children,
+              } = serie;
 
-                if (series.length > 1 && !innerRadius && !serie.outerRadius) {
-                  // first has 2/n and rest have only 1/n;
-                  const part = 100 / (series.length + 1);
-                  innerRadius = Math.round((i ? i + 1 : i) * part) + "%";
-                  outerRadius = Math.round((i + 2) * part) + "%";
-                }
+              if (series.length > 1 && !innerRadius && !serie.outerRadius) {
+                // first has 2/n and rest have only 1/n;
+                const part = 100 / (series.length + 1);
+                innerRadius = Math.round((i ? i + 1 : i) * part) + "%";
+                outerRadius = Math.round((i + 2) * part) + "%";
+              }
 
-                let componentProps = {
-                  onClick,
-                  id,
-                  innerRadius,
-                  outerRadius,
-                  startAngle: 90 - startAngle,
-                  endAngle: 90 - endAngle,
-                  paddingAngle,
-                };
+              let componentProps = {
+                onClick,
+                id,
+                innerRadius,
+                outerRadius,
+                startAngle: 90 - startAngle,
+                endAngle: 90 - endAngle,
+                paddingAngle,
+              };
 
-                if (label === true) label = {};
+              if (label === true) label = {};
 
-                const data = dataArr[i];
-                const currentColors = Color.generateColors(data.length, i % 2 !== 0);
+              const data = dataArr[i];
+              const currentColors = Color.generateColors(data.length, i % 2 !== 0);
 
-                return (
-                  <Pie data={data} {...componentProps} key={valueKey + "-" + i} dataKey={valueKey} nameKey={labelKey}>
-                    {data.map((item, i) => {
-                      const fill = Color.getColor(
-                        color ? (typeof color === "function" ? color(item) : item[color] || color) : undefined,
-                        currentColors
-                      );
+              return (
+                <Pie data={data} {...componentProps} key={valueKey + "-" + i} dataKey={valueKey} nameKey={labelKey}>
+                  {data.map((item, i) => {
+                    const fill = Color.getColor(
+                      color ? (typeof color === "function" ? color(item) : item[color] || color) : undefined,
+                      currentColors
+                    );
 
-                      const opacity = hoverData === item ? 0.4 : undefined;
+                    const opacity = hoverData === item ? 0.4 : undefined;
 
-                      return <Cell key={i} fill={fill} opacity={opacity} />;
-                    })}
-                    {label && DefaultLabel({ dataKey: valueKey, position: "inside", ...label })}
-                    {children && <Label position="center" value={children} />}
-                  </Pie>
-                );
-              })}
+                    return <Cell key={i} fill={fill} opacity={opacity} />;
+                  })}
+                  {label && DefaultLabel({ dataKey: valueKey, position: "inside", ...label })}
+                  {children && <Label position="center" value={children} />}
+                </Pie>
+              );
+            })}
 
-              {tooltip && Tooltip({ children: tooltip === true ? undefined : tooltip })}
-              {legend && Legend({ ...(legend === true ? null : legend), ...legendAttrs })}
-            </RechartsPieChart>
-          </ResponsiveContainer>
-        </div>
+            {tooltip && Tooltip({ children: tooltip === true ? undefined : tooltip })}
+            {legend && Legend({ ...(legend === true ? null : legend), ...legendAttrs })}
+          </RechartsPieChart>
+        </ResponsiveContainer>
       );
       //@@viewOff:render
     },

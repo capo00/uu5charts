@@ -18,7 +18,7 @@ import {
   ReferenceLine,
   ZAxis,
 } from "recharts";
-import { createComponent, createVisualComponent, PropTypes, useState } from "uu5g05";
+import { createComponent, createVisualComponent, PropTypes, useEffect, useRef, useState } from "uu5g05";
 import Config from "../config/config.js";
 import Tooltip from "./tooltip";
 import Legend from "./legend";
@@ -411,7 +411,6 @@ const XyChart = withDataCorrector(
       data: [],
       series: [],
       tooltip: true,
-      height: 300,
       lines: [],
     },
     //@@viewOff:defaultProps
@@ -475,158 +474,171 @@ const XyChart = withDataCorrector(
 
       let zAxis;
 
+      const ref = useRef();
+      useEffect(() => {
+        const element = ref.current?.current;
+        element.addEventListener("dblclick", onDoubleClick);
+        return () => {
+          element.removeEventListener("dblclick", onDoubleClick);
+        };
+      }, [onDoubleClick]);
+
       return (
-        <div style={{ width, height, display: props.width ? "inline-block" : undefined }} onDoubleClick={onDoubleClick}>
-          <ResponsiveContainer>
-            <ComposedChart
-              data={data}
-              margin={{ top: 24, right: 8, bottom: 8, left: 8 }}
-              barCategoryGap={barGap}
-              layout={layout}
-              {...chartAttrs}
+        <ResponsiveContainer
+          aspect={!width || !height ? 16 / 9 : undefined}
+          width={width}
+          height={height}
+          minWidth={0}
+          ref={ref}
+        >
+          <ComposedChart
+            data={data}
+            margin={{ top: 24, right: 8, bottom: 8, left: 8 }}
+            barCategoryGap={barGap}
+            layout={layout}
+            {...chartAttrs}
+          >
+            <XAxis
+              dataKey={labelAxis.dataKey}
+              unit={labelAxis.unit}
+              type={isNumericX ? "number" : undefined}
+              domain={domainX || ["auto", "auto"]}
+              interval="preserveStartEnd"
+              tickCount={10}
+              tickSize={5}
+              minTickGap={1}
+              ticks={labelAxis.ticks}
+              // because of zooming
+              allowDataOverflow
             >
-              <XAxis
-                dataKey={labelAxis.dataKey}
-                unit={labelAxis.unit}
-                type={isNumericX ? "number" : undefined}
-                domain={domainX || ["auto", "auto"]}
-                interval="preserveStartEnd"
-                tickCount={10}
-                tickSize={5}
-                minTickGap={1}
-                ticks={labelAxis.ticks}
-                // because of zooming
-                allowDataOverflow
-              >
-                {labelAxis.title != null && <Label value={labelAxis.title} offset={0} position="insideBottomRight" />}
-              </XAxis>
+              {labelAxis.title != null && <Label value={labelAxis.title} offset={0} position="insideBottomRight" />}
+            </XAxis>
 
-              <YAxis
-                dataKey={valueAxis?.dataKey}
-                unit={valueAxis?.unit}
-                type={isNumericY ? "number" : "category"}
-                domain={domainY || ["auto", "auto"]}
-                interval="preserveStartEnd"
-                // because of zooming
-                allowDataOverflow
-                yAxisId="1"
-              >
-                {valueAxis?.title != null && <Label value={valueAxis.title} angle={-90} position="insideLeft" />}
-              </YAxis>
+            <YAxis
+              dataKey={valueAxis?.dataKey}
+              unit={valueAxis?.unit}
+              type={isNumericY ? "number" : "category"}
+              domain={domainY || ["auto", "auto"]}
+              interval="preserveStartEnd"
+              // because of zooming
+              allowDataOverflow
+              yAxisId="1"
+            >
+              {valueAxis?.title != null && <Label value={valueAxis.title} angle={-90} position="insideLeft" />}
+            </YAxis>
 
-              {zeroLineProps && <ReferenceLine {...zeroLineProps} yAxisId="1" stroke="#000" />}
+            {zeroLineProps && <ReferenceLine {...zeroLineProps} yAxisId="1" stroke="#000" />}
 
-              {series.map(({ id, valueKey, title, color, onClick, label, unit, point, line, area, bar }, i) => {
-                id ??= "id-" + i;
-                let Component;
-                let componentProps = {
-                  onClick: handleSerieClick(onClick),
-                  id,
-                  unit,
-                  hide: !visibilityMap[id],
-                  yAxisId: "1",
+            {series.map(({ id, valueKey, title, color, onClick, label, unit, point, line, area, bar }, i) => {
+              id ??= "id-" + i;
+              let Component;
+              let componentProps = {
+                onClick: handleSerieClick(onClick),
+                id,
+                unit,
+                hide: !visibilityMap[id],
+                yAxisId: "1",
+              };
+              if (title) componentProps.name = title;
+
+              const opacity = hoverId && hoverId !== id ? 0.4 : undefined;
+
+              if (label === true) label = {};
+              else if (label && label.position) label.position = dashToCamel(label.position);
+
+              if (line) {
+                Component = Line;
+                if (typeof line === "object") {
+                  const { point: dot, width: strokeWidth, ...restProps } = line;
+                  componentProps = { dot, strokeWidth, ...restProps, ...componentProps };
+                }
+                componentProps = {
+                  ...componentProps,
+                  stroke: Color.getColor(color, currentColors), // fixed value
+                  strokeOpacity: opacity ?? componentProps.strokeOpacity,
                 };
-                if (title) componentProps.name = title;
-
-                const opacity = hoverId && hoverId !== id ? 0.4 : undefined;
-
-                if (label === true) label = {};
-                else if (label && label.position) label.position = dashToCamel(label.position);
-
-                if (line) {
-                  Component = Line;
-                  if (typeof line === "object") {
-                    const { point: dot, width: strokeWidth, ...restProps } = line;
-                    componentProps = { dot, strokeWidth, ...restProps, ...componentProps };
-                  }
-                  componentProps = {
-                    ...componentProps,
-                    stroke: Color.getColor(color, currentColors), // fixed value
-                    strokeOpacity: opacity ?? componentProps.strokeOpacity,
-                  };
-                  componentProps.dot ??= false; // default if not set
-                  componentProps.legendType = componentProps.dot ? "line" : "plainline"; // fixed value
-                } else if (area) {
-                  Component = Area;
-                  if (typeof area === "object") {
-                    const { point: dot, ...restProps } = area;
-                    componentProps = { dot, ...restProps, ...componentProps };
-                  }
-
-                  const selectedColor = Color.getColor(color, currentColors);
-                  componentProps = {
-                    ...componentProps,
-                    stroke: selectedColor,
-                    fill: selectedColor, // fixed value
-                    fillOpacity: opacity ?? componentProps.fillOpacity,
-                  };
-                  componentProps.dot ??= false; // default if not set
-                  componentProps.legendType = componentProps.dot ? "line" : "plainline"; // fixed value
-                } else if (bar) {
-                  Component = Bar;
-                  if (typeof bar === "object") {
-                    const { width: barSize, maxWidth: maxBarSize, ...restProps } = bar;
-                    componentProps = { barSize, maxBarSize, ...restProps, ...componentProps };
-                  }
-
-                  if (label && layout === "vertical") {
-                    label = { ...label, position: label.position ?? "right" };
-                  }
-
-                  componentProps = {
-                    ...componentProps,
-                    fill: Color.getColor(color, currentColors), // fixed value
-                    fillOpacity: opacity ?? componentProps.fillOpacity,
-                  };
-                } else {
-                  Component = Scatter;
-                  if (typeof point === "object") {
-                    const { sizeKey, ...restProps } = point;
-                    componentProps = { ...restProps, ...componentProps };
-
-                    if (sizeKey) zAxis = <ZAxis dataKey={sizeKey} range={[10, 100]} />;
-                  }
-                  componentProps = {
-                    ...componentProps,
-                    fill: Color.getColor(color, currentColors),
-                    fillOpacity: opacity ?? componentProps.fillOpacity,
-                  };
+                componentProps.dot ??= false; // default if not set
+                componentProps.legendType = componentProps.dot ? "line" : "plainline"; // fixed value
+              } else if (area) {
+                Component = Area;
+                if (typeof area === "object") {
+                  const { point: dot, ...restProps } = area;
+                  componentProps = { dot, ...restProps, ...componentProps };
                 }
 
-                return (
-                  <Component {...componentProps} key={valueKey} dataKey={valueKey}>
-                    {label && DefaultLabel({ dataKey: valueKey, ...label })}
-                  </Component>
-                );
-              })}
+                const selectedColor = Color.getColor(color, currentColors);
+                componentProps = {
+                  ...componentProps,
+                  stroke: selectedColor,
+                  fill: selectedColor, // fixed value
+                  fillOpacity: opacity ?? componentProps.fillOpacity,
+                };
+                componentProps.dot ??= false; // default if not set
+                componentProps.legendType = componentProps.dot ? "line" : "plainline"; // fixed value
+              } else if (bar) {
+                Component = Bar;
+                if (typeof bar === "object") {
+                  const { width: barSize, maxWidth: maxBarSize, ...restProps } = bar;
+                  componentProps = { barSize, maxBarSize, ...restProps, ...componentProps };
+                }
 
-              {zAxis}
+                if (label && layout === "vertical") {
+                  label = { ...label, position: label.position ?? "right" };
+                }
 
-              {displayCartesianGrid && <CartesianGrid strokeDasharray="3 3" />}
-              {tooltip && Tooltip({ labelAxis, valueAxis, children: tooltip === true ? undefined : tooltip })}
-              {legend && Legend({ ...(legend === true ? null : legend), ...legendAttrs })}
+                componentProps = {
+                  ...componentProps,
+                  fill: Color.getColor(color, currentColors), // fixed value
+                  fillOpacity: opacity ?? componentProps.fillOpacity,
+                };
+              } else {
+                Component = Scatter;
+                if (typeof point === "object") {
+                  const { sizeKey, ...restProps } = point;
+                  componentProps = { ...restProps, ...componentProps };
 
-              {refArea?.left && refArea.right && (
-                <ReferenceArea yAxisId="1" x1={refArea.left} x2={refArea.right} strokeOpacity={0.3} />
-              )}
+                  if (sizeKey) zAxis = <ZAxis dataKey={sizeKey} range={[10, 100]} />;
+                }
+                componentProps = {
+                  ...componentProps,
+                  fill: Color.getColor(color, currentColors),
+                  fillOpacity: opacity ?? componentProps.fillOpacity,
+                };
+              }
 
-              {lines.map(({ x, y, title, titlePosition, color, width }) => {
-                const stroke = Color.getColor(color);
-                return (
-                  <ReferenceLine
-                    key={"" + x + y}
-                    yAxisId="1"
-                    x={x}
-                    y={y}
-                    label={<DefaultLineLabel title={title} titlePosition={titlePosition} stroke={stroke} />}
-                    stroke={stroke}
-                    strokeWidth={width}
-                  />
-                );
-              })}
-            </ComposedChart>
-          </ResponsiveContainer>
-        </div>
+              return (
+                <Component {...componentProps} key={valueKey} dataKey={valueKey}>
+                  {label && DefaultLabel({ dataKey: valueKey, ...label })}
+                </Component>
+              );
+            })}
+
+            {zAxis}
+
+            {displayCartesianGrid && <CartesianGrid strokeDasharray="3 3" />}
+            {tooltip && Tooltip({ labelAxis, valueAxis, children: tooltip === true ? undefined : tooltip })}
+            {legend && Legend({ ...(legend === true ? null : legend), ...legendAttrs })}
+
+            {refArea?.left && refArea.right && (
+              <ReferenceArea yAxisId="1" x1={refArea.left} x2={refArea.right} strokeOpacity={0.3} />
+            )}
+
+            {lines.map(({ x, y, title, titlePosition, color, width }) => {
+              const stroke = Color.getColor(color);
+              return (
+                <ReferenceLine
+                  key={"" + x + y}
+                  yAxisId="1"
+                  x={x}
+                  y={y}
+                  label={<DefaultLineLabel title={title} titlePosition={titlePosition} stroke={stroke} />}
+                  stroke={stroke}
+                  strokeWidth={width}
+                />
+              );
+            })}
+          </ComposedChart>
+        </ResponsiveContainer>
       );
       //@@viewOff:render
     },

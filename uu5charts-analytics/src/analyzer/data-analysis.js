@@ -92,7 +92,12 @@ const DataAnalysis = createVisualComponent({
           />
         </Uu5Elements.Grid>
 
-        <div className={Config.Css.css({ display: "flex", gap: 16, padding: 16 })}>
+        <Uu5Elements.Grid
+          className={Config.Css.css({ padding: 16 })}
+          columnGap={16}
+          rowGap={16}
+          templateColumns="repeat(auto-fit, 144px)"
+        >
           <Card header="Všechna data" value={data.length} />
           <Card header="Očištěná data" value={cleanData.length} valueColorScheme="positive" />
           <OutliersCard
@@ -101,9 +106,9 @@ const DataAnalysis = createVisualComponent({
             valueColorScheme="red"
             data={data.filter((it) => it._outlier)}
           />
-        </div>
+        </Uu5Elements.Grid>
 
-        <Uu5Elements.Grid templateColumns="repeat(auto-fit, minmax(450px, 1fr))">
+        <Uu5Elements.Grid templateColumns="repeat(auto-fit, minmax(300px, 1fr))">
           <XyChart
             data={data.map(({ _distance, _outlier, _outlier2, ...item }) => ({
               ...item,

@@ -1,6 +1,6 @@
 //@@viewOn:imports
 import { XyChart } from "uu5charts";
-import { createVisualComponent, useMemo, Utils, Fragment } from "uu5g05";
+import { createVisualComponent, useMemo, Utils, Fragment, useScreenSize } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
 import Uu5Forms, { useFormApi } from "uu5g05-forms";
 import Config from "../config/config.js";
@@ -112,6 +112,9 @@ const DataPrediction = createVisualComponent({
     const { value, setItemValue } = useFormApi();
     const { cleanData: data, xAxes, yAxes, regressionType, predictValue } = value;
 
+    const [screenSize] = useScreenSize();
+    const isSmall = ["xs", "s"].includes(screenSize);
+
     const dataMap = useMemo(
       () => buildDataMap(data, xAxes, yAxes, regressionType),
       [data, xAxes, yAxes, regressionType]
@@ -124,9 +127,9 @@ const DataPrediction = createVisualComponent({
     const predData = dataModel.predictData(
       prediction === "custom"
         ? predictValue
-          ?.replace(",", ".")
-          ?.split(/\s*;\s*/)
-          ?.map((v) => ({ [xAxes]: +v }))
+            ?.replace(",", ".")
+            ?.split(/\s*;\s*/)
+            ?.map((v) => ({ [xAxes]: +v }))
         : undefined
     );
 
@@ -212,7 +215,7 @@ const DataPrediction = createVisualComponent({
                       className={
                         i
                           ? undefined
-                          : Config.Css.css({ display: "flex", justifyContent: "space-between", width: "100%" })
+                          : Config.Css.css({ display: "flex", justifyContent: "space-between", gap: 4, width: "100%" })
                       }
                     >
                       {!i && <span>{fn}</span>}

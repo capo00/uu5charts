@@ -1,5 +1,5 @@
 //@@viewOn:imports
-import { createVisualComponent, useEffect, useMemo, useState, useValueChange } from "uu5g05";
+import { createVisualComponent, useEffect, useMemo, useScreenSize, useState, useValueChange } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
 import Uu5Forms, { useFormApi } from "uu5g05-forms";
 import Config from "../config/config.js";
@@ -38,6 +38,9 @@ function Item(props) {
 function NormalityBlock(props) {
   const { data, ...blockProps } = props;
 
+  const [screenSize] = useScreenSize();
+  const isSmall = ["xs", "s"].includes(screenSize);
+
   const keys = data.getQuantitativeKeys();
 
   const [alpha, setAlpha] = useState(ALPHA);
@@ -65,12 +68,19 @@ function NormalityBlock(props) {
         onBlur={(e) => setAlpha(e.data.value)}
       />
 
-      <Uu5Elements.Grid templateColumns="max-content 1fr" className={Config.Css.css({ marginTop: 16 })}>
+      <Uu5Elements.Grid
+        templateColumns={{ xs: "1fr", m: "max-content 1fr" }}
+        className={Config.Css.css({ marginTop: 16 })}
+      >
         <div
           className={Config.Css.css({
-            width: "max-content",
-            paddingRight: 8,
-            borderRight: "1px solid grey",
+            width: isSmall ? "100%" : "max-content",
+            ...(isSmall
+              ? null
+              : {
+                  paddingRight: 8,
+                  borderRight: "1px solid grey",
+                }),
             display: "flex",
             flexDirection: "column",
             gap: 4,
@@ -79,6 +89,7 @@ function NormalityBlock(props) {
           {keyList.map(({ name, pValue, W, isNormalized }) => (
             <Item
               key={name}
+              size="l"
               name={name}
               passed={isNormalized}
               selected={name === key}
@@ -89,7 +100,7 @@ function NormalityBlock(props) {
             </Item>
           ))}
         </div>
-        <Histogram data={data} valueAxis={{ dataKey: key }} labelAxis={{ title: key }} />
+        <Histogram data={data} valueAxis={{ dataKey: key }} labelAxis={{ title: key }} height={300} />
       </Uu5Elements.Grid>
     </Uu5Elements.Block>
   );
@@ -97,6 +108,9 @@ function NormalityBlock(props) {
 
 function MulticollinearityBlock(props) {
   const { data, keys = data.getQuantitativeKeys(), onKeysChange, ...blockProps } = props;
+
+  const [screenSize] = useScreenSize();
+  const isSmall = ["xs", "s"].includes(screenSize);
 
   const [keyList, setKeyList] = useValueChange(keys, onKeysChange);
 
@@ -115,7 +129,14 @@ function MulticollinearityBlock(props) {
       initialDisplayInfo
       {...blockProps}
     >
-      <div className={Config.Css.css({ display: "flex", flexDirection: "column", gap: 4, width: "max-content" })}>
+      <div
+        className={Config.Css.css({
+          display: "flex",
+          flexDirection: "column",
+          gap: 4,
+          width: isSmall ? "100%" : "max-content",
+        })}
+      >
         {data.getQuantitativeKeys().map((key) => {
           const selected = keyList.includes(key);
           return (
