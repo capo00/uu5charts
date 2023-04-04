@@ -1,5 +1,5 @@
 //@@viewOn:imports
-import { createVisualComponent, useEffect, useRef, useState, Utils } from "uu5g05";
+import { createVisualComponent, useEffect, useRef, useState, Utils, PropTypes } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
 import Uu5Forms from "uu5g05-forms";
 import Config from "../config/config.js";
@@ -43,7 +43,12 @@ const DataLoading = createVisualComponent({
   //@@viewOff:statics
 
   //@@viewOn:propTypes
-  propTypes: {},
+  propTypes: {
+    onDataChange: PropTypes.func.isRequired,
+    data: PropTypes.arrayOf(PropTypes.object),
+    omitEmpty: PropTypes.bool,
+    uri: PropTypes.string,
+  },
   //@@viewOff:propTypes
 
   //@@viewOn:defaultProps
@@ -52,14 +57,14 @@ const DataLoading = createVisualComponent({
 
   render(props) {
     //@@viewOn:private
-    const { data: propsData, onChange, omitEmpty, initialUri } = props;
+    const { data: propsData, onDataChange, omitEmpty, uri, ...blockProps } = props;
     let data = propsData;
     if (propsData && !(propsData instanceof Data)) {
       data = new Data(propsData);
       if (omitEmpty) data = data.removeEmpty();
     }
 
-    const [dataUri, setDataUri] = useState(initialUri);
+    const [dataUri, setDataUri] = useState(uri);
     const [dataFile, setDataFile] = useState();
     const initialData = useRef(data).current;
 
@@ -71,12 +76,12 @@ const DataLoading = createVisualComponent({
         data = new Data(parseData(text));
         if (omitEmpty) data = data.removeEmpty();
       }
-      onChange(new Utils.Event({ data }, e));
+      onDataChange(data);
     }
 
     useEffect(() => {
-      if (initialUri) loadData();
-    }, []);
+      if (uri) loadData();
+    }, [uri]);
     //@@viewOff:private
 
     //@@viewOn:interface
@@ -84,8 +89,8 @@ const DataLoading = createVisualComponent({
 
     //@@viewOn:render
     return (
-      <Uu5Elements.Block headerType="heading" header="Načtení dat" level={2} {...props}>
-        {!initialData && (
+      <Uu5Elements.Block headerType="heading" header="Načtení dat" level={2} {...blockProps}>
+        {!initialData && !uri && (
           <Uu5Elements.Grid templateColumns={{ xs: "1fr", m: "2fr 1fr" }} rowGap={16} columnGap={16}>
             <Uu5Forms.Link
               name="dataUri"
@@ -107,19 +112,19 @@ const DataLoading = createVisualComponent({
                   reader.onload = () => {
                     let data = new Data(parseData(reader.result));
                     if (omitEmpty) data = data.removeEmpty();
-                    onChange(new Utils.Event({ data }, e));
+                    onDataChange(data);
                   };
                   // start reading the file. When it is done, calls the onload event defined above.
                   reader.readAsBinaryString(e.data.value);
                 } else {
-                  onChange(new Utils.Event({ data: null }, e));
+                  onDataChange(null);
                 }
                 setDataFile(e.data.value);
               }}
             />
           </Uu5Elements.Grid>
         )}
-        {data && <DataTable data={data} onChange={(data) => onChange(new Utils.Event({ data: new Data(data) }))} />}
+        {data && <DataTable data={data} onChange={(data) => onDataChange(new Data(data))} />}
       </Uu5Elements.Block>
     );
     //@@viewOff:render

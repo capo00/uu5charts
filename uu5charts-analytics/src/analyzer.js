@@ -14,15 +14,30 @@ import Data from "./model/data";
 const STEP_LIST = [
   {
     title: "Načtení",
-    component: () => {
+    component() {
       const { value, setItemValue } = useFormApi();
 
-      return <DataLoading data={value.data} onChange={(e) => setItemValue("data", e.data.data)} />;
+      return <DataLoading data={value.data} onDataChange={(data) => setItemValue("data", data)} />;
     },
   },
   {
-    component: DataAnalysis,
     title: "Analýza",
+    component() {
+      const { value, setItemValue } = useFormApi();
+
+      return (
+        <DataAnalysis
+          data={value.data}
+          alpha={value.mahalAlpha}
+          max={value.mahalMax}
+          removeOutliers={value.removeOutliers}
+          onDataChange={(data) => setItemValue("cleanData", data)}
+          onAlphaChange={(alpha) => setItemValue("mahalAlpha", alpha)}
+          onMaxChange={(max) => setItemValue("mahalMax", max)}
+          onRemoveOutliersChange={(removeOutliers) => setItemValue("removeOutliers", removeOutliers)}
+        />
+      );
+    },
   },
   {
     component: DataTesting,
@@ -87,6 +102,7 @@ const Analyzer = createVisualComponent({
 });
 
 Analyzer.DataLoading = DataLoading;
+Analyzer.DataAnalysis = DataAnalysis;
 
 //@@viewOn:helpers
 //@@viewOff:helpers

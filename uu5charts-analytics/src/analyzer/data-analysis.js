@@ -1,6 +1,6 @@
 //@@viewOn:imports
 import { XyChart } from "uu5charts";
-import { createVisualComponent, useEffect, useState } from "uu5g05";
+import { createVisualComponent, useEffect, useState, Utils } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
 import Uu5Forms from "uu5g05-forms";
 import { useFormApi } from "uu5g05-forms";
@@ -9,6 +9,7 @@ import Data, { OUTLIERS_ALPHA } from "../model/data";
 import Histogram from "../charts/histogram";
 import Card from "./card";
 import List from "./list";
+import withControlledInput from "./with-controlled-input";
 
 //@@viewOff:imports
 
@@ -31,6 +32,8 @@ function OutliersCard(props) {
   );
 }
 
+const NumberInput = withControlledInput(Uu5Forms.Number);
+
 const DataAnalysis = createVisualComponent({
   //@@viewOn:statics
   uu5Tag: Config.TAG + "DataAnalysing",
@@ -46,17 +49,32 @@ const DataAnalysis = createVisualComponent({
 
   render(props) {
     //@@viewOn:private
-    const { value, setItemValue } = useFormApi();
-    const { mahalAlpha: alpha, mahalMax: max, removeOutliers } = value;
+    const {
+      data: propsData,
+      onDataChange,
+      alpha = OUTLIERS_ALPHA,
+      max,
+      onAlphaChange,
+      onMaxChange,
+      removeOutliers = true,
+      onRemoveOutliersChange,
+      ...blockProps
+    } = props;
 
-    const [data, setData] = useState(() => prepareData(value.data, { alpha, max }));
+    const [data, setData] = useState(() => {
+      let d = propsData;
+      if (!(propsData instanceof Data)) {
+        d = new Data(propsData);
+      }
+
+      return prepareData(d, { alpha, max });
+    });
 
     const cleanData = data.filter(({ _outlier }) => !_outlier);
 
-    // unmount is later than mount of next component
     useEffect(() => {
-      setItemValue("cleanData", removeOutliers ? new Data(cleanData) : value.data);
-    }, [data, value.data, removeOutliers, setItemValue]);
+      removeOutliers && onDataChange(new Data(cleanData));
+    }, [data, alpha, max]);
 
     // TODO format by user preferences
     const outliersLimitToDisplay = Math.round(data.outliersLimit * 100) / 100;
@@ -67,30 +85,39 @@ const DataAnalysis = createVisualComponent({
 
     //@@viewOn:render
     return (
-      <Uu5Elements.Block headerType="heading" header="Mahalanobis" level={2} {...props}>
-        <Uu5Elements.Grid templateColumns={{ xs: "1fr", s: "1fr 1fr" }} columnGap={16} rowGap={16}>
-          <Uu5Forms.FormNumber
-            name="mahalAlpha"
-            label={{ cs: "Hladina významnosti" }}
-            initialValue={OUTLIERS_ALPHA}
-            min={0}
-            max={1}
-            step={0.01}
-            onBlur={() => setData(prepareData(data, { alpha, max }))}
-            disabled={max != null}
-            info={{
-              cs: "Dle zadané hladiny významnosti se vypočítá odpovídající hodnota chí-kvadrát rozdělení pro tolik stupňů volnosti, kolik je kvantitativních proměnných. Tato hodnota slouží jako hranice pro odlehlá pozorování.",
-            }}
-          />
-          <Uu5Forms.FormNumber
-            name="mahalMax"
-            label={{ cs: "Hranice odlehlosti" }}
-            onBlur={() => setData(prepareData(data, { alpha, max }))}
-            info={{
-              cs: "Maximální vzdálenost, které mohou položky dosáhnout, aby nešlo o odlehlá pozorování.",
-            }}
-          />
-        </Uu5Elements.Grid>
+      <Uu5Elements.Block headerType="heading" header="Mahalanobis" level={2} {...blockProps}>
+        {onAlphaChange && onMaxChange && (
+          <Uu5Elements.Grid templateColumns={{ xs: "1fr", s: "1fr 1fr" }} columnGap={16} rowGap={16}>
+            <NumberInput
+              name="alpha"
+              label={{ cs: "Hladina významnosti" }}
+              min={0}
+              max={1}
+              step={0.01}
+              value={alpha}
+              onBlur={(e) => {
+                onAlphaChange && onAlphaChange(e.data.value);
+                setData(prepareData(data, { alpha: e.data.value, max }));
+              }}
+              disabled={max != null}
+              info={{
+                cs: "Dle zadané hladiny významnosti se vypočítá odpovídající hodnota chí-kvadrát rozdělení pro tolik stupňů volnosti, kolik je kvantitativních proměnných. Tato hodnota slouží jako hranice pro odlehlá pozorování.",
+              }}
+            />
+            <NumberInput
+              name="max"
+              label={{ cs: "Hranice odlehlosti" }}
+              value={max}
+              onBlur={(e) => {
+                onMaxChange && onMaxChange(e.data.value);
+                setData(prepareData(data, { alpha, max: e.data.value }));
+              }}
+              info={{
+                cs: "Maximální vzdálenost, které mohou položky dosáhnout, aby nešlo o odlehlá pozorování.",
+              }}
+            />
+          </Uu5Elements.Grid>
+        )}
 
         <Uu5Elements.Grid
           className={Config.Css.css({ padding: 16 })}
@@ -129,7 +156,14 @@ const DataAnalysis = createVisualComponent({
           />
         </Uu5Elements.Grid>
 
-        <Uu5Forms.FormCheckbox name="removeOutliers" label={{ cs: "Odebrat odlehlá pozorování" }} initialValue={true} />
+        {onRemoveOutliersChange && (
+          <Uu5Forms.Checkbox
+            name="removeOutliers"
+            label={{ cs: "Odebrat odlehlá pozorování" }}
+            value={removeOutliers}
+            onChange={(e) => onRemoveOutliersChange(e.data.value)}
+          />
+        )}
       </Uu5Elements.Block>
     );
     //@@viewOff:render
