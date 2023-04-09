@@ -64,14 +64,14 @@ const Regression = createVisualComponent({
 
     const [data] = useState(() => {
       const dataModel = new Data(propsData.map((item) => ({ ...item })));
-      dataModel.removeOutliers();
+      const cleanDataModel = dataModel.removeOutliers();
 
-      dataModel.addRegression(valueKey, labelKey, {
+      cleanDataModel.addRegression(valueKey, labelKey, {
         key: "_regression",
         predict: labelPredictList || getPredictRange(dataModel, labelKey),
       });
 
-      return dataModel.filter((it) => !it._outlier);
+      return cleanDataModel;
     });
     //@@viewOff:private
 

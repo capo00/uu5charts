@@ -53,14 +53,16 @@ function DuplicatedAlert(props) {
     <>
       <Uu5Elements.Alert header={`${duplicated.length} duplicitních záznamů`}>
         <Uu5Elements.Button onClick={() => setOpen(true)}>Zobrazit</Uu5Elements.Button>
-        <Uu5Elements.Button
-          colorScheme="negative"
-          onClick={() => {
-            onChange(data.filter((it) => !duplicated.includes(it)));
-          }}
-        >
-          Odstranit
-        </Uu5Elements.Button>
+        {onChange && (
+          <Uu5Elements.Button
+            colorScheme="negative"
+            onClick={() => {
+              onChange(data.filter((it) => !duplicated.includes(it)));
+            }}
+          >
+            Odstranit
+          </Uu5Elements.Button>
+        )}
       </Uu5Elements.Alert>
       <Uu5Elements.Modal width="100%" open={open} onClose={() => setOpen(false)}>
         <List data={duplicated} tileMinWidth={300} tileMaxWidth={350} />

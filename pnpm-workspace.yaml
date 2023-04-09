@@ -2,3 +2,4 @@ packages:
   - 'uu5charts'
   - 'uu5charts-analytics'
   - 'uu5charts-data'
+  - 'uu5charts-demo'

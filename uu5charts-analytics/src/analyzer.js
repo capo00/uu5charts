@@ -40,16 +40,46 @@ const STEP_LIST = [
     },
   },
   {
-    component: DataTesting,
     title: "Test",
+    component() {
+      const { value } = useFormApi();
+      return <DataTesting data={value.cleanData} />;
+    },
   },
   {
-    component: DataRegression,
     title: "Regrese",
+    component() {
+      const { value, setItemValue } = useFormApi();
+
+      return (
+        <DataRegression
+          data={value.cleanData}
+          xAxes={value.xAxes}
+          yAxes={value.yAxes}
+          onXAxesChange={(xAxes) => setItemValue("xAxes", xAxes)}
+          onYAxesChange={(yAxes) => setItemValue("yAxes", yAxes)}
+          type={value.regressionType}
+          onTypeChange={(type) => setItemValue("regressionType", type)}
+        />
+      );
+    },
   },
   {
-    component: DataPrediction,
     title: "Predikce",
+    component() {
+      const { value, setItemValue } = useFormApi();
+
+      return (
+        <DataPrediction
+          data={value.cleanData}
+          xAxes={value.xAxes}
+          yAxes={value.yAxes}
+          type={value.regressionType}
+          prediction={value.prediction}
+          onPredictionChange={(prediction) => setItemValue("prediction", prediction)}
+        />
+      );
+    },
   },
 ];
 
@@ -103,6 +133,9 @@ const Analyzer = createVisualComponent({
 
 Analyzer.DataLoading = DataLoading;
 Analyzer.DataAnalysis = DataAnalysis;
+Analyzer.DataTesting = DataTesting;
+Analyzer.DataRegression = DataRegression;
+Analyzer.DataPrediction = DataPrediction;
 
 //@@viewOn:helpers
 //@@viewOff:helpers

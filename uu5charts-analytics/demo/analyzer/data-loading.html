@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Analyzer.DataLoading</title>
+    <title>Data Loading</title>
 
     <script src="https://cdn.plus4u.net/uu-uu5loaderg01/1.0.0/uu5loaderg01.min.js" crossorigin="anonymous"></script>
     <script src="https://cdn.plus4u.net/uu-uu5g05/1.0.0/assets/example-config.js" crossorigin="anonymous"></script>
@@ -29,11 +29,8 @@
     <div id="uu5">Loading...</div>
 
     <script type="text/babel">
-      import { useUpdateEffect, useState, Utils } from "uu5g05";
+      import { useState, Utils } from "uu5g05";
       import Uu5Elements from "uu5g05-elements";
-      import { Config } from "uu5g05-dev";
-      import Uu5TilesElements from "uu5tilesg02-elements";
-      import { XyChart } from "uu5charts";
       import { Analyzer } from "uu5charts-analytics";
       import { carsData } from "uu5charts-data";
 
@@ -41,14 +38,20 @@
         const [data, setData] = useState(carsData);
 
         return (
-          <div>
-            <Analyzer.DataLoading
-              //initialUri="http://localhost:2224/assets/cars.csv"
-              data={data}
-              onChange={(e) => setData(e.data.data)}
-              omitEmpty
-            />
-          </div>
+          <Uu5Elements.Tabs itemList={[
+            { label: "Default", children: <Analyzer.DataLoading data={carsData} /> },
+            {
+              label: "Uri",
+              children: (
+                <Analyzer.DataLoading
+                  uri="http://localhost:2224/assets/cars.csv"
+                  data={data}
+                  onDataChange={(newData) => setData(newData)}
+                />
+              ),
+            },
+            { label: "Omit empty", children: <Analyzer.DataLoading data={carsData} omitEmpty /> },
+          ]} />
         );
       }
 

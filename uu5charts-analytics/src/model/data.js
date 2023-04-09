@@ -354,25 +354,20 @@ class Data extends Array {
   }
 
   removeOutliers(params) {
-    let outliers = [];
-
-    if (params) {
-      outliers = this.selectOutliers(params, (it) => {
-        if (!it._deleted && it._outlier) {
-          it._deleted = { type: "outlier", params: it._outlier };
-          delete it._outlier;
-        }
-      });
-    } else {
-      this.forEach((it) => {
-        if (it._outlier) {
-          it._deleted = { type: "outlier", params: it._outlier };
-          delete it._outlier;
-        }
-      });
+    function clb(it) {
+      if (!it._deleted && it._outlier) {
+        it._deleted = { type: "outlier", params: it._outlier };
+        delete it._outlier;
+      }
     }
 
-    return outliers;
+    // if (params) {
+    this.selectOutliers(params, clb);
+    // } else {
+    //   this.forEach(clb);
+    // }
+
+    return new Data(this.filter((item) => item._deleted?.type !== "outlier"));
   }
 
   removeEmpty() {

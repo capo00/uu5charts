@@ -1,14 +1,15 @@
 //@@viewOn:imports
-import { createVisualComponent, useEffect, useMemo, useScreenSize, useState, useValueChange } from "uu5g05";
+import { createVisualComponent, PropTypes, useMemo, useScreenSize, useState, useValueChange } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
-import Uu5Forms, { useFormApi } from "uu5g05-forms";
+import Uu5Forms from "uu5g05-forms";
 import Config from "../config/config.js";
 import Histogram from "../charts/histogram";
 import vif from "../model/vif";
-import Card from "./card";
 import withControlledInput from "./with-controlled-input";
-
+import withData from "./with-data";
+import Data from "../model/data";
 //@@viewOff:imports
+
 const ControlledNumber = withControlledInput(Uu5Forms.Number);
 
 const ALPHA = 0.05;
@@ -163,42 +164,41 @@ function MulticollinearityBlock(props) {
   );
 }
 
-const DataTesting = createVisualComponent({
-  //@@viewOn:statics
-  uu5Tag: Config.TAG + "DataTesting",
-  //@@viewOff:statics
+const DataTesting = withData(
+  createVisualComponent({
+    //@@viewOn:statics
+    uu5Tag: Config.TAG + "DataTesting",
+    //@@viewOff:statics
 
-  //@@viewOn:propTypes
-  propTypes: {},
-  //@@viewOff:propTypes
+    //@@viewOn:propTypes
+    propTypes: {
+      data: PropTypes.instanceOf(Data).isRequired, // clean data
+    },
+    //@@viewOff:propTypes
 
-  //@@viewOn:defaultProps
-  defaultProps: {},
-  //@@viewOff:defaultProps
+    //@@viewOn:defaultProps
+    defaultProps: {},
+    //@@viewOff:defaultProps
 
-  render(props) {
-    //@@viewOn:private
-    const { value } = useFormApi();
-    const { cleanData: data } = value;
-    //@@viewOff:private
+    render(props) {
+      //@@viewOn:private
+      const { data, ...blockProps } = props;
+      //@@viewOff:private
 
-    //@@viewOn:interface
-    //@@viewOff:interface
+      //@@viewOn:interface
+      //@@viewOff:interface
 
-    //@@viewOn:render
-
-    // unmount of data-analysis is later than mount of this component -> data is not here for first render
-    return (
-      data && (
-        <Uu5Elements.Block headerType="heading" header="Testování předpokladů regrese" level={2} {...props}>
+      //@@viewOn:render
+      return (
+        <Uu5Elements.Block headerType="heading" header="Testování předpokladů regrese" level={2} {...blockProps}>
           <NormalityBlock data={data} />
           <MulticollinearityBlock data={data} />
         </Uu5Elements.Block>
-      )
-    );
-    //@@viewOff:render
-  },
-});
+      );
+      //@@viewOff:render
+    },
+  })
+);
 
 //@@viewOn:helpers
 //@@viewOff:helpers

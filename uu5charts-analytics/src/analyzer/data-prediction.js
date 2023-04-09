@@ -1,14 +1,17 @@
 //@@viewOn:imports
 import { XyChart } from "uu5charts";
-import { createVisualComponent, useMemo, Utils, Fragment, useScreenSize } from "uu5g05";
+import { createVisualComponent, useMemo, Utils, Fragment, PropTypes } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
-import Uu5Forms, { useFormApi } from "uu5g05-forms";
+import Uu5Forms from "uu5g05-forms";
 import Config from "../config/config.js";
 import Regression from "../model/regression";
 import withControlledInput from "./with-controlled-input";
 import { round } from "../model/tools";
-
+import withData from "./with-data";
+import Data from "../model/data";
 //@@viewOff:imports
+
+const regTypeKeys = Object.keys(Config.REG_TYPE_MAP);
 
 const PRED_DATA_PERCENTAGE = 0.2;
 
@@ -94,170 +97,195 @@ function findTheBestPrediction(dataMap) {
 
 const TextInput = withControlledInput(Uu5Forms.Text);
 
-const DataPrediction = createVisualComponent({
-  //@@viewOn:statics
-  uu5Tag: Config.TAG + "DataPrediction",
-  //@@viewOff:statics
+const DataPrediction = withData(
+  createVisualComponent({
+    //@@viewOn:statics
+    uu5Tag: Config.TAG + "DataPrediction",
+    //@@viewOff:statics
 
-  //@@viewOn:propTypes
-  propTypes: {},
-  //@@viewOff:propTypes
+    //@@viewOn:propTypes
+    propTypes: {
+      data: PropTypes.instanceOf(Data).isRequired,
+      xAxes: PropTypes.string.isRequired,
+      yAxes: PropTypes.string.isRequired,
+      type: PropTypes.oneOf(regTypeKeys).isRequired,
+      prediction: PropTypes.oneOfType([
+        PropTypes.oneOf(predTypeKeys.slice(0, predTypeKeys.length - 1)),
+        PropTypes.arrayOf(PropTypes.number), // custom
+      ]),
+      onPredictionChange: PropTypes.func,
+    },
+    //@@viewOff:propTypes
 
-  //@@viewOn:defaultProps
-  defaultProps: {},
-  //@@viewOff:defaultProps
+    //@@viewOn:defaultProps
+    defaultProps: {},
+    //@@viewOff:defaultProps
 
-  render(props) {
-    //@@viewOn:private
-    const { value, setItemValue } = useFormApi();
-    const { cleanData: data, xAxes, yAxes, regressionType, predictValue } = value;
+    render(props) {
+      //@@viewOn:private
+      let { data, xAxes, yAxes, type, prediction, onPredictionChange, ...blockProps } = props;
 
-    const [screenSize] = useScreenSize();
-    const isSmall = ["xs", "s"].includes(screenSize);
+      let predictionType = prediction;
+      let predictData;
+      if (Array.isArray(prediction)) {
+        predictionType = "custom";
+        predictData = prediction;
+      }
 
-    const dataMap = useMemo(
-      () => buildDataMap(data, xAxes, yAxes, regressionType),
-      [data, xAxes, yAxes, regressionType]
-    );
+      const dataMap = useMemo(() => buildDataMap(data, xAxes, yAxes, type), [data, xAxes, yAxes, type]);
 
-    const { prediction = findTheBestPrediction(dataMap) } = value;
+      predictionType ??= findTheBestPrediction(dataMap);
 
-    const dataModel = dataMap[prediction];
-    const testData = dataModel.testData;
-    const predData = dataModel.predictData(
-      prediction === "custom"
-        ? predictValue
-            ?.replace(",", ".")
-            ?.split(/\s*;\s*/)
-            ?.map((v) => ({ [xAxes]: +v }))
-        : undefined
-    );
+      const dataModel = dataMap[predictionType];
+      const testData = dataModel.testData;
+      const predData = dataModel.predictData(predictData?.map((v) => ({ [xAxes]: +v })));
 
-    const series = [
-      { valueKey: yAxes },
-      { valueKey: "_regression", color: "purple", line: { strokeWidth: 2, type: "monotone" }, title: "Regrese" },
-    ];
+      const series = [
+        { valueKey: yAxes },
+        { valueKey: "_regression", color: "purple", line: { strokeWidth: 2, type: "monotone" }, title: "Regrese" },
+      ];
 
-    let isTwoCharts = ["random", "custom"].includes(prediction);
+      let isTwoCharts = ["random", "custom"].includes(predictionType);
 
-    let displayedData = testData;
+      let displayedData = testData;
 
-    const predSeries = [
-      { valueKey: "_regression$max", color: "orange", area: { fillOpacity: 0.2, type: "monotone" }, title: "max 95%" },
-      { valueKey: "_regression$min", color: "#fff", area: { fillOpacity: 1, type: "monotone" }, title: "min 95%" },
-      {
-        valueKey: "_regression$predict",
-        color: "orange",
-        title: "Predikce",
-        line: { strokeWidth: 5, type: "monotone", point: prediction === "custom" },
-      },
-    ];
+      const predSeries = [
+        {
+          valueKey: "_regression$max",
+          color: "orange",
+          area: { fillOpacity: 0.2, type: "monotone" },
+          title: "max 95%",
+        },
+        { valueKey: "_regression$min", color: "#fff", area: { fillOpacity: 1, type: "monotone" }, title: "min 95%" },
+        {
+          valueKey: "_regression$predict",
+          color: "orange",
+          title: "Predikce",
+          line: { strokeWidth: 5, type: "monotone", point: predictionType === "custom" },
+        },
+      ];
 
-    if (prediction === "prev") {
-      displayedData = [...predData, ...displayedData];
-      series.push(...predSeries);
-    } else if (prediction === "next") {
-      displayedData.push(...predData);
-      series.push(...predSeries);
-    } else if (prediction === "random") {
-      predSeries.unshift({ valueKey: yAxes });
-    }
+      if (predictionType === "prev") {
+        displayedData = [...predData, ...displayedData];
+        series.push(...predSeries);
+      } else if (predictionType === "next") {
+        displayedData.push(...predData);
+        series.push(...predSeries);
+      } else if (predictionType === "random") {
+        predSeries.unshift({ valueKey: yAxes });
+      }
 
-    const customLabel = `Vlastní hodnoty pro ${xAxes}`;
-    //@@viewOff:private
+      const customLabel = `Vlastní hodnoty pro ${xAxes}`;
+      //@@viewOff:private
 
-    //@@viewOn:interface
-    //@@viewOff:interface
+      //@@viewOn:interface
+      //@@viewOff:interface
 
-    //@@viewOn:render
-    return (
-      <Uu5Elements.Block
-        headerType="heading"
-        header={"Predikce - " + Config.REG_TYPE_MAP[regressionType] + " regrese"}
-        level={2}
-        {...props}
-      >
-        <Uu5Elements.Grid
-          templateColumns={{ xs: "1fr", m: "1fr 1fr" }}
-          columnGap={16}
-          rowGap={16}
-          templateAreas={{ xs: "prediction, stats, predictValue", m: "prediction predictValue, stats ." }}
+      //@@viewOn:render
+      return (
+        <Uu5Elements.Block
+          headerType="heading"
+          header={"Predikce - " + Config.REG_TYPE_MAP[type] + " regrese"}
+          level={2}
+          {...blockProps}
         >
-          <Uu5Forms.FormSwitchSelect
-            name="prediction"
-            initialValue={prediction}
-            itemList={predTypeKeys.map((value) => ({ value, children: PRED_TYPE_MAP[value] }))}
-            className={Config.Css.css({ gridArea: "prediction" })}
-          />
-          {prediction === "custom" && (
-            <TextInput
-              name="predictValue"
-              placeholder={{ cs: customLabel }}
-              value={predictValue}
-              onBlur={(e) => setItemValue("predictValue", e.data.value)}
-              className={Config.Css.css({ gridArea: "predictValue" })}
-            />
+          {onPredictionChange && (
+            <Uu5Elements.Grid
+              templateColumns={{ xs: "1fr", m: "1fr 1fr" }}
+              columnGap={16}
+              rowGap={16}
+              templateAreas={{ xs: "prediction, stats, predictValue", m: "prediction predictValue, stats ." }}
+            >
+              <Uu5Forms.SwitchSelect
+                name="prediction"
+                value={predictionType}
+                onChange={(e) => onPredictionChange(e.data.value === "custom" ? [] : e.data.value)}
+                itemList={predTypeKeys.map((value) => ({ value, children: PRED_TYPE_MAP[value] }))}
+                className={Config.Css.css({ gridArea: "prediction" })}
+              />
+              {predictionType === "custom" && (
+                <TextInput
+                  name="predictValue"
+                  placeholder={{ cs: customLabel }}
+                  value={predictData.join("; ")}
+                  onBlur={(e) =>
+                    onPredictionChange(
+                      e.data.value
+                        .replace(",", ".")
+                        .split(/\s*;\s*/)
+                        .map((v) => +v)
+                    )
+                  }
+                  className={Config.Css.css({ gridArea: "predictValue" })}
+                />
+              )}
+              <Uu5Elements.Grid
+                templateColumns="repeat(4, 1fr)"
+                columnGap={4}
+                rowGap={4}
+                className={Config.Css.css({ gridArea: "stats", padding: 8, justifyItems: "end" })}
+              >
+                {["MAE", "MAPE", "RMSE"].map((fn) => (
+                  <Fragment key={fn}>
+                    {predTypeKeys.map((predKey, i) => {
+                      const v = dataMap[predKey][fn.toLowerCase()];
+                      const value = round(v, 5);
+                      return (
+                        <span
+                          key={predKey}
+                          className={
+                            i
+                              ? undefined
+                              : Config.Css.css({
+                                  display: "flex",
+                                  justifyContent: "space-between",
+                                  gap: 4,
+                                  width: "100%",
+                                })
+                          }
+                        >
+                          {!i && <span>{fn}</span>}
+                          <span
+                            title={`Zkopírovat ${v}`}
+                            onClick={() => Utils.Clipboard.write(v + "")}
+                            className={Config.Css.css({ cursor: "copy" })}
+                          >
+                            {value}
+                          </span>
+                        </span>
+                      );
+                    })}
+                  </Fragment>
+                ))}
+              </Uu5Elements.Grid>
+            </Uu5Elements.Grid>
           )}
-          <Uu5Elements.Grid
-            templateColumns="repeat(4, 1fr)"
-            columnGap={4}
-            rowGap={4}
-            className={Config.Css.css({ gridArea: "stats", padding: 8, justifyItems: "end" })}
-          >
-            {["MAE", "MAPE", "RMSE"].map((fn) => (
-              <Fragment key={fn}>
-                {predTypeKeys.map((predKey, i) => {
-                  const v = dataMap[predKey][fn.toLowerCase()];
-                  const value = round(v, 5);
-                  return (
-                    <span
-                      key={predKey}
-                      className={
-                        i
-                          ? undefined
-                          : Config.Css.css({ display: "flex", justifyContent: "space-between", gap: 4, width: "100%" })
-                      }
-                    >
-                      {!i && <span>{fn}</span>}
-                      <span
-                        title={`Zkopírovat ${v}`}
-                        onClick={() => Utils.Clipboard.write(v + "")}
-                        className={Config.Css.css({ cursor: "copy" })}
-                      >
-                        {value}
-                      </span>
-                    </span>
-                  );
-                })}
-              </Fragment>
-            ))}
-          </Uu5Elements.Grid>
-        </Uu5Elements.Grid>
 
-        <Uu5Elements.Block headerType="heading" header={dataModel.formula}>
-          <XyChart
-            data={displayedData}
-            series={series}
-            labelAxis={{ dataKey: xAxes, title: xAxes }}
-            valueAxis={{ title: yAxes }}
-            legend
-          />
-
-          {isTwoCharts && predData && (
+          <Uu5Elements.Block headerType="heading" header={dataModel.formula}>
             <XyChart
-              data={predData}
-              series={predSeries}
+              data={displayedData}
+              series={series}
               labelAxis={{ dataKey: xAxes, title: xAxes }}
               valueAxis={{ title: yAxes }}
               legend
             />
-          )}
+
+            {isTwoCharts && predData && (
+              <XyChart
+                data={predData}
+                series={predSeries}
+                labelAxis={{ dataKey: xAxes, title: xAxes }}
+                valueAxis={{ title: yAxes }}
+                legend
+              />
+            )}
+          </Uu5Elements.Block>
         </Uu5Elements.Block>
-      </Uu5Elements.Block>
-    );
-    //@@viewOff:render
-  },
-});
+      );
+      //@@viewOff:render
+    },
+  })
+);
 
 //@@viewOn:helpers
 //@@viewOff:helpers
