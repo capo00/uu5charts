@@ -31,5 +31,10 @@
     "namespace": "Uu5ChartsData",
     "sourceUri": "https://cdn.plus4u.net/uu-uu5charts/%s/uu5charts-data.min.js",
     "componentList": []
+  },
+  "uu5charts-demo": {
+    "namespace": "Uu5ChartsDemo",
+    "sourceUri": "https://cdn.plus4u.net/uu-uu5charts/%s/uu5charts-demo.min.js",
+    "componentList": []
   }
 }

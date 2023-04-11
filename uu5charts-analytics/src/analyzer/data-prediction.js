@@ -262,23 +262,25 @@ const DataPrediction = withData(
           )}
 
           <Uu5Elements.Block headerType="heading" header={dataModel.formula}>
-            <XyChart
-              data={displayedData}
-              series={series}
-              labelAxis={{ dataKey: xAxes, title: xAxes }}
-              valueAxis={{ title: yAxes }}
-              legend
-            />
-
-            {isTwoCharts && predData && (
+            <Uu5Elements.Grid templateColumns={{ xs: "1fr", l: "1fr 1fr" }} columnGap={16} rowGap={16}>
               <XyChart
-                data={predData}
-                series={predSeries}
+                data={displayedData}
+                series={series}
                 labelAxis={{ dataKey: xAxes, title: xAxes }}
                 valueAxis={{ title: yAxes }}
                 legend
               />
-            )}
+
+              {isTwoCharts && predData && (
+                <XyChart
+                  data={predData}
+                  series={predSeries}
+                  labelAxis={{ dataKey: xAxes, title: xAxes }}
+                  valueAxis={{ title: yAxes }}
+                  legend
+                />
+              )}
+            </Uu5Elements.Grid>
           </Uu5Elements.Block>
         </Uu5Elements.Block>
       );

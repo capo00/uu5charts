@@ -117,33 +117,33 @@ const DataRegression = withData(
           )}
 
           {reg && (
-            <XyChart
-              data={data.map((it, i) => ({
-                ...it,
-                _regression: reg.points[i],
-              }))}
-              series={[
-                { valueKey: yAxes },
-                {
-                  valueKey: "_regression",
-                  color: "purple",
-                  line: { strokeWidth: 5, type: "monotone" },
-                  title: Config.REG_TYPE_MAP[reg.name] + " regrese",
-                },
-              ]}
-              labelAxis={{ dataKey: xAxes, title: xAxes }}
-              valueAxis={{ title: yAxes }}
-              legend
-            />
-          )}
-
-          {reg && (
-            <XyChart
-              data={data.map((it, i) => ({ ...it, _residuals: reg.residuals[i], _i: i }))}
-              series={[{ valueKey: "_residuals", title: "Residua" }]}
-              labelAxis={{ dataKey: "_i", title: "Pořadí" }}
-              valueAxis={{ title: "Vzdálenost" }}
-            />
+            <Uu5Elements.Grid templateColumns={{ xs: "1fr", l: "1fr 1fr" }} columnGap={16} rowGap={16}>
+              <XyChart
+                data={data.map((it, i) => ({
+                  ...it,
+                  _regression: reg.points[i],
+                }))}
+                series={[
+                  { valueKey: yAxes },
+                  {
+                    valueKey: "_regression",
+                    color: "purple",
+                    line: { strokeWidth: 5, type: "monotone" },
+                    title: Config.REG_TYPE_MAP[reg.name] + " regrese",
+                  },
+                ]}
+                labelAxis={{ dataKey: xAxes, title: xAxes }}
+                valueAxis={{ title: yAxes }}
+                legend
+              />
+              <XyChart
+                data={data.map((it, i) => ({ ...it, _residuals: reg.residuals[i], _i: i }))}
+                series={[{ valueKey: "_residuals", title: "Residua" }]}
+                labelAxis={{ dataKey: "_i", title: "Pořadí" }}
+                valueAxis={{ title: "Vzdálenost" }}
+                legend
+              />
+            </Uu5Elements.Grid>
           )}
         </Uu5Elements.Block>
       );

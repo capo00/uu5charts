@@ -40,6 +40,18 @@
         { ...item, name: "Banány", label: "bananas", value: bananas },
       ])).flat();
 
+      function Grid({ children }) {
+        return (
+          <div className={Config.Css.css({
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(300px, 500px))",
+            gap: 16,
+          })}>
+            {children}
+          </div>
+        )
+      }
+
       function Page() {
         return (
           <div>
@@ -57,20 +69,18 @@
             </div>
 
             <Uu5Elements.Block headerType="heading" level={4} header="Default" collapsible>
-              <PieChart
-                data={data}
-                series={[
-                  { valueKey: "sum", labelKey: "monthName" }
-                ]}
-              />
+              <Grid>
+                <PieChart
+                  data={data}
+                  series={[
+                    { valueKey: "sum", labelKey: "monthName" }
+                  ]}
+                />
+              </Grid>
             </Uu5Elements.Block>
 
             <Uu5Elements.Block headerType="heading" level={4} header="Data" collapsible>
-              <div className={Config.Css.css({
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-                gap: 16,
-              })}>
+              <Grid>
                 <Uu5Elements.Block headerType="heading" header="Pole objektů">
                   <PieChart data={[
                     { month: "Leden", count: 20, optimal: 10, maximal: 30 },
@@ -96,15 +106,11 @@
                     ["Červen", 70],
                   ]} />
                 </Uu5Elements.Block>
-              </div>
+              </Grid>
             </Uu5Elements.Block>
 
             <Uu5Elements.Block headerType="heading" level={4} header="Series" collapsible>
-              <div className={Config.Css.css({
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-                gap: 16,
-              })}>
+              <Grid>
                 <Uu5Elements.Block headerType="heading" header="innerRadius, outerRadius">
                   <PieChart
                     data={[data, data2]}
@@ -180,14 +186,10 @@
                     ]}
                   />
                 </Uu5Elements.Block>
-              </div>
+              </Grid>
 
               <Uu5Elements.Block headerType="heading" header="startAngle, endAngle">
-                <div className={Config.Css.css({
-                  display: "grid",
-                  gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-                  gap: 16,
-                })}>
+                <Grid>
                   <PieChart
                     data={[data, data2]}
                     series={[
@@ -231,16 +233,12 @@
                       },
                     ]}
                   />
-                </div>
+                </Grid>
               </Uu5Elements.Block>
             </Uu5Elements.Block>
 
             <Uu5Elements.Block headerType="heading" level={4} header="Legend" collapsible>
-              <div className={Config.Css.css({
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-                gap: 16,
-              })}>
+              <Grid>
                 <Uu5Elements.Block headerType="heading" header="default">
                   <PieChart
                     data={[data, data2]}
@@ -338,15 +336,11 @@
                     }}
                   />
                 </Uu5Elements.Block>
-              </div>
+              </Grid>
             </Uu5Elements.Block>
 
             <Uu5Elements.Block headerType="heading" level={4} header="Tooltip" collapsible>
-              <div className={Config.Css.css({
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-                gap: 16,
-              })}>
+              <Grid>
                 <Uu5Elements.Block headerType="heading" header="false">
                   <PieChart
                     data={[data, data2]}
@@ -407,7 +401,7 @@
                     }
                   />
                 </Uu5Elements.Block>
-              </div>
+              </Grid>
             </Uu5Elements.Block>
           </div>
         );

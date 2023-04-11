@@ -5,7 +5,8 @@
   "workspaces": [
     "uu5charts",
     "uu5charts-analytics",
-    "uu5charts-data"
+    "uu5charts-data",
+    "uu5charts-demo"
   ],
   "description": "",
   "license": "License Commercial",

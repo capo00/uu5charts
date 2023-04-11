@@ -36,27 +36,37 @@
 
       const data = fruitsData.map((item) => ({ ...item, sum: item.apples + item.bananas }));
 
+      function Grid({ children }) {
+        return (
+          <div className={Config.Css.css({
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(300px, 500px))",
+            gap: 16,
+          })}>
+            {children}
+          </div>
+        )
+      }
+
       function Page() {
         return (
-          <div>
+          <>
             <Uu5Elements.Block headerType="heading" level={4} header="Data" collapsible initialCollapsed>
               <pre>{"[\n  " + JSON.stringify(data, null, 4).replace(/}/, "  }") + ",\n  ...\n]"}</pre>
             </Uu5Elements.Block>
 
             <Uu5Elements.Block headerType="heading" level={4} header="Default" collapsible>
-              <XyChart
-                data={data}
-                series={[{ valueKey: "apples" }]}
-                labelAxis={{ dataKey: "monthName" }}
-              />
+              <Grid>
+                <XyChart
+                  data={data}
+                  series={[{ valueKey: "apples" }]}
+                  labelAxis={{ dataKey: "monthName" }}
+                />
+              </Grid>
             </Uu5Elements.Block>
 
             <Uu5Elements.Block headerType="heading" level={4} header="Data" collapsible>
-              <div className={Config.Css.css({
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-                gap: 16,
-              })}>
+              <Grid>
                 <Uu5Elements.Block headerType="heading" header="Pole objektů">
                   <XyChart data={[
                     { month: "Leden", count: 20, optimal: 10, maximal: 30 },
@@ -82,15 +92,11 @@
                     ["Červen", 70],
                   ]} />
                 </Uu5Elements.Block>
-              </div>
+              </Grid>
             </Uu5Elements.Block>
 
             <Uu5Elements.Block headerType="heading" level={4} header="Series" collapsible>
-              <div className={Config.Css.css({
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-                gap: 16,
-              })}>
+              <Grid>
                 <Uu5Elements.Block headerType="heading" header="color, title, onClick, label, unit">
                   <XyChart
                     data={data}
@@ -126,15 +132,11 @@
                     labelAxis={{ dataKey: "monthName" }}
                   />
                 </Uu5Elements.Block>
-              </div>
+              </Grid>
             </Uu5Elements.Block>
 
             <Uu5Elements.Block headerType="heading" level={5} header="Point" collapsible>
-              <div className={Config.Css.css({
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-                gap: 16,
-              })}>
+              <Grid>
                 <Uu5Elements.Block headerType="heading" header="default">
                   <XyChart
                     data={data}
@@ -164,15 +166,11 @@
                     labelAxis={{ dataKey: "monthName" }}
                   />
                 </Uu5Elements.Block>
-              </div>
+              </Grid>
             </Uu5Elements.Block>
 
             <Uu5Elements.Block headerType="heading" level={5} header="Line" collapsible>
-              <div className={Config.Css.css({
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-                gap: 16,
-              })}>
+              <Grid>
                 <Uu5Elements.Block headerType="heading" header="default">
                   <XyChart
                     data={data}
@@ -191,15 +189,11 @@
                     labelAxis={{ dataKey: "monthName" }}
                   />
                 </Uu5Elements.Block>
-              </div>
+              </Grid>
             </Uu5Elements.Block>
 
             <Uu5Elements.Block headerType="heading" level={5} header="Area" collapsible>
-              <div className={Config.Css.css({
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-                gap: 16,
-              })}>
+              <Grid>
                 <Uu5Elements.Block headerType="heading" header="default">
                   <XyChart
                     data={data}
@@ -218,15 +212,11 @@
                     labelAxis={{ dataKey: "monthName" }}
                   />
                 </Uu5Elements.Block>
-              </div>
+              </Grid>
             </Uu5Elements.Block>
 
             <Uu5Elements.Block headerType="heading" level={5} header="Bar" collapsible>
-              <div className={Config.Css.css({
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-                gap: 16,
-              })}>
+              <Grid>
                 <Uu5Elements.Block headerType="heading" header="default">
                   <XyChart
                     data={data}
@@ -291,15 +281,11 @@
                     labelAxis={{ dataKey: "monthName" }}
                   />
                 </Uu5Elements.Block>
-              </div>
+              </Grid>
             </Uu5Elements.Block>
 
             <Uu5Elements.Block headerType="heading" level={5} header="Combinations" collapsible>
-              <div className={Config.Css.css({
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-                gap: 16,
-              })}>
+              <Grid>
                 <Uu5Elements.Block headerType="heading" header="default">
                   <XyChart
                     data={data}
@@ -330,15 +316,11 @@
                     labelAxis={{ dataKey: "monthName" }}
                   />
                 </Uu5Elements.Block>
-              </div>
+              </Grid>
             </Uu5Elements.Block>
 
             <Uu5Elements.Block headerType="heading" level={4} header="Axises" collapsible>
-              <div className={Config.Css.css({
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-                gap: 16,
-              })}>
+              <Grid>
                 <Uu5Elements.Block headerType="heading" header="title, unit">
                   <XyChart
                     data={data}
@@ -356,15 +338,11 @@
                     displayCartesianGrid
                   />
                 </Uu5Elements.Block>
-              </div>
+              </Grid>
             </Uu5Elements.Block>
 
             <Uu5Elements.Block headerType="heading" level={4} header="Legend" collapsible>
-              <div className={Config.Css.css({
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-                gap: 16,
-              })}>
+              <Grid>
                 <Uu5Elements.Block headerType="heading" header="default">
                   <XyChart
                     data={data}
@@ -423,15 +401,11 @@
                     }}
                   />
                 </Uu5Elements.Block>
-              </div>
+              </Grid>
             </Uu5Elements.Block>
 
             <Uu5Elements.Block headerType="heading" level={4} header="Tooltip" collapsible>
-              <div className={Config.Css.css({
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-                gap: 16,
-              })}>
+              <Grid>
                 <Uu5Elements.Block headerType="heading" header="false">
                   <XyChart
                     data={data}
@@ -476,15 +450,11 @@
                     }
                   />
                 </Uu5Elements.Block>
-              </div>
+              </Grid>
             </Uu5Elements.Block>
 
             <Uu5Elements.Block headerType="heading" level={4} header="Lines" collapsible>
-              <div className={Config.Css.css({
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-                gap: 16,
-              })}>
+              <Grid>
                 <XyChart
                   data={data}
                   series={[
@@ -494,9 +464,9 @@
                   labelAxis={{ dataKey: "monthName" }}
                   lines={[{ y: 20, color: "red", title: "Optimum" }, { x: "Březen", color: "green", title: "Start" }]}
                 />
-              </div>
+              </Grid>
             </Uu5Elements.Block>
-          </div>
+          </>
         );
       }
 

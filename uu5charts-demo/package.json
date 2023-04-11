@@ -1,26 +1,22 @@
 {
-  "name": "uu5charts-analytics",
+  "name": "uu5charts-demo",
   "version": "0.1.0",
   "description": "",
   "license": "License Commercial",
-  "namespace": "Uu5ChartsAnalytics",
+  "namespace": "Uu5ChartsDemo",
   "spec": "uu5-lib; uu_appg01_devkit@5.2.2",
   "dependencies": {
     "uu5g05": "^1.0.0",
-    "uu5g05-elements": "^1.0.0",
-    "uu5g05-forms": "^1.0.0",
-    "uu5tilesg02": "^2.0.0",
-    "uu5tilesg02-elements": "^2.0.0",
-    "uu5tilesg02-controls": "^2.0.0",
-    "jstat": "^1.9.6",
-    "uu5charts": "C:\\Users\\User\\Documents\\work\\github\\uu5charts\\uu5charts\\target\\uu5charts-0.1.0.tgz"
+    "uu5g05-elements": "^1.0.0"
   },
   "uuBuildSettings": {
     "externals": {}
   },
   "devDependencies": {
     "uu_appg01_devkit": "^5.2.2",
-    "uu5g05-test": "^1.0.0"
+    "uu5g05-test": "^1.0.0",
+    "@nivo/line": "^0.80.0",
+    "@nivo/core": "^0.80.0"
   },
   "engines": {
     "node": ">=12.0.0"
