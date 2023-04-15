@@ -252,7 +252,7 @@ class Data extends Array {
     return this._duplicated;
   }
 
-  getHistogram(key, bins = 10) {
+  getHistogram(key, bins = 30) {
     if (!this._histogram[key]?.[bins]) {
       const values = this.values(key);
       const min = Math.floor(values.min());

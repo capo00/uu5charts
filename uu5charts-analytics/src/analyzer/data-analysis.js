@@ -158,7 +158,7 @@ const DataAnalysis = withData(
               data={data}
               valueAxis={{ dataKey: "_distance" }}
               labelAxis={{ title: "Vzdálenosti" }}
-              binSize={20}
+              binSize={30}
               lines={[{ color: "red", x: data.outliersLimit, title: `Hranice odlehlosti ${outliersLimitToDisplay}` }]}
             />
           </Uu5Elements.Grid>
