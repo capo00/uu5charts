@@ -2,7 +2,6 @@ import jStat from "jstat";
 import { Utils } from "uu5g05";
 import { mahalanobis } from "./mahalanobis";
 import { mean, median } from "./statistics";
-import TensorFlow from "./tensor-flow";
 import shapiroWilk from "./shapiro-wilk";
 import Regression from "./regression";
 
@@ -403,25 +402,6 @@ class Data extends Array {
           _predict: true,
         });
       });
-    }
-  }
-
-  async addTF(y, x, { key = `${y}~${x}`, predict } = {}) {
-    const regData = this.filter((it) => !it._outlier && !it._predict);
-    const data = regData.map((car) => ({ x: car[x], y: car[y] }));
-
-    const model = new TensorFlow(data);
-
-    await model.train();
-
-    this.forEach((it) => {
-      if (!it._outlier && !it._predict) {
-        it[key] = model.predict([it[x]])[0];
-      }
-    });
-
-    if (predict) {
-      this.push(...model.predict(predict).map((y, i) => ({ [x]: predict[i], [key + "$predict"]: y, _predict: true })));
     }
   }
 

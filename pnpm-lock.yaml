@@ -10,16 +10,12 @@ importers:
 
   uu5charts:
     specifiers:
-      chart.js: ^3.6.0
-      react-chartjs-2: ^4.0.0
       recharts: ^2.0.0
       uu_appg01_devkit: ^5.2.2
       uu5g05: ^1.0.0
       uu5g05-elements: ^1.0.0
       uu5g05-test: ^1.0.0
     dependencies:
-      chart.js: 3.9.1
-      react-chartjs-2: 4.3.1_chart.js@3.9.1
       recharts: 2.4.3
       uu5g05: 1.15.1
       uu5g05-elements: 1.15.1
@@ -29,19 +25,17 @@ importers:
 
   uu5charts-analytics:
     specifiers:
-      '@tensorflow/tfjs': ^4.2.0
       jstat: ^1.9.6
       uu_appg01_devkit: ^5.2.2
       uu5g05: ^1.0.0
       uu5g05-elements: ^1.0.0
       uu5g05-forms: ^1.0.0
       uu5g05-test: ^1.0.0
-      uu5charts: C:\Users\User\Documents\work\github\uu5charts\uu5charts\target\uu5charts-0.1.0.tgz
+      uu5charts: ..\uu5charts\target\uu5charts-0.1.0.tgz
       uu5tilesg02: ^2.0.0
       uu5tilesg02-controls: ^2.0.0
       uu5tilesg02-elements: ^2.0.0
     dependencies:
-      '@tensorflow/tfjs': 4.2.0
       jstat: 1.9.6
       uu5g05: 1.15.1
       uu5g05-elements: 1.15.1
@@ -1944,97 +1938,6 @@ packages:
       defer-to-connect: 2.0.1
     dev: true
 
-  /@tensorflow/tfjs-backend-cpu/4.2.0_@tensorflow+tfjs-core@4.2.0:
-    resolution: {integrity: sha512-8HWg9J69m0Ovc6w8TVhhixMOcwA3t/NPXLblOA/sgJ+/JD5gsbpLWJk4QISQyb1RnpSVzw6PX3BSMTJU7hWVOg==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/@tensorflow/tfjs-backend-cpu/-/tfjs-backend-cpu-4.2.0.tgz}
-    engines: {yarn: '>= 1.3.2'}
-    peerDependencies:
-      '@tensorflow/tfjs-core': 4.2.0
-    dependencies:
-      '@tensorflow/tfjs-core': 4.2.0
-      '@types/seedrandom': 2.4.30
-      seedrandom: 3.0.5
-    dev: false
-
-  /@tensorflow/tfjs-backend-webgl/4.2.0_@tensorflow+tfjs-core@4.2.0:
-    resolution: {integrity: sha512-Qvf+hD5pSh+xi48kChSGzcDKJemkc4EKfoVVjuxl4k25ZUPwuEd7zZUAtinkLu1dzgHNyvePZY8k+9rVm59HJA==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/@tensorflow/tfjs-backend-webgl/-/tfjs-backend-webgl-4.2.0.tgz}
-    engines: {yarn: '>= 1.3.2'}
-    peerDependencies:
-      '@tensorflow/tfjs-core': 4.2.0
-    dependencies:
-      '@tensorflow/tfjs-backend-cpu': 4.2.0_@tensorflow+tfjs-core@4.2.0
-      '@tensorflow/tfjs-core': 4.2.0
-      '@types/offscreencanvas': 2019.3.0
-      '@types/seedrandom': 2.4.30
-      '@types/webgl-ext': 0.0.30
-      seedrandom: 3.0.5
-    dev: false
-
-  /@tensorflow/tfjs-converter/4.2.0_@tensorflow+tfjs-core@4.2.0:
-    resolution: {integrity: sha512-m+E2KJM6yGQdi8ElzWpChdD/JaqhWMCi9yK70v/ndkOaCL2q2UN48nYP2T5S15vkDvMIgzAQyZfh7hxQsMuvRQ==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/@tensorflow/tfjs-converter/-/tfjs-converter-4.2.0.tgz}
-    peerDependencies:
-      '@tensorflow/tfjs-core': 4.2.0
-    dependencies:
-      '@tensorflow/tfjs-core': 4.2.0
-    dev: false
-
-  /@tensorflow/tfjs-core/4.2.0:
-    resolution: {integrity: sha512-uuHkiWVC8b00ngFbHvAV7J7haRlN/9PEdeenCi0CzBjgKd7aN25wPWaoN0TSQcU+GT4FJ8mofMZ9VBYZ/s/WLg==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/@tensorflow/tfjs-core/-/tfjs-core-4.2.0.tgz}
-    engines: {yarn: '>= 1.3.2'}
-    dependencies:
-      '@types/long': 4.0.2
-      '@types/offscreencanvas': 2019.7.0
-      '@types/seedrandom': 2.4.30
-      '@types/webgl-ext': 0.0.30
-      '@webgpu/types': 0.1.21
-      long: 4.0.0
-      node-fetch: 2.6.9
-      seedrandom: 3.0.5
-    transitivePeerDependencies:
-      - encoding
-    dev: false
-
-  /@tensorflow/tfjs-data/4.2.0_@tensorflow+tfjs-core@4.2.0:
-    resolution: {integrity: sha512-11t7Q+ikseduJgkd9iSeRrtor1aA3o5PVCFhC5yYvR3JLO55ic1+4Ryo0EJfhRoismS6zBUJrpzX4K0zlLbIfw==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/@tensorflow/tfjs-data/-/tfjs-data-4.2.0.tgz}
-    peerDependencies:
-      '@tensorflow/tfjs-core': 4.2.0
-      seedrandom: ^3.0.5
-    dependencies:
-      '@tensorflow/tfjs-core': 4.2.0
-      '@types/node-fetch': 2.6.2
-      node-fetch: 2.6.9
-      string_decoder: 1.3.0
-    transitivePeerDependencies:
-      - encoding
-    dev: false
-
-  /@tensorflow/tfjs-layers/4.2.0_@tensorflow+tfjs-core@4.2.0:
-    resolution: {integrity: sha512-SO0KTmCFOjrW+PlP9nKYXz07XGFq6uE7am9yH2bRaRPWpEeaKT/+k0C9vFMxI/GzRwY8AK4sLe4U+jE1mhYxGw==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/@tensorflow/tfjs-layers/-/tfjs-layers-4.2.0.tgz}
-    peerDependencies:
-      '@tensorflow/tfjs-core': 4.2.0
-    dependencies:
-      '@tensorflow/tfjs-core': 4.2.0
-    dev: false
-
-  /@tensorflow/tfjs/4.2.0:
-    resolution: {integrity: sha512-iZmtyGC9IJkx+TpFnkgDol8BHv2BU3zJ01HyNcuvnm1w1EqoNe+1n8bwvLzI/sxHMcHTqzuu7VugMaphryxE+A==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/@tensorflow/tfjs/-/tfjs-4.2.0.tgz}
-    hasBin: true
-    dependencies:
-      '@tensorflow/tfjs-backend-cpu': 4.2.0_@tensorflow+tfjs-core@4.2.0
-      '@tensorflow/tfjs-backend-webgl': 4.2.0_@tensorflow+tfjs-core@4.2.0
-      '@tensorflow/tfjs-converter': 4.2.0_@tensorflow+tfjs-core@4.2.0
-      '@tensorflow/tfjs-core': 4.2.0
-      '@tensorflow/tfjs-data': 4.2.0_@tensorflow+tfjs-core@4.2.0
-      '@tensorflow/tfjs-layers': 4.2.0_@tensorflow+tfjs-core@4.2.0
-      argparse: 1.0.10
-      core-js: 3.28.0
-      chalk: 4.1.2
-      regenerator-runtime: 0.13.11
-      yargs: 16.2.0
-    transitivePeerDependencies:
-      - encoding
-      - seedrandom
-    dev: false
-
   /@testing-library/dom/8.20.0:
     resolution: {integrity: sha512-d9ULIT+a4EXLX3UU8FBjauG9NnsZHkHztXoIcTsOKoOw030fyjheN9svkTULjJxtYag9DZz5Jz5qkWZDPxTFwA==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/@testing-library/dom/-/dom-8.20.0.tgz}
     engines: {node: '>=12'}
@@ -2255,31 +2158,13 @@ packages:
       '@types/node': 18.13.0
     dev: true
 
-  /@types/long/4.0.2:
-    resolution: {integrity: sha512-MqTGEo5bj5t157U6fA/BiDynNkn0YknVdh48CMPkTSpFTVmvao5UQmm7uEF6xBEo7qIMAlY/JSleYaE6VOdpaA==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/@types/long/-/long-4.0.2.tgz}
-    dev: false
-
   /@types/minimatch/3.0.5:
     resolution: {integrity: sha512-Klz949h02Gz2uZCMGwDUSDS1YBlTdDDgbWHi+81l29tQALUtvz4rAYi5uoVhE5Lagoq6DeqAUlbrHvW/mXDgdQ==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/@types/minimatch/-/minimatch-3.0.5.tgz}
     dev: true
 
-  /@types/node-fetch/2.6.2:
-    resolution: {integrity: sha512-DHqhlq5jeESLy19TYhLakJ07kNumXWjcDdxXsLUMJZ6ue8VZJj4kLPQVE/2mdHh3xZziNF1xppu5lwmS53HR+A==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/@types/node-fetch/-/node-fetch-2.6.2.tgz}
-    dependencies:
-      '@types/node': 18.13.0
-      form-data: 3.0.1
-    dev: false
-
   /@types/node/18.13.0:
     resolution: {integrity: sha512-gC3TazRzGoOnoKAhUx+Q0t8S9Tzs74z7m0ipwGpSqQrleP14hKxP4/JUeEQcD3W1/aIpnWl8pHowI7WokuZpXg==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/@types/node/-/node-18.13.0.tgz}
-
-  /@types/offscreencanvas/2019.3.0:
-    resolution: {integrity: sha512-esIJx9bQg+QYF0ra8GnvfianIY8qWB0GBx54PK5Eps6m+xTj86KLavHv6qDhzKcu5UUOgNfJ2pWaIIV7TRUd9Q==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/@types/offscreencanvas/-/offscreencanvas-2019.3.0.tgz}
-    dev: false
-
-  /@types/offscreencanvas/2019.7.0:
-    resolution: {integrity: sha512-PGcyveRIpL1XIqK8eBsmRBt76eFgtzuPiSTyKHZxnGemp2yzGzWpjYKAfK3wIMiU7eH+851yEpiuP8JZerTmWg==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/@types/offscreencanvas/-/offscreencanvas-2019.7.0.tgz}
-    dev: false
+    dev: true
 
   /@types/parse-json/4.0.0:
     resolution: {integrity: sha512-//oorEZjL6sbPcKUaCdIGlIUeH26mgzimjBB77G6XRgnDl/L5wOnpyBGRe/Mmf5CVW3PwEBE1NjiMZ/ssFh4wA==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/@types/parse-json/-/parse-json-4.0.0.tgz}
@@ -2317,10 +2202,6 @@ packages:
     resolution: {integrity: sha512-hppQEBDmlwhFAXKJX2KnWLYu5yMfi91yazPb2l+lbJiwW+wdo1gNeRA+3RgNSO39WYX2euey41KEwnqesU2Jew==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/@types/scheduler/-/scheduler-0.16.2.tgz}
     dev: true
 
-  /@types/seedrandom/2.4.30:
-    resolution: {integrity: sha512-AnxLHewubLVzoF/A4qdxBGHCKifw8cY32iro3DQX9TPcetE95zBeVt3jnsvtvAUf1vwzMfwzp4t/L2yqPlnjkQ==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/@types/seedrandom/-/seedrandom-2.4.30.tgz}
-    dev: false
-
   /@types/stack-utils/2.0.1:
     resolution: {integrity: sha512-Hl219/BT5fLAaz6NDkSuhzasy49dwQS/DSdu4MdggFB8zcXv7vflBI3xp7FEmkmdDkBUI2bPUNeMttp2knYdxw==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/@types/stack-utils/-/stack-utils-2.0.1.tgz}
     dev: true
@@ -2334,10 +2215,6 @@ packages:
   /@types/tough-cookie/4.0.2:
     resolution: {integrity: sha512-Q5vtl1W5ue16D+nIaW8JWebSSraJVlK+EthKn7e7UcD4KWsaSJ8BqGPXNaPghgtcn/fhvrN17Tv8ksUsQpiplw==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/@types/tough-cookie/-/tough-cookie-4.0.2.tgz}
     dev: true
-
-  /@types/webgl-ext/0.0.30:
-    resolution: {integrity: sha512-LKVgNmBxN0BbljJrVUwkxwRYqzsAEPcZOe6S2T6ZaBDIrFp0qu4FNlpc5sM1tGbXUYFgdVQIoeLk1Y1UoblyEg==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/@types/webgl-ext/-/webgl-ext-0.0.30.tgz}
-    dev: false
 
   /@types/yargs-parser/21.0.0:
     resolution: {integrity: sha512-iO9ZQHkZxHn4mSakYV0vFHAVDyEOIJQrV2uZ06HxEPcx+mt8swXoZHIbaaJ2crJYFfErySgktuTZ3BeLz+XmFA==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/@types/yargs-parser/-/yargs-parser-21.0.0.tgz}
@@ -2515,10 +2392,6 @@ packages:
       '@xtuc/long': 4.2.2
     dev: true
 
-  /@webgpu/types/0.1.21:
-    resolution: {integrity: sha512-pUrWq3V5PiSGFLeLxoGqReTZmiiXwY3jRkIG5sLLKjyqNxrwm/04b4nw7LSmGWJcKk59XOM/YRTUwOzo4MMlow==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/@webgpu/types/-/types-0.1.21.tgz}
-    dev: false
-
   /@xtuc/ieee754/1.2.0:
     resolution: {integrity: sha512-DX8nKgqcGwsc0eJSqYt5lwP4DH5FlHnmuWWBRy7X0NcaGR0ZtuyeESgMwTYVEtxmsNGY+qit4QYT/MIYTOTPeA==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/@xtuc/ieee754/-/ieee754-1.2.0.tgz}
     dev: true
@@ -2668,6 +2541,7 @@ packages:
   /ansi-regex/5.0.1:
     resolution: {integrity: sha512-quJQXlTSUGL2LH9SUXo8VwsY4soanhgo6LNSm84E1LBcE8s3O0wpdiRzyR9z/ZZJMlMWv37qOOb9pdJlMUEKFQ==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/ansi-regex/-/ansi-regex-5.0.1.tgz}
     engines: {node: '>=8'}
+    dev: true
 
   /ansi-styles/3.2.1:
     resolution: {integrity: sha512-VT0ZI6kZRdTh8YyJw3SMbYm/u+NqfsAxEpWO0Pf9sq8/e94WxxOpPKx9FR1FlyCtOVDNOQ+8ntlqFxiRc+r5qA==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/ansi-styles/-/ansi-styles-3.2.1.tgz}
@@ -2681,6 +2555,7 @@ packages:
     engines: {node: '>=8'}
     dependencies:
       color-convert: 2.0.1
+    dev: true
 
   /ansi-styles/5.2.0:
     resolution: {integrity: sha512-Cxwpt2SfTzTtXcfOlzGEee8O+c+MmUgGrNiBcXnuWxuFJHe6a5Hz7qwhwe5OgaSYI0IJvkLqWX1ASG+cJOkEiA==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/ansi-styles/-/ansi-styles-5.2.0.tgz}
@@ -2739,6 +2614,7 @@ packages:
     resolution: {integrity: sha512-o5Roy6tNG4SL/FOkCAN6RzjiakZS25RLYFrcMttJqbdd8BWrnA+fGz57iN5Pb06pvBGvl5gQ0B48dJlslXvoTg==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/argparse/-/argparse-1.0.10.tgz}
     dependencies:
       sprintf-js: 1.0.3
+    dev: true
 
   /argparse/2.0.1:
     resolution: {integrity: sha512-8+9WqebbFzpX9OR+Wa6O29asIogeRMzcGtAINdpMHHyAg10f05aSFVBbcEqGf/PXw1EjAZ+q2/bEBg3DvurK3Q==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/argparse/-/argparse-2.0.1.tgz}
@@ -2836,6 +2712,7 @@ packages:
 
   /asynckit/0.4.0:
     resolution: {integrity: sha512-Oei9OH4tRh0YqU3GxhX79dM/mwVgvbZJaSNaRk+bshkj0S5cfHcgYakreBjrHwatXKbz+IoIdYLxrKim2MjW0Q==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/asynckit/-/asynckit-0.4.0.tgz}
+    dev: true
 
   /auto-bind/4.0.0:
     resolution: {integrity: sha512-Hdw8qdNiqdJ8LqT0iK0sVzkFbzg6fhnQqqfWhBDxcHZvU75+B+ayzTy8x+k5Ix0Y92XOhOUlx74ps+bA6BeYMQ==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/auto-bind/-/auto-bind-4.0.0.tgz}
@@ -3253,6 +3130,7 @@ packages:
     dependencies:
       ansi-styles: 4.3.0
       supports-color: 7.2.0
+    dev: true
 
   /char-regex/1.0.2:
     resolution: {integrity: sha512-kWWXztvZ5SBQV+eRgKFeh8q5sLuZY2+8WUIzlxWVTg+oGwY14qylx1KbKzHd8P6ZYkAg0xyIDU9JMHhyJMZ1jw==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/char-regex/-/char-regex-1.0.2.tgz}
@@ -3355,6 +3233,7 @@ packages:
       string-width: 4.2.3
       strip-ansi: 6.0.1
       wrap-ansi: 7.0.0
+    dev: true
 
   /cliui/8.0.1:
     resolution: {integrity: sha512-BSeNnyus75C4//NQ9gQt1/csTXyo/8Sb+afLAkzAptFuMsod9HFokGNudZpi/oQV73hnVK+sR+5PVRMd+Dr7YQ==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/cliui/-/cliui-8.0.1.tgz}
@@ -3391,6 +3270,7 @@ packages:
     engines: {node: '>=7.0.0'}
     dependencies:
       color-name: 1.1.4
+    dev: true
 
   /color-name/1.1.3:
     resolution: {integrity: sha512-72fSenhMw2HZMTVHeCA9KCmpEIbzWiQsjN+BHcBbS9vr1mtt+vJjPdksIBNUmKAW8TFUDPJK5SUU3QhE9NEXDw==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/color-name/-/color-name-1.1.3.tgz}
@@ -3398,6 +3278,7 @@ packages:
 
   /color-name/1.1.4:
     resolution: {integrity: sha512-dOy+3AuW3a2wNbZHIuMZpTcgjGuLU/uBL/ubcZF9OXbDo8ff4O8yVp5Bf0efS8uEoYo5q4Fx7dY9OgQGXgAsQA==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/color-name/-/color-name-1.1.4.tgz}
+    dev: true
 
   /colord/2.9.3:
     resolution: {integrity: sha512-jeC1axXpnb0/2nn/Y1LPuLdgXBLH7aDcHu4KEKfqw3CUhX7ZpfBSlPKyqXE6btIgEzfWtrX3/tyBCaCvXvMkOw==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/colord/-/colord-2.9.3.tgz}
@@ -3417,6 +3298,7 @@ packages:
     engines: {node: '>= 0.8'}
     dependencies:
       delayed-stream: 1.0.0
+    dev: true
 
   /commander/2.20.3:
     resolution: {integrity: sha512-GpVkmM8vF2vQUkj2LvZmD35JxeJOLCwJ9cUkugyk2nuhbv3+mJvpLYYt+0+USMxE+oj+ey/lJEnhZw75x/OMcQ==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/commander/-/commander-2.20.3.tgz}
@@ -3510,11 +3392,6 @@ packages:
     dependencies:
       browserslist: 4.21.5
     dev: true
-
-  /core-js/3.28.0:
-    resolution: {integrity: sha512-GiZn9D4Z/rSYvTeg1ljAIsEqFm0LaN9gVtwDCrKL80zHtS31p9BAjmTxVqTQDMpwlMolJZOFntUG2uwyj7DAqw==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/core-js/-/core-js-3.28.0.tgz}
-    requiresBuild: true
-    dev: false
 
   /core-util-is/1.0.3:
     resolution: {integrity: sha512-ZQBvi1DcpJ4GDqanjucZ2Hj3wEO5pZDS89BWbkcrvdxksJorwUDDZamX9ldFkp9aw2lmBDLgkObEA4DWNJ9FYQ==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/core-util-is/-/core-util-is-1.0.3.tgz}
@@ -4036,6 +3913,7 @@ packages:
   /delayed-stream/1.0.0:
     resolution: {integrity: sha512-ZySD7Nf91aLB0RxL4KGrKHBXl7Eds1DAmEdcoVawXnLD7SDhpNgtuII2aAkg7a7QS41jxPSZ17p4VdGnMHk3MQ==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/delayed-stream/-/delayed-stream-1.0.0.tgz}
     engines: {node: '>=0.4.0'}
+    dev: true
 
   /depcheck/1.4.3:
     resolution: {integrity: sha512-vy8xe1tlLFu7t4jFyoirMmOR7x7N601ubU9Gkifyr9z8rjBFtEdWHDBMqXyk6OkK+94NXutzddVXJuo0JlUQKQ==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/depcheck/-/depcheck-1.4.3.tgz}
@@ -4249,6 +4127,7 @@ packages:
 
   /emoji-regex/8.0.0:
     resolution: {integrity: sha512-MSjYzcWNOA0ewAHpz0MxpYFvwg6yjy1NG3xteoqz644VCo/RPgnr1/GGt+ic3iJTzQ8Eu3TdM14SawnVUmGE6A==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/emoji-regex/-/emoji-regex-8.0.0.tgz}
+    dev: true
 
   /emojis-list/3.0.0:
     resolution: {integrity: sha512-/kyM18EfinwXZbno9FyUGeFh87KC8HRQBQGildHZbEuRyWFOmv1U10o9BBp8XVZDVNNuQKyIGIu5ZYAAXJ0V2Q==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/emojis-list/-/emojis-list-3.0.0.tgz}
@@ -4465,6 +4344,7 @@ packages:
   /escalade/3.1.1:
     resolution: {integrity: sha512-k0er2gUkLf8O0zKJiAhmkTnJlTvINGv7ygDNPbeIsX/TJjGJZHuh9B2UxbsaEkmlEo9MfhrSzmhIlhRlI2GXnw==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/escalade/-/escalade-3.1.1.tgz}
     engines: {node: '>=6'}
+    dev: true
 
   /escape-html/1.0.3:
     resolution: {integrity: sha512-NiSupZ4OeuGwr68lGIeym/ksIZMJodUGOSCZ/FSnTxcrekbvqrgdUxlJOMpijaKZVjAJrWrGs/6Jy8OMuyj9ow==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/escape-html/-/escape-html-1.0.3.tgz}
@@ -4978,15 +4858,6 @@ packages:
       signal-exit: 3.0.7
     dev: true
 
-  /form-data/3.0.1:
-    resolution: {integrity: sha512-RHkBKtLWUVwd7SqRIvCZMEvAMoGUp0XU+seQiZejj0COz3RI3hWP4sCv3gZWWLjJTd7rGwcsF5eKZGii0r/hbg==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/form-data/-/form-data-3.0.1.tgz}
-    engines: {node: '>= 6'}
-    dependencies:
-      asynckit: 0.4.0
-      combined-stream: 1.0.8
-      mime-types: 2.1.35
-    dev: false
-
   /form-data/4.0.0:
     resolution: {integrity: sha512-ETEklSGi5t0QMZuiXoA/Q6vcnxcLQP5vdugSpuAyi6SVGi2clPPp+xgEhuMaHC+zGgn31Kd235W35f7Hykkaww==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/form-data/-/form-data-4.0.0.tgz}
     engines: {node: '>= 6'}
@@ -5079,6 +4950,7 @@ packages:
   /get-caller-file/2.0.5:
     resolution: {integrity: sha512-DyFP3BM/3YHTQOCUL/w0OZHR0lpKeGrxotcHWcqNEdnltqFwXVfhEBQ94eIo34AfQpo0rGki4cyIiftY06h2Fg==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/get-caller-file/-/get-caller-file-2.0.5.tgz}
     engines: {node: 6.* || 8.* || >= 10.*}
+    dev: true
 
   /get-intrinsic/1.2.0:
     resolution: {integrity: sha512-L049y6nFOuom5wGyRc3/gdTLO94dySVKRACj1RmJZBQXlbTMhtNIgkWkUHq+jYmZvKf14EW1EoJnnjbmoHij0Q==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/get-intrinsic/-/get-intrinsic-1.2.0.tgz}
@@ -5244,6 +5116,7 @@ packages:
   /has-flag/4.0.0:
     resolution: {integrity: sha512-EykJT/Q1KjTWctppgIAgfSO0tKVuZUjhgMr17kqTumMl6Afv3EISleU7qZUzoXDFTAHTDC4NOoG/ZxU3EvlMPQ==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/has-flag/-/has-flag-4.0.0.tgz}
     engines: {node: '>=8'}
+    dev: true
 
   /has-property-descriptors/1.0.0:
     resolution: {integrity: sha512-62DVLZGoiEBDHQyqG4w9xCuZ7eJEwNmJRWw2VY84Oedb7WFcA27fiEVe8oUQx9hAUJ4ekurquucTGwsyO1XGdQ==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/has-property-descriptors/-/has-property-descriptors-1.0.0.tgz}
@@ -5625,6 +5498,7 @@ packages:
   /is-fullwidth-code-point/3.0.0:
     resolution: {integrity: sha512-zymm5+u+sCsSWyD9qNaejV3DFvhCKclKdizYaJUuHA83RLjb7nSuGnddCHGv0hk+KY7BMAlsWeK4Ueg6EV6XQg==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/is-fullwidth-code-point/-/is-fullwidth-code-point-3.0.0.tgz}
     engines: {node: '>=8'}
+    dev: true
 
   /is-generator-fn/2.1.0:
     resolution: {integrity: sha512-cTIB4yPYL/Grw0EaSzASzg6bBy9gqCofvWN8okThAYIxKJZC+udlRAmGbM0XLeniEJSs8uEgHPGuHSe1XsOLSQ==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/is-generator-fn/-/is-generator-fn-2.1.0.tgz}
@@ -6683,10 +6557,6 @@ packages:
   /lodash/4.17.21:
     resolution: {integrity: sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/lodash/-/lodash-4.17.21.tgz}
 
-  /long/4.0.0:
-    resolution: {integrity: sha512-XsP+KhQif4bjX1kbuSiySJFNAehNxgLb6hPRGJ9QsUr8ajHkuXGdrHmFUTUUXhDwVX2R5bY4JNZEwbUiMhV+MA==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/long/-/long-4.0.0.tgz}
-    dev: false
-
   /loose-envify/1.4.0:
     resolution: {integrity: sha512-lyuxPGr/Wfhrlem2CL/UcnUc1zcqKAImBDzukY7Y5F/yQiNdko6+fRLevlw1HgMySw7f611UIY408EtxRSoK3Q==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/loose-envify/-/loose-envify-1.4.0.tgz}
     hasBin: true
@@ -6796,12 +6666,14 @@ packages:
   /mime-db/1.52.0:
     resolution: {integrity: sha512-sPU4uV7dYlvtWJxwwxHD0PuihVNiE7TyAbQ5SWxDCB9mUYvOgroQOwYQQOKPJ8CIbE+1ETVlOoK1UC2nU3gYvg==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/mime-db/-/mime-db-1.52.0.tgz}
     engines: {node: '>= 0.6'}
+    dev: true
 
   /mime-types/2.1.35:
     resolution: {integrity: sha512-ZDY+bPm5zTTF+YpCrAU9nK0UgICYPT0QtT1NZWFv4s++TNkcgVaT0g6+4R2uI4MjQjzysHB1zxuWL50hzaeXiw==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/mime-types/-/mime-types-2.1.35.tgz}
     engines: {node: '>= 0.6'}
     dependencies:
       mime-db: 1.52.0
+    dev: true
 
   /mime/1.6.0:
     resolution: {integrity: sha512-x0Vn8spI+wuJ1O6S7gnbaQg8Pxh4NNHb7KSINmEWKiPE4RKOplvijn+NkmYmmRgP68mc70j2EbeTFRsrswaQeg==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/mime/-/mime-1.6.0.tgz}
@@ -6986,6 +6858,7 @@ packages:
         optional: true
     dependencies:
       whatwg-url: 5.0.0
+    dev: true
 
   /node-int64/0.4.0:
     resolution: {integrity: sha512-O5lz91xSOeoXP6DulyHfllpq+Eg00MWitZIbtPfoSEvqIHdl5gfcY6hYzDWnj0qD5tz52PI08u9qUvSVeUBeHw==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/node-int64/-/node-int64-0.4.0.tgz}
@@ -8271,6 +8144,7 @@ packages:
   /require-directory/2.1.1:
     resolution: {integrity: sha512-fGxEI7+wsG9xrvdjsrlmL22OMTTiHRwAMroiEeMgq8gzoLC/PQr7RsRDSTLUg/bZAZtF+TVIkHc6/4RIKrui+Q==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/require-directory/-/require-directory-2.1.1.tgz}
     engines: {node: '>=0.10.0'}
+    dev: true
 
   /require-from-string/2.0.2:
     resolution: {integrity: sha512-Xf0nWe6RseziFMu+Ap9biiUbmplq6S9/p+7w7YXP/JBHhrUDDUhwa+vANyubuqfZWTveU//DYVGsDG7RKL/vEw==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/require-from-string/-/require-from-string-2.0.2.tgz}
@@ -8408,6 +8282,7 @@ packages:
 
   /safe-buffer/5.2.1:
     resolution: {integrity: sha512-rp3So07KcdmmKbGvgaNxQSJr7bGVSVk5S9Eq1F+ppbRo70+YeaDxkw5Dd8NPN+GD6bjnYm2VuPuCXmpuYvmCXQ==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/safe-buffer/-/safe-buffer-5.2.1.tgz}
+    dev: true
 
   /safe-regex-test/1.0.0:
     resolution: {integrity: sha512-JBUUzyOgEwXQY1NuPtvcj/qcBDbDmEvWufhlnXZIm75DEHp+afM1r1ujJpJsV/gSM4t59tpDyPi1sd6ZaPFfsA==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/safe-regex-test/-/safe-regex-test-1.0.0.tgz}
@@ -8481,10 +8356,6 @@ packages:
       invariant: 2.2.4
       lodash: 4.17.21
     dev: true
-
-  /seedrandom/3.0.5:
-    resolution: {integrity: sha512-8OwmbklUNzwezjGInmZ+2clQmExQPvomqjL7LFqOYqtmuxRgQYqOD3mHaU+MvZn5FLUeVxVfQjwLZW/n/JFuqg==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/seedrandom/-/seedrandom-3.0.5.tgz}
-    dev: false
 
   /semver-compare/1.0.0:
     resolution: {integrity: sha512-YM3/ITh2MJ5MtzaM429anh+x2jiLVjqILF4m4oyQB18W7Ggea7BfqdH/wGMK7dDiMghv/6WG7znWMwUDzJiXow==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/semver-compare/-/semver-compare-1.0.0.tgz}
@@ -8693,6 +8564,7 @@ packages:
 
   /sprintf-js/1.0.3:
     resolution: {integrity: sha512-D9cPgkvLlV3t3IzL0D0YLvGA9Ahk4PcvVwUbN0dSGr1aP0Nrt4AEnTUbuGvquEC0mA64Gqt1fzirlRs5ibXx8g==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/sprintf-js/-/sprintf-js-1.0.3.tgz}
+    dev: true
 
   /stable/0.1.8:
     resolution: {integrity: sha512-ji9qxRnOVfcuLDySj9qzhGSEFVobyt1kIOSkj1qZzYLzq7Tos/oUUWvotUPQLlrsidqsK6tBH89Bc9kL5zHA6w==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/stable/-/stable-0.1.8.tgz}
@@ -8742,6 +8614,7 @@ packages:
       emoji-regex: 8.0.0
       is-fullwidth-code-point: 3.0.0
       strip-ansi: 6.0.1
+    dev: true
 
   /string.prototype.matchall/4.0.8:
     resolution: {integrity: sha512-6zOCOcJ+RJAQshcTvXPHoxoQGONa3e/Lqx90wUA+wEzX78sg5Bo+1tQo4N0pohS0erG9qtCqJDjNCQBjeWVxyg==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/string.prototype.matchall/-/string.prototype.matchall-4.0.8.tgz}
@@ -8791,12 +8664,14 @@ packages:
     resolution: {integrity: sha512-hkRX8U1WjJFd8LsDJ2yQ/wWWxaopEsABU1XfkM8A+j0+85JAGppt16cr1Whg6KIbb4okU6Mql6BOj+uup/wKeA==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/string_decoder/-/string_decoder-1.3.0.tgz}
     dependencies:
       safe-buffer: 5.2.1
+    dev: true
 
   /strip-ansi/6.0.1:
     resolution: {integrity: sha512-Y38VPSHcqkFrCpFnQ9vuSXmquuv5oXOKpGeT6aGrr3o3Gc9AlVa6JBfUSOCnbxGGZF+/0ooI7KrPuUSztUdU5A==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/strip-ansi/-/strip-ansi-6.0.1.tgz}
     engines: {node: '>=8'}
     dependencies:
       ansi-regex: 5.0.1
+    dev: true
 
   /strip-bom/4.0.0:
     resolution: {integrity: sha512-3xurFv5tEgii33Zi8Jtp55wEIILR9eh34FAW00PZf+JnSsTmV/ioewSgQl97JHvgjoRGwPShsWm+IdrxB35d0w==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/strip-bom/-/strip-bom-4.0.0.tgz}
@@ -8852,6 +8727,7 @@ packages:
     engines: {node: '>=8'}
     dependencies:
       has-flag: 4.0.0
+    dev: true
 
   /supports-color/8.1.1:
     resolution: {integrity: sha512-MpUEN2OodtUzxvKQl72cUF7RQ5EiHsGvSsVG0ia9c5RbWGL2CI4C7EpPS8UTBIplnlzZiNuV56w+FuNxy3ty2Q==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/supports-color/-/supports-color-8.1.1.tgz}
@@ -8992,6 +8868,7 @@ packages:
 
   /tr46/0.0.3:
     resolution: {integrity: sha512-N3WMsuqV66lT30CrXNbEjx4GEwlow3v6rr4mCcv6prnfwhS01rkgyFdjPNBYd9br7LpXV1+Emh01fHnq2Gdgrw==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/tr46/-/tr46-0.0.3.tgz}
+    dev: true
 
   /tr46/3.0.0:
     resolution: {integrity: sha512-l7FvfAHlcmulp8kr+flpQZmVwtu7nfRV7NZujtN0OqES8EL4O4e0qqzL0DC5gAvx/ZC/9lk6rhcUwYvkBnBnYA==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/tr46/-/tr46-3.0.0.tgz}
@@ -9512,6 +9389,7 @@ packages:
 
   /webidl-conversions/3.0.1:
     resolution: {integrity: sha512-2JAn3z8AR6rjK8Sm8orRC0h/bcl/DqL7tRPdGZ4I1CjdF+EaMLmYxBHyXuKL849eucPFhvBoxMsflfOb8kxaeQ==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/webidl-conversions/-/webidl-conversions-3.0.1.tgz}
+    dev: true
 
   /webidl-conversions/7.0.0:
     resolution: {integrity: sha512-VwddBukDzu71offAQR975unBIGqfKZpM+8ZX6ySk8nYhVoo5CYaZyzt3YBvYtRtO+aoGlqxPg/B87NGVZ/fu6g==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/webidl-conversions/-/webidl-conversions-7.0.0.tgz}
@@ -9629,6 +9507,7 @@ packages:
     dependencies:
       tr46: 0.0.3
       webidl-conversions: 3.0.1
+    dev: true
 
   /which-boxed-primitive/1.0.2:
     resolution: {integrity: sha512-bwZdv0AKLpplFY2KZRX6TvyuN7ojjr7lwkg6ml0roIy9YeuSr7JS372qlNW18UQYzgYK9ziGcerWqZOmEn9VNg==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/which-boxed-primitive/-/which-boxed-primitive-1.0.2.tgz}
@@ -9694,6 +9573,7 @@ packages:
       ansi-styles: 4.3.0
       string-width: 4.2.3
       strip-ansi: 6.0.1
+    dev: true
 
   /wrappy/1.0.2:
     resolution: {integrity: sha512-l4Sp/DRseor9wL6EvV2+TuQn63dMkPjZ/sp9XkghTEbV9KlPS1xUsZ3u7/IQO4wxtcFB4bgpQPRcR3QCvezPcQ==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/wrappy/-/wrappy-1.0.2.tgz}
@@ -9758,6 +9638,7 @@ packages:
   /y18n/5.0.8:
     resolution: {integrity: sha512-0pfFzegeDWJHJIAmTLRP2DwHjdF5s7jo9tuztdQxAhINCdvS+3nGINqPd00AphqJR/0LhANUS6/+7SCb98YOfA==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/y18n/-/y18n-5.0.8.tgz}
     engines: {node: '>=10'}
+    dev: true
 
   /yallist/3.1.1:
     resolution: {integrity: sha512-a4UGQaWPH59mOXUYnAG2ewncQS4i4F43Tv3JoAM+s2VDAmS9NsK8GpDMLrCHPksFT7h3K6TOoUNn2pb7RoXx4g==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/yallist/-/yallist-3.1.1.tgz}
@@ -9783,6 +9664,7 @@ packages:
   /yargs-parser/20.2.9:
     resolution: {integrity: sha512-y11nGElTIV+CT3Zv9t7VKl+Q3hTQoT9a1Qzezhhl6Rp21gJ/IVTW7Z3y9EWXhuUBC2Shnf+DX0antecpAwSP8w==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/yargs-parser/-/yargs-parser-20.2.9.tgz}
     engines: {node: '>=10'}
+    dev: true
 
   /yargs-parser/21.1.1:
     resolution: {integrity: sha512-tVpsJW7DdjecAiFpbIB1e3qxIQsE6NoPc5/eTdrbbIC4h0LVsWhnoa3g+m2HclBIujHzsxZ4VJVA+GUuc2/LBw==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/yargs-parser/-/yargs-parser-21.1.1.tgz}
@@ -9817,6 +9699,7 @@ packages:
       string-width: 4.2.3
       y18n: 5.0.8
       yargs-parser: 20.2.9
+    dev: true
 
   /yargs/17.6.2:
     resolution: {integrity: sha512-1/9UrdHjDZc0eOU0HxOHoS78C69UD3JRMvzlJ7S79S2nTaWRA/whGCTV8o9e/N/1Va9YIV7Q4sOxD8VV4pCWOw==, tarball: https://repo.plus4u.net/operatorGate/repository/public-javascript/yargs/-/yargs-17.6.2.tgz}
@@ -9853,7 +9736,7 @@ packages:
     dev: true
 
   file:uu5charts/target/uu5charts-0.1.0.tgz:
-    resolution: {integrity: sha512-iZpxMmDhgq1sIM++KqaF3stXHetLdv7OhY8g+NuPFb477sTP0y+qpx1SZkMOehuEGBNs/Eg/oW0zrEtLdq83Jg==, tarball: file:uu5charts/target/uu5charts-0.1.0.tgz}
+    resolution: {integrity: sha512-cfL0y4HQ6TBC4cUzagWVXvSvKH86CKrye5eLlczdPnKbs7GC5T2vhAieNBS8/1PRvJl5dLJU4Hah6bB/81Cnmg==, tarball: file:uu5charts/target/uu5charts-0.1.0.tgz}
     name: uu5charts
     version: 0.1.0
     engines: {node: '>=12.0.0'}
