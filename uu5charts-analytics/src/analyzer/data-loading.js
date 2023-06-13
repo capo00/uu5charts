@@ -96,7 +96,7 @@ const DataLoading = withData(
                 disabled={!!dataFile}
                 value={dataUri}
                 onChange={(e) => setDataUri(e.data.value)}
-                onBlur={loadData}
+                onBlur={(e) => loadData()}
               />
               <Uu5Forms.File
                 name="dataFile"
